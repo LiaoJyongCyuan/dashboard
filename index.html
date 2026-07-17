@@ -608,7 +608,7 @@
   var WX_LAT = 24.0994, WX_LON = 120.6781;
   // 環境部開放平臺 API 金鑰（https://data.moenv.gov.tw 免費註冊後填入引號中）；
   // 留空時改用 Open-Meteo 衛星模型估計值
-  var MOENV_API_KEY = "";
+  var MOENV_API_KEY = "b3dbbfb7-fbaf-46fb-b3c8-fd67b6ae707a";
   var MOENV_SITE = "大里"; // 就近測站（臺中市大里區）
   var WX_ICONS = {
     0: "\u2600\uFE0F", 1: "\uD83C\uDF24\uFE0F", 2: "\u26C5", 3: "\u2601\uFE0F",
@@ -642,7 +642,7 @@
       "&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code&hourly=precipitation_probability&forecast_days=1&timezone=Asia%2FTaipei";
     // 空品：優先環境部官方測站資料，失敗或未設金鑰時退回 Open-Meteo 估計
     var aqPromise = (MOENV_API_KEY
-      ? fetch("https://data.moenv.gov.tw/api/v2/aqx_p_432?language=zh&api_key=" + b3dbbfb7-fbaf-46fb-b3c8-fd67b6ae707a + "&limit=250")
+      ? fetch("https://data.moenv.gov.tw/api/v2/aqx_p_432?language=zh&api_key=" + MOENV_API_KEY + "&limit=250")
           .then(function (r) { return r.json(); })
           .then(function (j) {
             var recs = (j && j.records) || [];
