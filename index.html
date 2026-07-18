@@ -10,6 +10,9 @@
     --text2: #7D7A75;
     --seg-empty: #F0EFED;
     --dot-ring: rgba(0,0,0,0.18);
+    --sun-day: #F0CE9A;
+    --sun-night: #B9C6DF;
+    --sun-hand: #DF5B4E;
     --dot-blue: #A9CDEC;
     --dot-green: #A8D3B8;
     --dot-amber: #E9CF95;
@@ -22,11 +25,11 @@
     --chip-text: #5B8FC7;
     /* 星期燈：平日柿橘、週末灰玫瑰，亮燈皆實心白字、同尺寸 */
     --wd-on: #E8683C;
-    --wd-on-wknd: #C77E92;
+    --wd-on-wknd: #D37790;
     --wd-off-bg: #FCEFE5;
     --wd-off-text: #C68C66;
-    --wd-off-bg-wknd: #F9EEF1;
-    --wd-off-text-wknd: #C99AA6;
+    --wd-off-bg-wknd: #FAEFF2;
+    --wd-off-text-wknd: #D194A3;
     /* 年度天數標籤：扁平內斂 */
     --doy-text: #8C8983;
     /* 分區細線 */
@@ -68,16 +71,19 @@
       --text2: rgba(255,255,255,0.65);
       --seg-empty: rgba(255,255,255,0.13);
       --dot-ring: rgba(255,255,255,0.35);
+      --sun-day: rgba(240,200,130,0.72);
+      --sun-night: rgba(150,170,210,0.55);
+      --sun-hand: #E97B6F;
       --seg-fill-a: rgba(94,159,232,0.45);
       --seg-fill-b: rgba(94,159,232,0.85);
       --chip-bg: rgba(94,159,232,0.14);
       --chip-text: #8FB8E8;
       --wd-on: #E97C4E;
-      --wd-on-wknd: #C9798F;
+      --wd-on-wknd: #D17B92;
       --wd-off-bg: rgba(233,124,78,0.14);
       --wd-off-text: rgba(238,158,120,0.78);
-      --wd-off-bg-wknd: rgba(223,160,178,0.13);
-      --wd-off-text-wknd: rgba(233,182,196,0.75);
+      --wd-off-bg-wknd: rgba(228,150,173,0.14);
+      --wd-off-text-wknd: rgba(238,175,193,0.8);
       --doy-text: rgba(255,255,255,0.62);
       --divider: rgba(255,255,255,0.18);
     }
@@ -177,7 +183,7 @@
     align-self: center;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 5px;
   }
   .wc-row {
     display: grid;
@@ -208,9 +214,11 @@
     color: var(--text2);
     user-select: none;
   }
+  .wc-days { row-gap: 4px; }
   .wc-days span.wknd { color: var(--wd-off-text-wknd); }
   .wc-days span.today { background: var(--wd-on); color: #FFFFFF; }
   .wc-days span.today.wknd { background: var(--wd-on-wknd); }
+  .doy-chip.term { background: #F7E7CB; color: #A9702B; }
   .doy-chip {
     background: var(--seg-empty);
     color: var(--doy-text);
@@ -284,6 +292,11 @@
     stroke-width: 9;
   }
   body.ready .ring-fill { transition: stroke-dasharray 0.8s ease; }
+  /* 日照時鐘：自訂角度（正午在上、午夜在下），不套用 -90deg 旋轉 */
+  #sunring { transform: none; }
+  #sunDayArc { fill: none; stroke: var(--sun-day); stroke-width: 4.4; }
+  #sunNightArc { fill: none; stroke: var(--sun-night); stroke-width: 4.4; }
+  #sunHand { fill: var(--sun-hand); stroke: var(--chip-bg); stroke-width: 0.9; }
   .time {
     font-size: 21px;
     font-weight: 650;
@@ -410,6 +423,13 @@
             <circle class="ring-base" cx="10" cy="10" r="9"></circle>
             <circle class="ring-fill week" id="weekFill" cx="10" cy="10" r="4.5"></circle>
           </svg>
+          <svg class="dayring" id="sunring" viewBox="0 0 20 20" width="19" height="19" role="img" aria-label="日照時鐘">
+            <title id="sunTitle">日照時鐘</title>
+            <circle class="ring-base" cx="10" cy="10" r="9"></circle>
+            <path id="sunDayArc" d=""></path>
+            <path id="sunNightArc" d=""></path>
+            <circle id="sunHand" cx="10" cy="3.5" r="1.9"></circle>
+          </svg>
           <svg class="dayring" id="dayring" viewBox="0 0 20 20" width="19" height="19" role="img" aria-label="今日進度">
             <title id="ringTitle">今日進度</title>
             <circle class="ring-base" cx="10" cy="10" r="9"></circle>
@@ -456,6 +476,63 @@
   var segContainer = document.getElementById("segments");
   var ringFill = document.getElementById("ringFill");
   var weekFill = document.getElementById("weekFill");
+
+  // ---- 日照時鐘：台中日出日落（NOAA 簡化公式，本地計算免 API） ----
+  var SUN_LAT = 24.135, SUN_LON = 120.68, SUN_R = 6.8;
+  var sunKey = "", sunRise = 5.5, sunSet = 18.5;
+  function computeSunTimes(d) {
+    var rad = Math.PI / 180;
+    var N = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
+    var lngHour = SUN_LON / 15;
+    function calc(rising) {
+      var t = N + ((rising ? 6 : 18) - lngHour) / 24;
+      var M = 0.9856 * t - 3.289;
+      var L = M + 1.916 * Math.sin(M * rad) + 0.02 * Math.sin(2 * M * rad) + 282.634;
+      L = (L % 360 + 360) % 360;
+      var RA = Math.atan(0.91764 * Math.tan(L * rad)) / rad;
+      RA = (RA % 360 + 360) % 360;
+      RA = (RA + Math.floor(L / 90) * 90 - Math.floor(RA / 90) * 90) / 15;
+      var sinDec = 0.39782 * Math.sin(L * rad);
+      var cosDec = Math.cos(Math.asin(sinDec));
+      var cosH = (Math.cos(90.833 * rad) - sinDec * Math.sin(SUN_LAT * rad)) / (cosDec * Math.cos(SUN_LAT * rad));
+      if (cosH > 1) return rising ? 6 : 18;
+      if (cosH < -1) return rising ? 0 : 24;
+      var H = (rising ? 360 - Math.acos(cosH) / rad : Math.acos(cosH) / rad) / 15;
+      var T = H + RA - 0.06571 * t - 6.622;
+      return ((T - lngHour + 8) % 24 + 24) % 24; // 台灣 UTC+8
+    }
+    return [calc(true), calc(false)];
+  }
+  // 將時刻映射到圓上：正午在頂、午夜在底，順時針
+  function sunPt(t, r) {
+    var a = ((t - 12) / 24) * 2 * Math.PI;
+    return [(10 + r * Math.sin(a)).toFixed(2), (10 - r * Math.cos(a)).toFixed(2)];
+  }
+  function sunArc(t1, t2) {
+    var p1 = sunPt(t1, SUN_R), p2 = sunPt(t2, SUN_R);
+    var span = ((t2 - t1) % 24 + 24) % 24 / 24 * 360;
+    return "M " + p1[0] + " " + p1[1] + " A " + SUN_R + " " + SUN_R + " 0 " + (span > 180 ? 1 : 0) + " 1 " + p2[0] + " " + p2[1];
+  }
+  function fmtHM(h) {
+    var hh = Math.floor(h), mm = Math.round((h - hh) * 60);
+    if (mm === 60) { hh = (hh + 1) % 24; mm = 0; }
+    return pad(hh) + ":" + pad(mm);
+  }
+  function updateSunRing(now) {
+    var key = now.getFullYear() + "-" + now.getMonth() + "-" + now.getDate();
+    if (key !== sunKey) {
+      sunKey = key;
+      var st = computeSunTimes(now);
+      sunRise = st[0]; sunSet = st[1];
+      document.getElementById("sunDayArc").setAttribute("d", sunArc(sunRise, sunSet));
+      document.getElementById("sunNightArc").setAttribute("d", sunArc(sunSet, sunRise));
+      setText("sunTitle", "日出 " + fmtHM(sunRise) + "｜日落 " + fmtHM(sunSet));
+    }
+    var hp = sunPt(now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600, SUN_R);
+    var hand = document.getElementById("sunHand");
+    hand.setAttribute("cx", hp[0]);
+    hand.setAttribute("cy", hp[1]);
+  }
   var wdChip = document.getElementById("wdchip");
   var wcDays = document.getElementById("wcdays");
   var weekcal = document.getElementById("weekcal");
@@ -543,6 +620,7 @@
     var weekRatio = (now - weekStart) / 604800000;
     weekFill.style.strokeDasharray = (weekRatio * RING_C).toFixed(2) + " " + RING_C.toFixed(2);
     setText("weekTitle", "本週進度 " + (weekRatio * 100).toFixed(1) + "%");
+    updateSunRing(now);
 
     // 今年進度（分段）
     var yearStart = new Date(now.getFullYear(), 0, 1);
@@ -675,6 +753,7 @@
     var lu = document.getElementById("lunar");
     if (txt) {
       lu.textContent = txt;
+      lu.classList.toggle("term", !!term);
       lu.title = term ? "今日節氣：" + term + (lun ? "（農曆" + lun + "）" : "") : "農曆" + lun;
       lu.hidden = false;
     }
@@ -893,6 +972,8 @@
       if (aq && aq.src === "環境部") srcs.push("環境部");
       if (om && (!cwa || pick("pressure") != null || pick("uv") != null || (aq && aq.src === "Open-Meteo"))) srcs.push("Open-Meteo");
       parts.push(L.name + "｜資訊：" + srcs.join("、"));
+      var upd = new Date();
+      parts.push("更新 " + pad(upd.getHours()) + ":" + pad(upd.getMinutes()));
       var label = parts.join("｜");
       var chip = document.getElementById("wx");
       chip.title = label + "\n（點一下切換 大里／南屯）";
