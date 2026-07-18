@@ -11,8 +11,7 @@
     --seg-empty: #F0EFED;
     --dot-ring: rgba(0,0,0,0.18);
     --sun-day: #F0CE9A;
-    --sun-night: #B9C6DF;
-    --sun-hand: var(--wd-on);
+    --sun-night: #96A8C9;
     --dot-blue: #A9CDEC;
     --dot-green: #A8D3B8;
     --dot-amber: #E9CF95;
@@ -72,8 +71,7 @@
       --seg-empty: rgba(255,255,255,0.13);
       --dot-ring: rgba(255,255,255,0.35);
       --sun-day: rgba(240,200,130,0.72);
-      --sun-night: rgba(150,170,210,0.55);
-      --sun-hand: var(--wd-on);
+      --sun-night: rgba(135,158,205,0.7);
       --seg-fill-a: rgba(94,159,232,0.45);
       --seg-fill-b: rgba(94,159,232,0.85);
       --chip-bg: rgba(94,159,232,0.14);
@@ -296,7 +294,6 @@
   #sunring { transform: none; }
   #sunDayArc { fill: none; stroke: var(--sun-day); stroke-width: 5.2; }
   #sunNightArc { fill: none; stroke: var(--sun-night); stroke-width: 5.2; }
-  #sunHand { stroke: var(--sun-hand); stroke-width: 1.7; stroke-linecap: round; }
   .time {
     font-size: 21px;
     font-weight: 650;
@@ -427,7 +424,6 @@
             <title id="sunTitle">日照時鐘</title>
             <path id="sunDayArc" d=""></path>
             <path id="sunNightArc" d=""></path>
-            <line id="sunHand" x1="10" y1="1.5" x2="10" y2="6.5"></line>
           </svg>
           <svg class="dayring" id="dayring" viewBox="0 0 20 20" width="19" height="19" role="img" aria-label="今日進度">
             <title id="ringTitle">今日進度</title>
@@ -517,23 +513,48 @@
     if (mm === 60) { hh = (hh + 1) % 24; mm = 0; }
     return pad(hh) + ":" + pad(mm);
   }
+  var SUN_GAP = 0.5; // 斷口半寬（小時），總寬約 15 度
+  function cutArc(a, b, g1, g2) {
+    // 從弧 [a,b] 中挖掉缺口 [g1,g2]（含跨午夜環繞）
+    var segs = [[a, b]];
+    for (var off = -24; off <= 24; off += 24) {
+      var h1 = g1 + off, h2 = g2 + off;
+      var out = [];
+      for (var i = 0; i < segs.length; i++) {
+        var s = segs[i];
+        if (h2 <= s[0] || h1 >= s[1]) { out.push(s); continue; }
+        if (h1 > s[0]) out.push([s[0], h1]);
+        if (h2 < s[1]) out.push([h2, s[1]]);
+      }
+      segs = out;
+    }
+    return segs;
+  }
+  function arcPath(segs) {
+    var d = [];
+    for (var i = 0; i < segs.length; i++) d.push(sunArc(segs[i][0], segs[i][1]));
+    return d.join(" ");
+  }
+  function fmtDur(h) {
+    var m = Math.round(h * 60);
+    var hh = Math.floor(m / 60), mm = m % 60;
+    return (hh > 0 ? hh + " 小時 " : "") + mm + " 分";
+  }
   function updateSunRing(now) {
     var key = now.getFullYear() + "-" + now.getMonth() + "-" + now.getDate();
     if (key !== sunKey) {
       sunKey = key;
       var st = computeSunTimes(now);
       sunRise = st[0]; sunSet = st[1];
-      document.getElementById("sunDayArc").setAttribute("d", sunArc(sunRise, sunSet));
-      document.getElementById("sunNightArc").setAttribute("d", sunArc(sunSet, sunRise));
-      setText("sunTitle", "日出 " + fmtHM(sunRise) + "｜日落 " + fmtHM(sunSet));
     }
     var tNow = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
-    var hp1 = sunPt(tNow, 4.9), hp2 = sunPt(tNow, 8.3);
-    var hand = document.getElementById("sunHand");
-    hand.setAttribute("x1", hp1[0]);
-    hand.setAttribute("y1", hp1[1]);
-    hand.setAttribute("x2", hp2[0]);
-    hand.setAttribute("y2", hp2[1]);
+    // 指針＝環上隨時間順時針移動的斷口
+    var g1 = tNow - SUN_GAP, g2 = tNow + SUN_GAP;
+    document.getElementById("sunDayArc").setAttribute("d", arcPath(cutArc(sunRise, sunSet, g1, g2)));
+    document.getElementById("sunNightArc").setAttribute("d", arcPath(cutArc(sunSet, sunRise + 24, g1, g2)));
+    var isDay = tNow >= sunRise && tNow < sunSet;
+    var nextTxt = isDay ? "距日落 " + fmtDur(sunSet - tNow) : "距日出 " + fmtDur(((sunRise - tNow) % 24 + 24) % 24);
+    setText("sunTitle", "日出 " + fmtHM(sunRise) + "｜日落 " + fmtHM(sunSet) + "｜" + nextTxt);
   }
   var wdChip = document.getElementById("wdchip");
   var wcDays = document.getElementById("wcdays");
@@ -1005,9 +1026,18 @@
   }
   var globalNote = "";
   var twTitleBase = "";
+  var twUpdT = null, globalUpdT = null;
+  function fmtClock(d) { return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
   function applyTwTitle() {
     var chip = document.getElementById("tw");
-    chip.title = twTitleBase + (globalNote ? "\n" + globalNote : "");
+    var tail = "";
+    if (twUpdT) {
+      var a = fmtClock(twUpdT);
+      var b = globalUpdT ? fmtClock(globalUpdT) : "";
+      // 台股與全球拓時間一致就合併，不一致則分列
+      tail = "\n更新：" + (b ? (b === a ? a : "台股 " + a + "｜全球 " + b) : "台股 " + a);
+    }
+    chip.title = twTitleBase + (globalNote ? "\n" + globalNote : "") + tail;
     chip.setAttribute("aria-label", twTitleBase);
   }
   function renderStock(val, chg, pct, note) {
@@ -1025,8 +1055,8 @@
     } else {
       chip.classList.add("mkt-closed");
     }
-    var updT = new Date();
-    twTitleBase = "台股加權指數 " + fmtIdx(val) + "，漲跌 " + (chg >= 0 ? "+" : "") + chg.toFixed(2) + "（" + (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%）" + (twMarketOpen() ? "｜盤中" : "｜已收盤") + (note ? "｜" + note : "") + "｜更新 " + pad(updT.getHours()) + ":" + pad(updT.getMinutes());
+    twUpdT = new Date();
+    twTitleBase = "台股加權指數 " + fmtIdx(val) + "，漲跌 " + (chg >= 0 ? "+" : "") + chg.toFixed(2) + "（" + (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%）" + (twMarketOpen() ? "｜盤中" : "｜已收盤") + (note ? "｜" + note : "");
     applyTwTitle();
     chip.hidden = false;
   }
@@ -1090,6 +1120,7 @@
     })).then(function (arr) {
       var ok = arr.filter(function (x) { return x; });
       globalNote = ok.length ? "全球收盤：" + ok.join("｜") : "";
+      if (ok.length) globalUpdT = new Date();
       if (twTitleBase) applyTwTitle();
     });
   }
