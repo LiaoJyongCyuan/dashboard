@@ -252,6 +252,11 @@
   .wx-down { color: #7FA98E; font-weight: 600; }
   .wx-flat { color: var(--text2); font-weight: 600; }
   .wx-lab { color: var(--text2); font-weight: 500; }
+  #wx { cursor: pointer; }
+  .moon-ic { font-size: 12px; line-height: 15px; align-self: center; user-select: none; }
+  #tw.mkt-closed { background: #EDEDEB; }
+  #tw.mkt-open-up { background: #F6E8E4; }
+  #tw.mkt-open-down { background: #E7F0EA; }
   .wx-aqi-dot {
     width: 7px;
     height: 7px;
@@ -388,7 +393,9 @@
       <div class="line">
         <span class="date" id="date">—</span>
         <span class="wd-chip" id="wdchip" role="img" aria-label="星期">—</span>
-        <span class="wx-chip" id="wx" hidden role="img" aria-label="台中即時天氣">
+        <span class="moon-ic" id="moon" role="img" aria-label="月相" hidden>—</span>
+        <span class="wx-chip" id="wx" hidden role="img" aria-label="台中即時天氣" title="點一下切換 大里／南屯">
+          <span class="wx-item"><span class="wx-lab" id="wxLoc">—</span></span>
           <span class="wx-item"><span class="wx-ic" id="wxIcon">—</span><span class="wx-t" id="wxTemp">--°</span></span>
           <span class="wx-item"><span class="wx-lab">☔</span><span id="wxRain">--%</span></span>
           <span class="wx-item"><span class="wx-aqi-dot" id="wxAqiDot" aria-hidden="true"></span><span id="wxAqi">--</span></span>
@@ -416,6 +423,7 @@
         <span class="segments" id="segments" role="progressbar" aria-label="今年進度" aria-valuemin="0" aria-valuemax="100"></span>
         <span class="bar-pct" id="yearpct">--%</span>
         <span class="doy-chip" id="yearline">—</span>
+        <span class="doy-chip" id="lunar" hidden>—</span>
       </div>
     </div>
     <div class="vdiv" aria-hidden="true"></div>
@@ -519,6 +527,7 @@
 
     var dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
     setText("yearline", "第 " + dayOfYear + " 天");
+    updateCalendarChips();
 
     // 今日進度：12 小時一輪。0-12 時由缺到滿；12-24 時由滿到缺（皆順時針推進）
     var midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -604,13 +613,90 @@
   });
   setInterval(tick, 1000);
 
-  // ---- 台中即時天氣（Open-Meteo，每 30 分鐘更新） ----
-  var WX_LAT = 24.0994, WX_LON = 120.6781;
+  // ---- 月相與農曆（本機天文公式計算，不需連線） ----
+  var MOON_EMOJI = ["\uD83C\uDF11", "\uD83C\uDF12", "\uD83C\uDF13", "\uD83C\uDF14", "\uD83C\uDF15", "\uD83C\uDF16", "\uD83C\uDF17", "\uD83C\uDF18"];
+  var MOON_NAMES = ["新月", "眉月", "上弦月", "盈凸月", "滿月", "虧凸月", "下弦月", "殘月"];
+  function moonInfo(d) {
+    var syn = 29.530588853;
+    var days = (d.getTime() - Date.UTC(2000, 0, 6, 18, 14)) / 86400000;
+    var age = ((days % syn) + syn) % syn;
+    var idx = Math.floor(age / syn * 8 + 0.5) % 8;
+    return { emoji: MOON_EMOJI[idx], name: MOON_NAMES[idx], age: age };
+  }
+  var LUNAR_DAYS = ["", "初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
+    "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
+    "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"];
+  var LUNAR_MONTHS = ["正月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
+  function lunarText(d) {
+    try {
+      var parts = new Intl.DateTimeFormat("zh-Hant-u-ca-chinese", { month: "long", day: "numeric" }).formatToParts(d);
+      var mon = "", day = 0;
+      for (var i = 0; i < parts.length; i++) {
+        if (parts[i].type === "month") mon = parts[i].value;
+        if (parts[i].type === "day") day = parseInt(parts[i].value, 10);
+      }
+      if (!mon || !day || !LUNAR_DAYS[day]) return null;
+      if (mon.indexOf("月") < 0) {
+        var mNum = parseInt(mon, 10);
+        mon = (isFinite(mNum) && LUNAR_MONTHS[mNum - 1]) ? LUNAR_MONTHS[mNum - 1] : mon + "月";
+      }
+      return mon + LUNAR_DAYS[day];
+    } catch (e) { return null; }
+  }
+  // 24 節氣（壽星通用公式，21 世紀係數）
+  var TERM_NAMES = ["小寒", "大寒", "立春", "雨水", "驚蟄", "春分", "清明", "穀雨", "立夏", "小滿", "芒種", "夏至",
+    "小暑", "大暑", "立秋", "處暑", "白露", "秋分", "寒露", "霜降", "立冬", "小雪", "大雪", "冬至"];
+  var TERM_C = [5.4055, 20.12, 3.87, 18.73, 5.63, 20.646, 4.81, 20.1, 5.52, 21.04, 5.678, 21.37,
+    7.108, 22.83, 7.5, 23.13, 7.646, 23.042, 8.318, 23.438, 7.438, 22.36, 7.18, 21.94];
+  function solarTermOf(d) {
+    var y = d.getFullYear() % 100, day = d.getDate();
+    for (var k = 0; k < 2; k++) {
+      var i = d.getMonth() * 2 + k;
+      var L = i < 4 ? Math.floor((y - 1) / 4) : Math.floor(y / 4);
+      if (day === Math.floor(y * 0.2422 + TERM_C[i]) - L) return TERM_NAMES[i];
+    }
+    return null;
+  }
+  var calChipKey = "";
+  function updateCalendarChips() {
+    if (typeof MOON_EMOJI === "undefined" || !MOON_EMOJI) return; // 初始化中，下一秒再試
+    var now = new Date();
+    var key = now.getFullYear() + "-" + now.getMonth() + "-" + now.getDate();
+    if (key === calChipKey) return;
+    calChipKey = key;
+    var mi = moonInfo(now);
+    var moonEl = document.getElementById("moon");
+    moonEl.textContent = mi.emoji;
+    moonEl.title = "月相：" + mi.name + "（月齡 " + mi.age.toFixed(1) + " 天）";
+    moonEl.hidden = false;
+    var lun = lunarText(now);
+    var term = solarTermOf(now);
+    var txt = term || lun;
+    var lu = document.getElementById("lunar");
+    if (txt) {
+      lu.textContent = txt;
+      lu.title = term ? "今日節氣：" + term + (lun ? "（農曆" + lun + "）" : "") : "農曆" + lun;
+      lu.hidden = false;
+    }
+  }
+
+  // ---- 即時天氣（氣象署官方預報為主，Open-Meteo 補充，每 30 分鐘更新） ----
+  // 兩個常用地點：點天氣膠囊即可切換；週一至五 8-17 時預設南屯（上班），其餘時間預設大里
+  var WX_LOCS = {
+    dali:   { name: "大里", cwa: "大里區", lat: 24.0994, lon: 120.6781, aq: "大里" },
+    nantun: { name: "南屯", cwa: "南屯區", lat: 24.1383, lon: 120.6431, aq: "西屯" }
+  };
+  function wxDefaultLoc() {
+    var d = new Date(), w = d.getDay(), h = d.getHours();
+    return (w >= 1 && w <= 5 && h >= 8 && h < 17) ? "nantun" : "dali";
+  }
+  var wxLocKey = wxDefaultLoc();
+  var wxManualLoc = false;
   // 環境部開放平臺 API 金鑰（https://data.moenv.gov.tw 免費註冊後填入引號中）；
   // 留空時改用 Open-Meteo 衛星模型估計值
   // 金鑰已改存於 Cloudflare Worker（機密 MOENV_KEY），由專線自動附加；此處留空即可
   var MOENV_API_KEY = "";
-  var MOENV_SITE = "大里"; // 就近測站（臺中市大里區）
+  // 空品測站隨地點自動選擇（大里→大里站、南屯→西屯站）
   // 自架 Cloudflare Worker 專線（穩定轉發，金鑰藏在 Worker 裡）
   var WORKER_URL = "https://dash-relay.tzc5w4gsk2.workers.dev";
   var WX_ICONS = {
@@ -690,38 +776,61 @@
     if (w.indexOf("晴") >= 0) return "\u2600\uFE0F";
     return "\uD83C\uDF21\uFE0F";
   }
+  function windDirText(deg) {
+    if (deg == null || !isFinite(deg)) return null;
+    var dirs = ["北", "東北", "東", "東南", "南", "西南", "西", "西北"];
+    return dirs[Math.round(deg / 45) % 8] + "風";
+  }
+  function uvText(v) {
+    if (v == null || !isFinite(v)) return null;
+    var lv = v < 3 ? "低量" : v < 6 ? "中量" : v < 8 ? "高量" : v < 11 ? "過量" : "危險";
+    return Math.round(v) + "（" + lv + "）";
+  }
   function loadWeather() {
-    var wxUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + WX_LAT + "&longitude=" + WX_LON +
-      "&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code&hourly=precipitation_probability&forecast_days=1&timezone=Asia%2FTaipei";
-    // 空品：優先環境部官方測站資料，失敗或未設金鑰時退回 Open-Meteo 估計
+    var L = WX_LOCS[wxLocKey];
+    var wxUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + L.lat + "&longitude=" + L.lon +
+      "&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,surface_pressure,uv_index,wind_speed_10m,wind_direction_10m&hourly=precipitation_probability&forecast_days=1&timezone=Asia%2FTaipei";
+    // 空品：優先環境部官方測站（大里→大里站、南屯→西屯站），失敗時退回 Open-Meteo 估計
     var aqPromise = ((MOENV_API_KEY || WORKER_URL)
       ? fetchJson("https://data.moenv.gov.tw/api/v2/aqx_p_432?language=zh&limit=250" + (MOENV_API_KEY ? "&api_key=" + MOENV_API_KEY : ""))
           .then(function (j) {
             // 環境部 2026/01 起回傳格式改為純陣列，舊格式包在 records 裡，兩種都支援
             var recs = Array.isArray(j) ? j : ((j && j.records) || []);
             for (var i = 0; i < recs.length; i++) {
-              if (recs[i].sitename === MOENV_SITE) {
-                return {
-                  aqi: Math.round(parseFloat(recs[i].aqi)),
-                  status: recs[i].status || null,
-                  src: MOENV_SITE + "測站（環境部）"
-                };
+              if (recs[i].sitename === L.aq) {
+                return { aqi: Math.round(parseFloat(recs[i].aqi)), status: recs[i].status || null, src: "環境部" };
               }
             }
             throw new Error("site not found");
           })
       : Promise.reject(new Error("no key")))
       .catch(function () {
-        return fetch("https://air-quality-api.open-meteo.com/v1/air-quality?latitude=" + WX_LAT + "&longitude=" + WX_LON + "&current=us_aqi&timezone=Asia%2FTaipei")
+        return fetch("https://air-quality-api.open-meteo.com/v1/air-quality?latitude=" + L.lat + "&longitude=" + L.lon + "&current=us_aqi&timezone=Asia%2FTaipei")
           .then(function (r) { return r.json(); })
-          .then(function (j) {
-            return { aqi: Math.round(j.current.us_aqi), status: null, src: "模型估計" };
-          });
+          .then(function (j) { return { aqi: Math.round(j.current.us_aqi), status: null, src: "Open-Meteo" }; });
       })
       .catch(function () { return null; });
 
-    // 天氣：優先中央氣象署大里區官方預報（金鑰由 Worker 專線自動附加），失敗時退回 Open-Meteo 模型
-    var wxPromise = fetchJson("https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-073?LocationName=" + encodeURIComponent("大里區"))
+    // Open-Meteo 模型：補足氣壓、紫外線等欄位，也是氣象署失效時的備援
+    var omPromise = fetch(wxUrl)
+      .then(function (r) { return r.json(); })
+      .then(function (wx) {
+        var cur = wx.current;
+        var hourIdx = new Date().getHours();
+        var rain = (wx.hourly && wx.hourly.precipitation_probability && wx.hourly.precipitation_probability[hourIdx] != null)
+          ? wx.hourly.precipitation_probability[hourIdx] : null;
+        return {
+          temp: cur.temperature_2m, feels: cur.apparent_temperature, hum: cur.relative_humidity_2m,
+          rain: rain, desc: WX_DESC[cur.weather_code] || "", icon: WX_ICONS[cur.weather_code] || "\uD83C\uDF21\uFE0F",
+          pressure: cur.surface_pressure, uv: cur.uv_index,
+          wind: windDirText(cur.wind_direction_10m),
+          windSpd: (cur.wind_speed_10m != null && isFinite(cur.wind_speed_10m)) ? Math.round(cur.wind_speed_10m / 3.6 * 10) / 10 : null
+        };
+      })
+      .catch(function () { return null; });
+
+    // 氣象署鄉鎮預報（金鑰由 Worker 專線自動附加）
+    var cwaPromise = fetchJson("https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-073?LocationName=" + encodeURIComponent(L.cwa))
       .then(function (j) {
         var locs = j && j.records && j.records.Locations && j.records.Locations[0];
         var loc = locs && locs.Location && locs.Location[0];
@@ -729,6 +838,7 @@
         var t = parseFloat(cwaPick(els, "溫度", "Temperature"));
         var wtext = cwaPick(els, "天氣現象", "Weather");
         if (!isFinite(t) && !wtext) throw new Error("no cwa data");
+        var ws = parseFloat(cwaPick(els, "風速", "WindSpeed"));
         return {
           temp: t,
           feels: parseFloat(cwaPick(els, "體感溫度", "ApparentTemperature")),
@@ -736,55 +846,66 @@
           rain: parseFloat(cwaPick(els, "3小時降雨機率", "ProbabilityOfPrecipitation")),
           desc: wtext || "",
           icon: cwaIcon(wtext),
-          precipMm: null,
-          src: "中央氣象署 大里區預報"
+          wind: cwaPick(els, "風向", "WindDirection") || null,
+          windSpd: isFinite(ws) ? ws : null
         };
       })
-      .catch(function () {
-        return fetch(wxUrl).then(function (r) { return r.json(); }).then(function (wx) {
-          var cur = wx.current;
-          var hourIdx = new Date().getHours();
-          var rain = (wx.hourly && wx.hourly.precipitation_probability && wx.hourly.precipitation_probability[hourIdx] != null)
-            ? wx.hourly.precipitation_probability[hourIdx] : null;
-          return {
-            temp: cur.temperature_2m,
-            feels: cur.apparent_temperature,
-            hum: cur.relative_humidity_2m,
-            rain: rain,
-            desc: WX_DESC[cur.weather_code] || "",
-            icon: WX_ICONS[cur.weather_code] || "\uD83C\uDF21\uFE0F",
-            precipMm: cur.precipitation,
-            src: "Open-Meteo 模型估計"
-          };
-        });
-      });
+      .catch(function () { return null; });
 
-    Promise.all([wxPromise, aqPromise]).then(function (res) {
-      var w = res[0], aq = res[1];
-      var temp = isFinite(w.temp) ? Math.round(w.temp) : null;
-      setText("wxIcon", w.icon);
+    var reqLoc = wxLocKey;
+    Promise.all([cwaPromise, omPromise, aqPromise]).then(function (res) {
+      if (reqLoc !== wxLocKey) return; // 使用者已切換地點，捨棄舊資料
+      var cwa = res[0], om = res[1], aq = res[2];
+      if (!cwa && !om) throw new Error("no weather");
+      var main = cwa || om, sub = (cwa && om) ? om : {};
+      function pick(k) {
+        var v = main[k];
+        if (v != null && v !== "" && (typeof v !== "number" || isFinite(v))) return v;
+        v = sub[k];
+        return (v != null && v !== "" && (typeof v !== "number" || isFinite(v))) ? v : null;
+      }
+      var temp = pick("temp");
+      temp = temp != null ? Math.round(temp) : null;
+      setText("wxLoc", L.name);
+      setText("wxIcon", pick("icon") || "\uD83C\uDF21\uFE0F");
       setText("wxTemp", (temp != null ? temp : "--") + "\u00B0");
-      setText("wxRain", isFinite(w.rain) ? Math.round(w.rain) + "%" : "--%");
-      var label = "台中 " + w.desc + " " + (temp != null ? temp : "--") + "\u00B0C";
-      if (isFinite(w.feels)) label += "（體感 " + Math.round(w.feels) + "\u00B0C）";
-      if (isFinite(w.hum)) label += "｜濕度 " + Math.round(w.hum) + "%";
-      label += "｜降雨機率 " + (isFinite(w.rain) ? Math.round(w.rain) + "%" : "未知");
-      if (w.precipMm != null) label += "，時雨量 " + w.precipMm + " mm";
+      var rain = pick("rain");
+      setText("wxRain", rain != null ? Math.round(rain) + "%" : "--%");
+      var parts = [];
+      var desc = pick("desc"), feels = pick("feels");
+      parts.push((desc ? desc + " " : "") + (temp != null ? temp : "--") + "\u00B0C" + (feels != null ? "（體感 " + Math.round(feels) + "\u00B0C）" : ""));
+      if (pick("hum") != null) parts.push("濕度 " + Math.round(pick("hum")) + "%");
+      parts.push("降雨機率 " + (rain != null ? Math.round(rain) + "%" : "未知"));
+      if (pick("pressure") != null) parts.push("氣壓 " + Math.round(pick("pressure")) + " hPa");
+      if (pick("wind")) parts.push("風 " + pick("wind") + (pick("windSpd") != null ? " " + pick("windSpd") + " m/s" : ""));
+      var uv = uvText(pick("uv"));
+      if (uv) parts.push("紫外線 " + uv);
       if (aq && aq.aqi != null && isFinite(aq.aqi)) {
         var info = aqiInfo(aq.aqi);
         setText("wxAqi", aq.aqi);
         document.getElementById("wxAqiDot").style.background = info[0];
-        label += "｜AQI " + aq.aqi + "（" + (aq.status || info[1]) + "，" + aq.src + "）";
+        parts.push("AQI " + aq.aqi + "（" + (aq.status || info[1]) + "）");
       } else {
         setText("wxAqi", "--");
       }
-      label += "｜天氣來源：" + w.src;
+      var srcs = [];
+      if (cwa) srcs.push("氣象署");
+      if (aq && aq.src === "環境部") srcs.push("環境部");
+      if (om && (!cwa || pick("pressure") != null || pick("uv") != null || (aq && aq.src === "Open-Meteo"))) srcs.push("Open-Meteo");
+      parts.push(L.name + "｜資訊：" + srcs.join("、"));
+      var label = parts.join("｜");
       var chip = document.getElementById("wx");
+      chip.title = label + "\n（點一下切換 大里／南屯）";
       chip.setAttribute("aria-label", label);
-      chip.title = label;
       chip.hidden = false;
     }).catch(function () { /* 連線失敗時保持隱藏，不影響儀表板 */ });
   }
+  // 點一下天氣膠囊切換大里／南屯（手動選擇後，本次開啟期間不再自動改回預設）
+  document.getElementById("wx").addEventListener("click", function () {
+    wxManualLoc = true;
+    wxLocKey = wxLocKey === "dali" ? "nantun" : "dali";
+    loadWeather();
+  });
 
   // ---- 台股加權指數（盤中延遲報價，失敗時退回證交所 OpenAPI 收盤資料） ----
   function fmtIdx(n) {
@@ -793,6 +914,19 @@
   function fmtK(n) {
     return (n / 1000).toFixed(1) + "K";
   }
+  function twMarketOpen() {
+    var d = new Date(), w = d.getDay();
+    if (w === 0 || w === 6) return false;
+    var m = d.getHours() * 60 + d.getMinutes();
+    return m >= 540 && m <= 810; // 09:00–13:30
+  }
+  var globalNote = "";
+  var twTitleBase = "";
+  function applyTwTitle() {
+    var chip = document.getElementById("tw");
+    chip.title = twTitleBase + (globalNote ? "\n" + globalNote : "");
+    chip.setAttribute("aria-label", twTitleBase);
+  }
   function renderStock(val, chg, pct, note) {
     setText("twVal", fmtK(val));
     var el = document.getElementById("twChg");
@@ -800,9 +934,16 @@
     el.textContent = arrow + fmtK(Math.abs(chg)) + " " + (chg > 0 ? "+" : chg < 0 ? "-" : "") + Math.abs(pct).toFixed(2) + "%";
     el.className = "wx-item " + (chg > 0 ? "wx-up" : chg < 0 ? "wx-down" : "wx-flat");
     var chip = document.getElementById("tw");
-    var label = "台股加權指數 " + fmtIdx(val) + "，漲跌 " + (chg >= 0 ? "+" : "") + chg.toFixed(2) + "（" + (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%）" + (note ? "｜" + note : "");
-    chip.title = label;
-    chip.setAttribute("aria-label", label);
+    // 盤中依漲跌上色，收盤後一律灰底
+    chip.classList.remove("mkt-open-up", "mkt-open-down", "mkt-closed");
+    if (twMarketOpen()) {
+      if (chg > 0) chip.classList.add("mkt-open-up");
+      else if (chg < 0) chip.classList.add("mkt-open-down");
+    } else {
+      chip.classList.add("mkt-closed");
+    }
+    twTitleBase = "台股加權指數 " + fmtIdx(val) + "，漲跌 " + (chg >= 0 ? "+" : "") + chg.toFixed(2) + "（" + (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%）" + (twMarketOpen() ? "｜盤中" : "｜已收盤") + (note ? "｜" + note : "");
+    applyTwTitle();
     chip.hidden = false;
   }
   function loadStock() {
@@ -844,10 +985,40 @@
           .catch(function () { /* 保持隱藏 */ });
       });
   }
+  // ---- 全球市場（納指、費半、標普、道瓊、金價、油價；Yahoo Finance 最新收盤，顯示於台股懸浮資訊） ----
+  var GLOBAL_SYMS = [["^IXIC", "納指"], ["^SOX", "費半"], ["^GSPC", "標普"], ["^DJI", "道瓊"], ["GC=F", "金價"], ["CL=F", "油價"]];
+  function loadGlobal() {
+    Promise.all(GLOBAL_SYMS.map(function (s) {
+      return fetchJson("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(s[0]) + "?range=1d&interval=1d")
+        .then(function (j) {
+          var meta = j && j.chart && j.chart.result && j.chart.result[0] && j.chart.result[0].meta;
+          var p = meta ? parseFloat(meta.regularMarketPrice) : NaN;
+          var prev = meta ? parseFloat(meta.chartPreviousClose) : NaN;
+          if (!isFinite(p)) return null;
+          var txt = s[1] + " " + p.toLocaleString("zh-Hant-TW", { maximumFractionDigits: p >= 1000 ? 0 : 2 });
+          if (isFinite(prev) && prev !== 0) {
+            var pc = (p - prev) / prev * 100;
+            txt += "（" + (pc >= 0 ? "+" : "") + pc.toFixed(2) + "%）";
+          }
+          return txt;
+        })
+        .catch(function () { return null; });
+    })).then(function (arr) {
+      var ok = arr.filter(function (x) { return x; });
+      globalNote = ok.length ? "全球收盤：" + ok.join("｜") : "";
+      if (twTitleBase) applyTwTitle();
+    });
+  }
+  updateCalendarChips(); // 月相與農曆資料就緒後立即補顯示
   loadWeather();
   loadStock();
-  setInterval(loadWeather, 30 * 60 * 1000);
+  loadGlobal();
+  setInterval(function () {
+    if (!wxManualLoc) wxLocKey = wxDefaultLoc(); // 未手動切換時，依上班時段自動回到預設地點
+    loadWeather();
+  }, 30 * 60 * 1000);
   setInterval(loadStock, 10 * 60 * 1000);
+  setInterval(loadGlobal, 30 * 60 * 1000);
 })();
 </script>
 </body>
