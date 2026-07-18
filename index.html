@@ -10,7 +10,7 @@
     --text2: #7D7A75;
     --seg-empty: #F0EFED;
     --dot-ring: rgba(0,0,0,0.18);
-    --sun-day: #F0CE9A;
+    --sun-day: #EBB670;
     --sun-night: #96A8C9;
     --dot-blue: #A9CDEC;
     --dot-green: #A8D3B8;
@@ -70,7 +70,7 @@
       --text2: rgba(255,255,255,0.65);
       --seg-empty: rgba(255,255,255,0.13);
       --dot-ring: rgba(255,255,255,0.35);
-      --sun-day: rgba(240,200,130,0.72);
+      --sun-day: rgba(236,175,110,0.78);
       --sun-night: rgba(135,158,205,0.7);
       --seg-fill-a: rgba(94,159,232,0.45);
       --seg-fill-b: rgba(94,159,232,0.85);
@@ -260,7 +260,7 @@
   .wx-lab { color: var(--text2); font-weight: 500; }
   #wx { cursor: pointer; }
   .moon-ic { font-size: 12px; line-height: 15px; align-self: center; user-select: none; }
-  #tw.mkt-closed { background: #EDEDEB; }
+  #tw.mkt-closed { background: var(--chip-bg); }
   #tw.mkt-open-up { background: #F6E8E4; }
   #tw.mkt-open-down { background: #E7F0EA; }
   .wx-aqi-dot {
@@ -292,8 +292,8 @@
   body.ready .ring-fill { transition: stroke-dasharray 0.8s ease; }
   /* 日照時鐘：自訂角度（正午在上、午夜在下），不套用 -90deg 旋轉 */
   #sunring { transform: none; }
-  #sunDayArc { fill: none; stroke: var(--sun-day); stroke-width: 5.2; }
-  #sunNightArc { fill: none; stroke: var(--sun-night); stroke-width: 5.2; }
+  #sunDayArc { fill: none; stroke: var(--sun-day); stroke-width: 5.8; }
+  #sunNightArc { fill: none; stroke: var(--sun-night); stroke-width: 5.8; }
   .time {
     font-size: 21px;
     font-weight: 650;
@@ -473,7 +473,7 @@
   var weekFill = document.getElementById("weekFill");
 
   // ---- 日照時鐘：台中日出日落（NOAA 簡化公式，本地計算免 API） ----
-  var SUN_LAT = 24.135, SUN_LON = 120.68, SUN_R = 6.6;
+  var SUN_LAT = 24.135, SUN_LON = 120.68, SUN_R = 6.4;
   var sunKey = "", sunRise = 5.5, sunSet = 18.5;
   function computeSunTimes(d) {
     var rad = Math.PI / 180;
@@ -513,7 +513,7 @@
     if (mm === 60) { hh = (hh + 1) % 24; mm = 0; }
     return pad(hh) + ":" + pad(mm);
   }
-  var SUN_GAP = 0.5; // 斷口半寬（小時），總寬約 15 度
+  var SUN_GAP = 0.62; // 斷口半寬（小時），總寬約 18.6 度
   function cutArc(a, b, g1, g2) {
     // 從弧 [a,b] 中挖掉缺口 [g1,g2]（含跨午夜環繞）
     var segs = [[a, b]];
@@ -891,7 +891,7 @@
   function loadWeather() {
     var L = WX_LOCS[wxLocKey];
     var wxUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + L.lat + "&longitude=" + L.lon +
-      "&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,surface_pressure,uv_index,wind_speed_10m,wind_direction_10m&hourly=precipitation_probability&forecast_days=1&timezone=Asia%2FTaipei";
+      "&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,surface_pressure,uv_index,wind_speed_10m,wind_direction_10m&hourly=precipitation_probability&daily=precipitation_sum&forecast_days=1&timezone=Asia%2FTaipei";
     // 空品：優先環境部官方測站（大里→大里站、南屯→西屯站），失敗時退回 Open-Meteo 估計
     var aqPromise = ((MOENV_API_KEY || WORKER_URL)
       ? fetchJson("https://data.moenv.gov.tw/api/v2/aqx_p_432?language=zh&limit=250" + (MOENV_API_KEY ? "&api_key=" + MOENV_API_KEY : ""))
@@ -921,9 +921,11 @@
         var hourIdx = new Date().getHours();
         var rain = (wx.hourly && wx.hourly.precipitation_probability && wx.hourly.precipitation_probability[hourIdx] != null)
           ? wx.hourly.precipitation_probability[hourIdx] : null;
+        var rainAmt = (wx.daily && wx.daily.precipitation_sum && wx.daily.precipitation_sum[0] != null)
+          ? wx.daily.precipitation_sum[0] : null;
         return {
           temp: cur.temperature_2m, feels: cur.apparent_temperature, hum: cur.relative_humidity_2m,
-          rain: rain, desc: WX_DESC[cur.weather_code] || "", icon: WX_ICONS[cur.weather_code] || "\uD83C\uDF21\uFE0F",
+          rain: rain, rainAmt: rainAmt, desc: WX_DESC[cur.weather_code] || "", icon: WX_ICONS[cur.weather_code] || "\uD83C\uDF21\uFE0F",
           pressure: cur.surface_pressure, uv: cur.uv_index,
           wind: windDirText(cur.wind_direction_10m),
           windSpd: (cur.wind_speed_10m != null && isFinite(cur.wind_speed_10m)) ? Math.round(cur.wind_speed_10m / 3.6 * 10) / 10 : null
@@ -978,6 +980,7 @@
       parts.push((desc ? desc + " " : "") + (temp != null ? temp : "--") + "\u00B0C" + (feels != null ? "（體感 " + Math.round(feels) + "\u00B0C）" : ""));
       if (pick("hum") != null) parts.push("濕度 " + Math.round(pick("hum")) + "%");
       parts.push("降雨機率 " + (rain != null ? Math.round(rain) + "%" : "未知"));
+      if (pick("rainAmt") != null) parts.push("今日降雨量 " + pick("rainAmt") + " mm");
       if (pick("pressure") != null) parts.push("氣壓 " + Math.round(pick("pressure")) + " hPa");
       if (pick("wind")) parts.push("風 " + pick("wind") + (pick("windSpd") != null ? " " + pick("windSpd") + " m/s" : ""));
       var uv = uvText(pick("uv"));
