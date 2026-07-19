@@ -13,6 +13,8 @@
     --sun-day: #EBB670;
     --sun-night: #96A8C9;
     --mkt-closed: #EDEDEB;
+    --sun-hand: var(--wd-on);
+    --sun-hand-night: #64769E;
     --dot-blue: #A9CDEC;
     --dot-green: #A8D3B8;
     --dot-amber: #E9CF95;
@@ -74,6 +76,8 @@
       --sun-day: rgba(236,175,110,0.78);
       --sun-night: rgba(135,158,205,0.7);
       --mkt-closed: rgba(170,170,170,0.2);
+      --sun-hand: var(--wd-on);
+      --sun-hand-night: #A9BADC;
       --seg-fill-a: rgba(94,159,232,0.45);
       --seg-fill-b: rgba(94,159,232,0.85);
       --chip-bg: rgba(94,159,232,0.14);
@@ -218,6 +222,10 @@
   .wc-days span.wknd { color: var(--wd-off-text-wknd); }
   .wc-days span.today { background: var(--wd-on); color: #FFFFFF; }
   .wc-days span.today.wknd { background: var(--wd-on-wknd); }
+  .doy-chip.s-spring { background: rgba(120,180,130,0.18); color: #55875B; }
+  .doy-chip.s-summer { background: rgba(226,132,110,0.18); color: #C2604F; }
+  .doy-chip.s-autumn { background: rgba(226,178,96,0.2); color: #A9702B; }
+  .doy-chip.s-winter { background: rgba(120,155,215,0.18); color: #5578A9; }
   .doy-chip.term { background: #F7E7CB; color: #A9702B; }
   .doy-chip {
     background: var(--seg-empty);
@@ -296,6 +304,8 @@
   #sunring { transform: none; }
   #sunDayArc { fill: none; stroke: var(--sun-day); stroke-width: 5.8; }
   #sunNightArc { fill: none; stroke: var(--sun-night); stroke-width: 5.8; }
+  #sunHand { fill: var(--sun-hand); }
+  #sunring.night #sunHand { fill: var(--sun-hand-night); }
   .time {
     font-size: 21px;
     font-weight: 650;
@@ -426,6 +436,7 @@
             <title id="sunTitle">日照時鐘</title>
             <path id="sunDayArc" d=""></path>
             <path id="sunNightArc" d=""></path>
+            <path id="sunHand" d="M 10 3.6 C 10.9 5.9 11.6 8.9 11.6 10.4 A 1.6 1.6 0 1 1 8.4 10.4 C 8.4 8.9 9.1 5.9 10 3.6 Z"></path>
           </svg>
           <svg class="dayring" id="dayring" viewBox="0 0 20 20" width="19" height="19" role="img" aria-label="今日進度">
             <title id="ringTitle">今日進度</title>
@@ -515,28 +526,6 @@
     if (mm === 60) { hh = (hh + 1) % 24; mm = 0; }
     return pad(hh) + ":" + pad(mm);
   }
-  var SUN_GAP = 0.62; // 斷口半寬（小時），總寬約 18.6 度
-  function cutArc(a, b, g1, g2) {
-    // 從弧 [a,b] 中挖掉缺口 [g1,g2]（含跨午夜環繞）
-    var segs = [[a, b]];
-    for (var off = -24; off <= 24; off += 24) {
-      var h1 = g1 + off, h2 = g2 + off;
-      var out = [];
-      for (var i = 0; i < segs.length; i++) {
-        var s = segs[i];
-        if (h2 <= s[0] || h1 >= s[1]) { out.push(s); continue; }
-        if (h1 > s[0]) out.push([s[0], h1]);
-        if (h2 < s[1]) out.push([h2, s[1]]);
-      }
-      segs = out;
-    }
-    return segs;
-  }
-  function arcPath(segs) {
-    var d = [];
-    for (var i = 0; i < segs.length; i++) d.push(sunArc(segs[i][0], segs[i][1]));
-    return d.join(" ");
-  }
   function fmtDur(h) {
     var m = Math.round(h * 60);
     var hh = Math.floor(m / 60), mm = m % 60;
@@ -548,15 +537,16 @@
       sunKey = key;
       var st = computeSunTimes(now);
       sunRise = st[0]; sunSet = st[1];
+      document.getElementById("sunDayArc").setAttribute("d", sunArc(sunRise, sunSet));
+      document.getElementById("sunNightArc").setAttribute("d", sunArc(sunSet, sunRise));
     }
     var tNow = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
-    // 指針＝環上隨時間順時針移動的斷口
-    var g1 = tNow - SUN_GAP, g2 = tNow + SUN_GAP;
-    document.getElementById("sunDayArc").setAttribute("d", arcPath(cutArc(sunRise, sunSet, g1, g2)));
-    document.getElementById("sunNightArc").setAttribute("d", arcPath(cutArc(sunSet, sunRise + 24, g1, g2)));
+    // 水滴指針：尖端朝外，隨時間繞環心順時針旋轉
+    document.getElementById("sunHand").setAttribute("transform", "rotate(" + (((tNow - 12) / 24) * 360).toFixed(2) + " 10 10)");
     var isDay = tNow >= sunRise && tNow < sunSet;
+    document.getElementById("sunring").classList.toggle("night", !isDay);
     var nextTxt = isDay ? "距日落 " + fmtDur(sunSet - tNow) : "距日出 " + fmtDur(((sunRise - tNow) % 24 + 24) % 24);
-    setText("sunTitle", "日出 " + fmtHM(sunRise) + "｜日落 " + fmtHM(sunSet) + "｜" + nextTxt);
+    setText("sunTitle", "日出 " + fmtHM(sunRise) + "｜日落 " + fmtHM(sunSet) + "｜日光 " + fmtDur(sunSet - sunRise) + "｜" + nextTxt);
   }
   var wdChip = document.getElementById("wdchip");
   var wcDays = document.getElementById("wcdays");
@@ -720,10 +710,32 @@
   var MOON_EMOJI = ["\uD83C\uDF11", "\uD83C\uDF12", "\uD83C\uDF13", "\uD83C\uDF14", "\uD83C\uDF15", "\uD83C\uDF16", "\uD83C\uDF17", "\uD83C\uDF18"];
   var MOON_NAMES = ["新月", "眉月", "上弦月", "盈凸月", "滿月", "虧凸月", "下弦月", "殘月"];
   function moonInfo(d) {
-    var syn = 29.530588853;
-    var days = (d.getTime() - Date.UTC(2000, 0, 6, 18, 14)) / 86400000;
-    var age = ((days % syn) + syn) % syn;
-    var idx = Math.floor(age / syn * 8 + 0.5) % 8;
+    var syn = 29.530588853, rad = Math.PI / 180;
+    function rev(x) { x = x % 360; return x < 0 ? x + 360 : x; }
+    function elongAt(t) {
+      var Ms = rev(357.5291 + 0.98560028 * t);
+      var sunLon = rev(280.459 + 0.98564736 * t) + 1.915 * Math.sin(Ms * rad) + 0.02 * Math.sin(2 * Ms * rad);
+      var Lm = rev(218.316 + 13.176396 * t);
+      var Mm = rev(134.963 + 13.064993 * t);
+      var D = rev(297.850 + 12.190749 * t);
+      // 月球真黃經：含中心差、出差、二均差等主要攝動項
+      var lon = Lm + 6.289 * Math.sin(Mm * rad) - 1.274 * Math.sin((Mm - 2 * D) * rad)
+        + 0.658 * Math.sin(2 * D * rad) - 0.214 * Math.sin(2 * Mm * rad) - 0.186 * Math.sin(Ms * rad)
+        - 0.059 * Math.sin((2 * Mm - 2 * D) * rad) - 0.057 * Math.sin((Mm - 2 * D + Ms) * rad)
+        + 0.053 * Math.sin((Mm + 2 * D) * rad) + 0.046 * Math.sin((2 * D - Ms) * rad)
+        + 0.041 * Math.sin((Mm - Ms) * rad) - 0.035 * Math.sin(D * rad) - 0.031 * Math.sin((Mm + Ms) * rad);
+      return rev(lon - sunLon);
+    }
+    var t = (d.getTime() - 946728000000) / 86400000; // J2000 起算天數
+    var elong = elongAt(t);
+    // 月齡＝距上次朔（新月）的實際天數，用牛頓法回推朔的時刻
+    var tNew = t - elong / 12.190749;
+    for (var i = 0; i < 4; i++) {
+      var e2 = elongAt(tNew);
+      tNew -= ((e2 + 180) % 360 - 180) / 12.190749;
+    }
+    var age = t - tNew;
+    var idx = Math.floor(elong / 45 + 0.5) % 8;
     return { emoji: MOON_EMOJI[idx], name: MOON_NAMES[idx], age: age };
   }
   var LUNAR_DAYS = ["", "初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
@@ -760,6 +772,50 @@
     }
     return null;
   }
+  var moonRiseTxt = null, moonSetTxt = null, moonTimesKey = "";
+  function loadMoonTimes(key) {
+    moonTimesKey = key;
+    var d = new Date();
+    var dstr = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+    fetchJson("https://opendata.cwa.gov.tw/api/v1/rest/datastore/A-B0063-001?CountyName=" + encodeURIComponent("臺中市") + "&Date=" + dstr)
+      .then(function (j) {
+        var locs = j && j.records && j.records.locations;
+        var loc = locs && locs.location && locs.location[0];
+        var times = (loc && (loc.time || loc.Time)) || [];
+        var t = null;
+        for (var i = 0; i < times.length; i++) {
+          var dt = String(times[i].Date || times[i].date || "");
+          if (dt.indexOf(dstr) === 0) { t = times[i]; break; }
+        }
+        if (!t) t = times[0];
+        if (!t) return;
+        function pickTime(o, kw) {
+          // 先剔除 rise 字段名再比對，避免 MoonRiseTime 裡的 riSETime 誤判為 set
+          for (var k in o) {
+            var kk = k.toLowerCase().split("rise").join(kw === "rise" ? "rise" : "");
+            if (kk.indexOf(kw) >= 0 && /^\d{1,2}:\d{2}/.test(String(o[k]))) return String(o[k]).slice(0, 5);
+          }
+          return null;
+        }
+        moonRiseTxt = pickTime(t, "rise");
+        moonSetTxt = pickTime(t, "set");
+        var moonEl = document.getElementById("moon");
+        if (!moonEl.hidden) {
+          var mi = moonInfo(new Date());
+          moonEl.title = "月相：" + mi.name + "（月齡 " + mi.age.toFixed(1) + " 天）"
+            + "\n月出 " + (moonRiseTxt || "—") + "｜月落 " + (moonSetTxt || "—");
+        }
+      })
+      .catch(function () { /* 抓不到就先不顯示 */ });
+  }
+  function seasonOf(d) {
+    // 以四立（立春 2/4、立夏 5/5、立秋 8/7、立冬 11/7 前後）劃分四季
+    var md = (d.getMonth() + 1) * 100 + d.getDate();
+    if (md >= 204 && md < 505) return "s-spring";
+    if (md >= 505 && md < 807) return "s-summer";
+    if (md >= 807 && md < 1107) return "s-autumn";
+    return "s-winter";
+  }
   var calChipKey = "";
   function updateCalendarChips() {
     if (typeof MOON_EMOJI === "undefined" || !MOON_EMOJI) return; // 初始化中，下一秒再試
@@ -770,7 +826,9 @@
     var mi = moonInfo(now);
     var moonEl = document.getElementById("moon");
     moonEl.textContent = mi.emoji;
-    moonEl.title = "月相：" + mi.name + "（月齡 " + mi.age.toFixed(1) + " 天）";
+    moonEl.title = "月相：" + mi.name + "（月齡 " + mi.age.toFixed(1) + " 天）"
+      + "\n月出 " + (moonRiseTxt || "—") + "｜月落 " + (moonSetTxt || "—");
+    if (moonTimesKey !== key) loadMoonTimes(key);
     moonEl.hidden = false;
     var lun = lunarText(now);
     var term = solarTermOf(now);
@@ -778,6 +836,8 @@
     var lu = document.getElementById("lunar");
     if (txt) {
       lu.textContent = txt;
+      lu.classList.remove("s-spring", "s-summer", "s-autumn", "s-winter");
+      lu.classList.add(seasonOf(now));
       lu.classList.toggle("term", !!term);
       lu.title = term ? "今日節氣：" + term + (lun ? "（農曆" + lun + "）" : "") : "農曆" + lun;
       lu.hidden = false;
@@ -980,13 +1040,17 @@
       var parts = [];
       var desc = pick("desc"), feels = pick("feels");
       parts.push((desc ? desc + " " : "") + (temp != null ? temp : "--") + "\u00B0C" + (feels != null ? "（體感 " + Math.round(feels) + "\u00B0C）" : ""));
-      if (pick("hum") != null) parts.push("濕度 " + Math.round(pick("hum")) + "%");
-      parts.push("降雨機率 " + (rain != null ? Math.round(rain) + "%" : "未知"));
-      if (pick("rainAmt") != null) parts.push("今日降雨量 " + pick("rainAmt") + " mm");
-      if (pick("pressure") != null) parts.push("氣壓 " + Math.round(pick("pressure")) + " hPa");
-      if (pick("wind")) parts.push("風 " + pick("wind") + (pick("windSpd") != null ? " " + pick("windSpd") + " m/s" : ""));
+      var wetLine = [];
+      if (pick("hum") != null) wetLine.push("濕度 " + Math.round(pick("hum")) + "%");
+      wetLine.push("降雨機率 " + (rain != null ? Math.round(rain) + "%" : "未知"));
+      if (pick("rainAmt") != null) wetLine.push("今日降雨量 " + pick("rainAmt") + " mm");
+      parts.push(wetLine.join("｜"));
+      var airLine = [];
+      if (pick("pressure") != null) airLine.push("氣壓 " + Math.round(pick("pressure")) + " hPa");
+      if (pick("wind")) airLine.push("風 " + pick("wind") + (pick("windSpd") != null ? " " + pick("windSpd") + " m/s" : ""));
       var uv = uvText(pick("uv"));
-      if (uv) parts.push("紫外線 " + uv);
+      if (uv) airLine.push("紫外線 " + uv);
+      if (airLine.length) parts.push(airLine.join("｜"));
       if (aq && aq.aqi != null && isFinite(aq.aqi)) {
         var info = aqiInfo(aq.aqi);
         setText("wxAqi", aq.aqi);
@@ -1002,7 +1066,7 @@
       parts.push(L.name + "｜資訊：" + srcs.join("、"));
       var upd = new Date();
       parts.push("更新 " + pad(upd.getHours()) + ":" + pad(upd.getMinutes()));
-      var label = parts.join("｜");
+      var label = parts.join("\n");
       var chip = document.getElementById("wx");
       chip.title = label + "\n（點一下切換 大里／南屯）";
       chip.setAttribute("aria-label", label);
@@ -1104,28 +1168,123 @@
           .catch(function () { /* 保持隱藏 */ });
       });
   }
-  // ---- 全球市場（納指、費半、標普、道瓊、金價、油價；Yahoo Finance 最新收盤，顯示於台股懸浮資訊） ----
-  var GLOBAL_SYMS = [["^IXIC", "納指"], ["^SOX", "費半"], ["^GSPC", "標普"], ["^DJI", "道瓊"], ["GC=F", "金價"], ["CL=F", "油價"]];
-  function loadGlobal() {
-    Promise.all(GLOBAL_SYMS.map(function (s) {
-      return fetchJson("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(s[0]) + "?range=1d&interval=1d")
-        .then(function (j) {
-          var meta = j && j.chart && j.chart.result && j.chart.result[0] && j.chart.result[0].meta;
-          var p = meta ? parseFloat(meta.regularMarketPrice) : NaN;
-          var prev = meta ? parseFloat(meta.chartPreviousClose) : NaN;
-          if (!isFinite(p)) return null;
-          var txt = s[1] + " " + p.toLocaleString("zh-Hant-TW", { maximumFractionDigits: p >= 1000 ? 0 : 2 });
-          if (isFinite(prev) && prev !== 0) {
-            var pc = (p - prev) / prev * 100;
-            txt += "（" + (pc >= 0 ? "+" : "") + pc.toFixed(2) + "%）";
-          }
-          return txt;
+  // ---- 全球市場（台指期、亞股、美股、商品、利率匯率、風險；Stooq／FRED／期交所／CNN，顯示於台股懸浮資訊） ----
+  function fetchText(url) {
+    var i = 0;
+    function attempt() {
+      if (i >= PROXIES.length) return Promise.reject(new Error("all routes failed"));
+      var target = PROXIES[i++](url);
+      return fetch(target)
+        .then(function (r) {
+          if (!r.ok) throw new Error("http " + r.status);
+          return r.text();
         })
-        .catch(function () { return null; });
-    })).then(function (arr) {
-      var ok = arr.filter(function (x) { return x; });
-      globalNote = ok.length ? "全球收盤：" + ok.join("｜") : "";
-      if (ok.length) globalUpdT = new Date();
+        .catch(attempt);
+    }
+    return attempt();
+  }
+  function z2(n) { return (n < 10 ? "0" : "") + n; }
+  function fmtNum(v) { return v.toLocaleString("zh-Hant-TW", { maximumFractionDigits: v >= 1000 ? 0 : 2 }); }
+  function fmtChg(last, prev, abs) {
+    if (!isFinite(prev)) return "";
+    if (abs) { var d = last - prev; return "（" + (d >= 0 ? "+" : "") + d.toFixed(2) + "）"; }
+    if (prev === 0) return "";
+    var pc = (last - prev) / prev * 100;
+    return "（" + (pc >= 0 ? "+" : "") + pc.toFixed(2) + "%）";
+  }
+  // Stooq 歷史日線 CSV（Date,Open,High,Low,Close,Volume）：取最近兩個收盤價計算漲跌
+  function stooqJob(sym, label, group, isRate) {
+    var d2 = new Date(), d1 = new Date(d2.getTime() - 21 * 86400000);
+    function ymd(d) { return "" + d.getFullYear() + z2(d.getMonth() + 1) + z2(d.getDate()); }
+    return fetchText("https://stooq.com/q/d/l/?s=" + encodeURIComponent(sym) + "&d1=" + ymd(d1) + "&d2=" + ymd(d2) + "&i=d")
+      .then(function (csv) {
+        var rows = String(csv).trim().split(/\r?\n/), closes = [];
+        for (var i = 1; i < rows.length; i++) {
+          var c = parseFloat(rows[i].split(",")[4]);
+          if (isFinite(c)) closes.push(c);
+        }
+        if (!closes.length) return null;
+        var last = closes[closes.length - 1];
+        var prev = closes.length > 1 ? closes[closes.length - 2] : NaN;
+        var txt = label + " " + (isRate ? last.toFixed(2) + "%" : fmtNum(last)) + fmtChg(last, prev, isRate);
+        return { g: group, t: txt };
+      })
+      .catch(function () { return null; });
+  }
+  var GLOBAL_SYMS = [
+    ["^nkx", "日經", "asia"], ["^kospi", "KOSPI", "asia"],
+    ["^ndq", "納指", "us"], ["^sox", "費半", "us"], ["^spx", "標普", "us"], ["^dji", "道瓊", "us"],
+    ["gc.f", "金價", "cmd"], ["cb.f", "布蘭特", "cmd"], ["cl.f", "西德州", "cmd"],
+    ["dx.f", "美元指數", "fx"], ["^vix", "VIX", "risk"]
+  ];
+  function loadGlobal() {
+    var jobs = GLOBAL_SYMS.map(function (s) { return stooqJob(s[0], s[1], s[2], false); });
+    jobs.push(stooqJob("10usy.b", "美債10Y", "fx", true));
+    jobs.push(stooqJob("^bdi", "BDI", "ship", false));
+    var cosd = new Date(Date.now() - 45 * 86400000);
+    jobs.push(fetchText("https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFF&cosd=" + cosd.getFullYear() + "-" + z2(cosd.getMonth() + 1) + "-" + z2(cosd.getDate()))
+      .then(function (csv) {
+        var rows = String(csv).trim().split(/\r?\n/), vals = [];
+        for (var i = 1; i < rows.length; i++) {
+          var v = parseFloat(rows[i].split(",")[1]);
+          if (isFinite(v)) vals.push(v);
+        }
+        if (!vals.length) return null;
+        var last = vals[vals.length - 1];
+        var prev = vals.length > 1 ? vals[vals.length - 2] : NaN;
+        return { g: "fx", t: "聯邦基金利率 " + last.toFixed(2) + "%" + fmtChg(last, prev, true) };
+      })
+      .catch(function () { return null; }));
+    // 期交所三大法人：臺股期貨外資多空未平倉口數 → 淨空單
+    jobs.push(fetchJson("https://openapi.taifex.com.tw/v1/MarketDataOfMajorInstitutionalTradersDetailsOfFuturesContractsData")
+      .then(function (list) {
+        if (!list || !list.length) return null;
+        for (var i = 0; i < list.length; i++) {
+          var row = list[i], all = JSON.stringify(row);
+          if (all.indexOf("臺股期貨") < 0 || all.indexOf("外資") < 0 || all.indexOf("自營") >= 0) continue;
+          var longOi = NaN, shortOi = NaN;
+          for (var k in row) {
+            var v = parseFloat(String(row[k]).replace(/,/g, ""));
+            if (!isFinite(v)) continue;
+            var eng = k.toLowerCase().replace(/[^a-z]/g, "");
+            if (k.indexOf("金額") >= 0 || eng.indexOf("amount") >= 0 || eng.indexOf("value") >= 0) continue;
+            if ((k.indexOf("多方") >= 0 && k.indexOf("未平倉") >= 0) || (eng.indexOf("long") >= 0 && eng.indexOf("openinterest") >= 0)) longOi = v;
+            if ((k.indexOf("空方") >= 0 && k.indexOf("未平倉") >= 0) || (eng.indexOf("short") >= 0 && eng.indexOf("openinterest") >= 0)) shortOi = v;
+          }
+          if (isFinite(longOi) && isFinite(shortOi)) {
+            var net = shortOi - longOi;
+            var lab = net >= 0 ? "外資淨空單 " : "外資淨多單 ";
+            return { g: "txf", t: lab + Math.round(Math.abs(net)).toLocaleString("zh-Hant-TW") + " 口" };
+          }
+        }
+        return null;
+      })
+      .catch(function () { return null; }));
+    // CNN 恐懼與貪婪指數（非官方端點，抓不到時自動略過）
+    jobs.push(fetchJson("https://production.dataviz.cnn.io/index/fearandgreed/graphdata")
+      .then(function (j) {
+        var fg = j && j.fear_and_greed;
+        if (!fg || fg.score == null) return null;
+        var map = { "extreme fear": "極度恐懼", "fear": "恐懼", "neutral": "中性", "greed": "貪婪", "extreme greed": "極度貪婪" };
+        var r = map[String(fg.rating || "").toLowerCase()];
+        var pv = parseFloat(fg.previous_close);
+        var chg = isFinite(pv) ? fmtChg(fg.score, pv, true) : "";
+        return { g: "risk", t: "CNN 恐懼貪婪 " + Math.round(fg.score) + (r ? "（" + r + "）" : "") + chg };
+      })
+      .catch(function () { return null; }));
+    Promise.all(jobs).then(function (arr) {
+      var by = { txf: [], asia: [], us: [], cmd: [], fx: [], ship: [], risk: [] };
+      for (var i = 0; i < arr.length; i++) if (arr[i]) by[arr[i].g].push(arr[i].t);
+      var lines = [];
+      if (by.txf.length) lines.push("台指期：" + by.txf.join("｜"));
+      if (by.asia.length) lines.push("亞股：" + by.asia.join("｜"));
+      if (by.us.length) lines.push("美股：" + by.us.join("｜"));
+      if (by.cmd.length) lines.push("商品：" + by.cmd.join("｜"));
+      if (by.fx.length) lines.push("利率匯率：" + by.fx.join("｜"));
+      if (by.ship.length) lines.push("航運：" + by.ship.join("｜"));
+      if (by.risk.length) lines.push("風險：" + by.risk.join("｜"));
+      globalNote = lines.join("\n");
+      if (lines.length) globalUpdT = new Date();
       if (twTitleBase) applyTwTitle();
     });
   }
