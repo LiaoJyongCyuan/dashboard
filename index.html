@@ -13,8 +13,8 @@
     --sun-day: #EBB670;
     --sun-night: #96A8C9;
     --mkt-closed: #EDEDEB;
-    --sun-hand: var(--wd-on);
-    --sun-hand-night: #64769E;
+    --sun-hand: #D5754A; /* 白天指針：比主題橘再沉穩一點 */
+    --sun-hand-night: #6B82C4; /* 夜間指針：比夜弧 #96A8C9 更飽和偏靖藍，避免同色融合 */
     --dot-blue: #A9CDEC;
     --dot-green: #A8D3B8;
     --dot-amber: #E9CF95;
@@ -76,8 +76,8 @@
       --sun-day: rgba(236,175,110,0.78);
       --sun-night: rgba(135,158,205,0.7);
       --mkt-closed: rgba(170,170,170,0.2);
-      --sun-hand: var(--wd-on);
-      --sun-hand-night: #A9BADC;
+      --sun-hand: #D9814F; /* 白天指針（深色模式）：稍降亮度 */
+      --sun-hand-night: #C3D2F0; /* 夜間指針（深色模式）：調亮 */
       --seg-fill-a: rgba(94,159,232,0.45);
       --seg-fill-b: rgba(94,159,232,0.85);
       --chip-bg: rgba(94,159,232,0.14);
@@ -419,7 +419,7 @@
   .dot-rose  { --c: var(--dot-rose); }
   .dot-teal  { --c: var(--dot-teal); }
   /* ---- 響應式排版 ---- */
-  .lbrk { display: none; } /* 手機版換行器：桌面不顯示 */
+  .lbrk { display: none; } /* 手機版換行器：桌面不顯�� */
   /* 中幅（窄視窗／平板）：先收掉右側雙週曆 */
   @media (max-width: 760px) {
     .weekcal, .vdiv { display: none; }
@@ -456,7 +456,7 @@
         <span class="wx-chip" id="wx" hidden role="img" aria-label="台中即時天氣" title="點一下切換 大里／南屯">
           <span class="wx-item"><span class="wx-lab" id="wxLoc">—</span></span>
           <span class="wx-item"><span class="wx-ic" id="wxIcon">—</span><span class="wx-t" id="wxTemp">--°</span></span>
-          <span class="wx-item"><span class="wx-lab">☔</span><span id="wxRain">--%</span></span>
+          <span class="wx-item"><span class="wx-lab">🌀</span><span id="wxRain">--%</span></span>
           <span class="wx-item"><span class="wx-aqi-dot" id="wxAqiDot" aria-hidden="true"></span><span id="wxAqi">--</span></span>
         </span>
         <span class="wx-chip" id="tw" hidden role="img" aria-label="台股加權指數">
@@ -585,7 +585,9 @@
     var isDay = tNow >= sunRise && tNow < sunSet;
     document.getElementById("sunring").classList.toggle("night", !isDay);
     var nextTxt = isDay ? "距日落 " + fmtDur(sunSet - tNow) : "距日出 " + fmtDur(((sunRise - tNow) % 24 + 24) % 24);
-    setText("sunTitle", "日出 " + fmtHM(sunRise) + "｜日落 " + fmtHM(sunSet) + "｜日光 " + fmtDur(sunSet - sunRise) + "｜" + nextTxt);
+    // 白天標日光時長、夜間標夜間時長
+    var spanTxt = isDay ? "日光 " + fmtDur(sunSet - sunRise) : "夜間 " + fmtDur(24 - (sunSet - sunRise));
+    setText("sunTitle", "日出 " + fmtHM(sunRise) + "｜日落 " + fmtHM(sunSet) + "｜" + spanTxt + "｜" + nextTxt);
   }
   var wdChip = document.getElementById("wdchip");
   var wcDays = document.getElementById("wcdays");
