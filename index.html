@@ -254,6 +254,25 @@
     font-variant-numeric: tabular-nums;
   }
   .wx-chip[hidden] { display: none; }
+  /* 台股標籤右端四小三角：左→右 0050／0051／0052／0055，紅漲綠跌、深淺=幅度（淡雅配色） */
+  .etf-tris { display: inline-flex; align-items: center; gap: 2px; font-size: 8px; line-height: 15px; }
+  .etf-tris[hidden] { display: none; }
+  .etf-tris .t-u1 { color: #DDB6AC; }
+  .etf-tris .t-u2 { color: #CE8B7B; }
+  .etf-tris .t-u3 { color: #B85F4F; }
+  .etf-tris .t-d1 { color: #AFCBBB; }
+  .etf-tris .t-d2 { color: #86AE95; }
+  .etf-tris .t-d3 { color: #5C8F72; }
+  .etf-tris .t-f  { color: #B9B4AC; }
+  @media (prefers-color-scheme: dark) {
+    .etf-tris .t-u1 { color: #7A544B; }
+    .etf-tris .t-u2 { color: #A16757; }
+    .etf-tris .t-u3 { color: #CB7E69; }
+    .etf-tris .t-d1 { color: #50695B; }
+    .etf-tris .t-d2 { color: #6F937D; }
+    .etf-tris .t-d3 { color: #93BFA4; }
+    .etf-tris .t-f  { color: #6E6961; }
+  }
   .wx-ic {
     font-size: 11px;
     line-height: 15px;
@@ -399,13 +418,31 @@
   .dot-lav   { --c: var(--dot-lav); }
   .dot-rose  { --c: var(--dot-rose); }
   .dot-teal  { --c: var(--dot-teal); }
-  @media (max-width: 480px) {
-    body { padding: 8px 16px; }
+  /* ---- 響應式排版 ---- */
+  .lbrk { display: none; } /* 手機版換行器：桌面不顯示 */
+  /* 中幅（窄視窗／平板）：先收掉右側雙週曆 */
+  @media (max-width: 760px) {
+    .weekcal, .vdiv { display: none; }
+  }
+  /* 手機版：改為固定三行式排版，隱藏次要資訊
+     第一行：日期＋週幾＋月相（左）、日照輪＋時鐘（右）
+     第二行：天氣膠囊＋台股膠囊
+     第三行：今年進度列
+     隱藏：週／日進度環、秒數、雙週曆、主題色點、第N天／農曆膠囊 */
+  @media (max-width: 520px) {
+    body { padding: 8px 14px; }
+    .line { row-gap: 7px; }
+    .time-group { order: 2; gap: 7px; }
+    .lbrk { display: block; order: 3; flex-basis: 100%; height: 0; }
+    .wx-chip { order: 4; }
     .time { font-size: 19px; }
-    .segments { gap: 2px; }
+    .time .sec { display: none; }
+    #weekring, #dayring { display: none; }
+    .dots { display: none; }
     .doy-chip { display: none; }
     .wx-chip .wx-lab { display: none; }
-    .weekcal, .vdiv { display: none; }
+    .bar-row { margin-top: 8px; }
+    .segments { gap: 2px; }
   }
 </style>
 </head>
@@ -425,23 +462,25 @@
         <span class="wx-chip" id="tw" hidden role="img" aria-label="台股加權指數">
           <span class="wx-item"><span class="wx-lab">^TWII</span><span class="wx-t" id="twVal">--</span></span>
           <span class="wx-item wx-flat" id="twChg">--</span>
+          <span class="etf-tris" id="etfTris" hidden aria-hidden="true"></span>
         </span>
+        <span class="lbrk" aria-hidden="true"></span>
         <span class="time-group">
           <svg class="dayring" id="weekring" viewBox="0 0 20 20" width="19" height="19" role="img" aria-label="本週進度">
             <title id="weekTitle">本週進度</title>
             <circle class="ring-base" cx="10" cy="10" r="9"></circle>
             <circle class="ring-fill week" id="weekFill" cx="10" cy="10" r="4.5"></circle>
           </svg>
+          <svg class="dayring" id="dayring" viewBox="0 0 20 20" width="19" height="19" role="img" aria-label="今日進度">
+            <title id="ringTitle">今日進度</title>
+            <circle class="ring-base" cx="10" cy="10" r="9"></circle>
+            <circle class="ring-fill" id="ringFill" cx="10" cy="10" r="4.5"></circle>
+          </svg>
           <svg class="dayring" id="sunring" viewBox="0 0 20 20" width="19" height="19" role="img" aria-label="日照時鐘">
             <title id="sunTitle">日照時鐘</title>
             <path id="sunDayArc" d=""></path>
             <path id="sunNightArc" d=""></path>
             <path id="sunHand" d="M 10 3.4 C 11.25 5.9 12.15 8.4 12.15 10.3 A 2.15 2.15 0 1 1 7.85 10.3 C 7.85 8.4 8.75 5.9 10 3.4 Z"></path>
-          </svg>
-          <svg class="dayring" id="dayring" viewBox="0 0 20 20" width="19" height="19" role="img" aria-label="今日進度">
-            <title id="ringTitle">今日進度</title>
-            <circle class="ring-base" cx="10" cy="10" r="9"></circle>
-            <circle class="ring-fill" id="ringFill" cx="10" cy="10" r="4.5"></circle>
           </svg>
           <span class="time"><span id="hm">--:--</span> <span class="sec" id="ss">--</span></span>
         </span>
@@ -1084,7 +1123,7 @@
     loadWeather();
   });
 
-  // ---- 台股加權指數（盤中延遲報價，失敗時退回證交所 OpenAPI 收盤資料） ----
+  // ---- 台股加權指數（盤中延遲報價，失敗時退回證交所 OpenAPI ���盤資料） ----
   function fmtIdx(n) {
     return n.toLocaleString("zh-Hant-TW", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
@@ -1096,6 +1135,11 @@
     if (w === 0 || w === 6) return false;
     var m = d.getHours() * 60 + d.getMinutes();
     return m >= 540 && m <= 810; // 09:00–13:30
+  }
+  function isStaleClose() {
+    // 週末與週一開盤前（09:00 前）：標籤顯示的是舊收盤資料
+    var n0 = new Date(), dow0 = n0.getDay();
+    return dow0 === 0 || dow0 === 6 || (dow0 === 1 && n0.getHours() * 60 + n0.getMinutes() < 540);
   }
   var globalNote = "";
   var twTitleBase = "";
@@ -1110,15 +1154,14 @@
       // 台股與全球拓時間一致就合併，不一致則分列
       tail = "\n更新：" + (b ? (b === a ? a : "台股 " + a + "｜全球 " + b) : "台股 " + a);
     }
-    chip.title = twTitleBase + (globalNote ? "\n" + globalNote : "") + tail;
+    chip.title = twTitleBase + (twEtfNote ? "\n" + twEtfNote : "") + (globalNote ? "\n" + globalNote : "") + tail;
     chip.setAttribute("aria-label", twTitleBase);
   }
   function renderStock(val, chg, pct, note) {
     setText("twVal", fmtK(val));
     var el = document.getElementById("twChg");
     // 週末與週一開盤前（09:00 前）顯示的是舊收盤，標籤上不顯示漲跌幅（懸浮資訊仍保留）
-    var n0 = new Date(), dow0 = n0.getDay();
-    var staleClose = dow0 === 0 || dow0 === 6 || (dow0 === 1 && n0.getHours() * 60 + n0.getMinutes() < 540);
+    var staleClose = isStaleClose();
     if (staleClose) {
       el.textContent = "";
       el.className = "wx-item wx-flat";
@@ -1181,6 +1224,97 @@
           })
           .catch(function () { /* 保持隱藏 */ });
       });
+  }
+  // ---- 台股 ETF／台積電（顯示於台股懸浮資訊；富果為主、證交所批次備援） ----
+  var TW_QUOTES = [
+    ["0050", "台灣50"],
+    ["0051", "中型100"],
+    ["0052", "富邦科技"],
+    ["0055", "MSCI金融"],
+    ["0056", "高股息"],
+    ["2330", "台積電"]
+  ];
+  var twEtfNote = "";
+  // 標籤右端四小三角：左→右 0050／0051／0052／0055；紅漲綠跌，深淺=幅度
+  // 幅度分級依大盤型 ETF 日波動特性：|漲跌| ≥1.5% 深（大漲跌）、0.5–1.5% 中、<0.5% 淺（小漲跌）
+  var TRI_CODES = ["0050", "0051", "0052", "0055"];
+  var twTriPcts = {};
+  function triClass(pc) {
+    if (pc === null || !isFinite(pc)) return null;
+    var a = Math.abs(pc);
+    var lv = a >= 1.5 ? 3 : a >= 0.5 ? 2 : 1;
+    return pc > 0 ? "t-u" + lv : pc < 0 ? "t-d" + lv : "t-f";
+  }
+  function renderEtfTris() {
+    var el = document.getElementById("etfTris");
+    if (!el) return;
+    var html = "";
+    for (var i = 0; i < TRI_CODES.length; i++) {
+      var pc = twTriPcts[TRI_CODES[i]];
+      var cls = triClass(pc);
+      if (!cls) { html = ""; break; } // 任一檔沒資料就整組不顯示，避免對位誤讀
+      html += '<span class="' + cls + '">' + (pc > 0 ? "\u25B2" : pc < 0 ? "\u25BC" : "\u2013") + '</span>';
+    }
+    el.innerHTML = html;
+    el.hidden = !html || isStaleClose(); // 舊收盤時段（週末、週一開盤前）與漲跌幅一起隱藏
+  }
+  function fmtTwQuote(code, name, z, y) {
+    var s = code + " " + name + " " + fmtNum(z);
+    if (isFinite(y) && y > 0 && isFinite(z)) {
+      var pc = (z - y) / y * 100;
+      s += "（" + (pc >= 0 ? "+" : "") + pc.toFixed(2) + "%）";
+    }
+    return s;
+  }
+  function applyTwQuotes(parts) {
+    var etf = [], stk = [];
+    for (var i = 0; i < parts.length; i++) {
+      if (!parts[i]) continue;
+      (TW_QUOTES[i][0] === "2330" ? stk : etf).push(parts[i]);
+    }
+    var lines = [];
+    if (etf.length) lines.push("ETF：" + etf.join("｜"));
+    if (stk.length) lines.push("個股：" + stk.join("｜"));
+    twEtfNote = lines.join("\n");
+    if (twTitleBase) applyTwTitle();
+    renderEtfTris();
+  }
+  function loadTwQuotes() {
+    var jobs = TW_QUOTES.map(function (it) {
+      return fetchJson("https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/" + it[0])
+        .then(function (j) {
+          var y = parseFloat(j && j.previousClose);
+          var z = parseFloat(j && (j.closePrice != null ? j.closePrice : j.lastPrice));
+          if (!isFinite(z) || z <= 0) throw new Error("no data");
+          twTriPcts[it[0]] = isFinite(y) && y > 0 ? (z - y) / y * 100 : null;
+          return fmtTwQuote(it[0], it[1], z, y);
+        })
+        .catch(function () { return null; });
+    });
+    Promise.all(jobs).then(function (parts) {
+      var missing = false;
+      for (var i = 0; i < parts.length; i++) if (!parts[i]) missing = true;
+      if (!missing) { applyTwQuotes(parts); return; }
+      // 備援：證交所批次延遲報價（單一請求補齊缺漏檔；盤前尚無成交時退回昨收、不標漲跌）
+      var q = [];
+      for (var k = 0; k < TW_QUOTES.length; k++) q.push("tse_" + TW_QUOTES[k][0] + ".tw");
+      fetchJson("https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=" + q.join("|") + "&json=1&delay=0")
+        .then(function (j) {
+          var arr = (j && j.msgArray) || [];
+          var byId = {};
+          for (var i2 = 0; i2 < arr.length; i2++) byId[arr[i2].c] = arr[i2];
+          for (var n = 0; n < TW_QUOTES.length; n++) {
+            if (parts[n]) continue;
+            var m = byId[TW_QUOTES[n][0]];
+            var z = parseFloat(m && m.z), y = parseFloat(m && m.y);
+            if (!isFinite(z) || z <= 0) { z = y; y = NaN; }
+            twTriPcts[TW_QUOTES[n][0]] = isFinite(y) && y > 0 && isFinite(z) ? (z - y) / y * 100 : null;
+            if (isFinite(z) && z > 0) parts[n] = fmtTwQuote(TW_QUOTES[n][0], TW_QUOTES[n][1], z, y);
+          }
+          applyTwQuotes(parts);
+        })
+        .catch(function () { applyTwQuotes(parts); });
+    });
   }
   // ---- 全球市場（台指期籌碼、美股、商品、利率匯率、風險；FinMind／CNN，顯示於台股懸浮資訊） ----
   // FinMind 為台灣開源財經資料 API：免金鑰、開放 CORS，可由瀏覽器直連（毋須 Worker 白名單）
@@ -1347,12 +1481,13 @@
   updateCalendarChips(); // 月相與農曆資料就緒後立即補顯示
   loadWeather();
   loadStock();
+  loadTwQuotes();
   loadGlobal();
   setInterval(function () {
     if (!wxManualLoc) wxLocKey = wxDefaultLoc(); // 未手動切換時，依上班時段自動回到預設地點
     loadWeather();
   }, 30 * 60 * 1000);
-  setInterval(loadStock, 10 * 60 * 1000);
+  setInterval(function () { loadStock(); loadTwQuotes(); }, 10 * 60 * 1000);
   setInterval(loadGlobal, 30 * 60 * 1000);
 })();
 </script>
