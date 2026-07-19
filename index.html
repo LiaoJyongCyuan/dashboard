@@ -14,7 +14,7 @@
     --sun-night: #96A8C9;
     --mkt-closed: #EDEDEB;
     --sun-hand: #D5754A; /* 白天指針：比主題橘再沉穩一點 */
-    --sun-hand-night: #A08874; /* 夜間指針：摩卡咖啡，暖色與冷灰藍夜弧拉開色相對比 */
+    --sun-hand-night: #57649E; /* 夜間指針：靛藍再淡一階，仍暗於夜弧 #96A8C9 */
     --dot-blue: #A9CDEC;
     --dot-green: #A8D3B8;
     --dot-amber: #E9CF95;
@@ -77,7 +77,7 @@
       --sun-night: rgba(135,158,205,0.7);
       --mkt-closed: rgba(170,170,170,0.2);
       --sun-hand: #D9814F; /* 白天指針（深色模式）：稍降亮度 */
-      --sun-hand-night: #CDB49C; /* 夜間指針（深色模式）：奶茶色，暖色對比冷色夜弧 */
+      --sun-hand-night: #8194DF; /* 夜間指針（深色模式）：靛藍再淡一階 */
       --seg-fill-a: rgba(94,159,232,0.45);
       --seg-fill-b: rgba(94,159,232,0.85);
       --chip-bg: rgba(94,159,232,0.14);
@@ -678,7 +678,7 @@
     setText("weekTitle", "本週進度 " + (weekRatio * 100).toFixed(1) + "%");
     updateSunRing(now);
 
-    // 今年進度（分段）
+    // 今年進度（分段��
     var yearStart = new Date(now.getFullYear(), 0, 1);
     var yearEnd = new Date(now.getFullYear() + 1, 0, 1);
     var yearRatio = (now - yearStart) / (yearEnd - yearStart);
@@ -801,7 +801,7 @@
   }
   // 24 節氣（壽星通用公式，21 世紀係數）
   var TERM_NAMES = ["小寒", "大寒", "立春", "雨水", "驚蟄", "春分", "清明", "穀雨", "立夏", "小滿", "芒種", "夏至",
-    "小暑", "大暑", "立秋", "處暑", "白露", "秋分", "寒露", "霜降", "立冬", "小雪", "大雪", "冬至"];
+    "小暑", "大暑", "立秋", "處暑", "白露", "秋分", "寒露", "霜降", "立���", "小雪", "大雪", "冬至"];
   var TERM_C = [5.4055, 20.12, 3.87, 18.73, 5.63, 20.646, 4.81, 20.1, 5.52, 21.04, 5.678, 21.37,
     7.108, 22.83, 7.5, 23.13, 7.646, 23.042, 8.318, 23.438, 7.438, 22.36, 7.18, 21.94];
   function solarTermOf(d) {
@@ -1108,7 +1108,7 @@
       if (cwa) srcs.push("氣象署");
       if (aq && aq.src === "環境部") srcs.push("環境部");
       if (om && (!cwa || pick("pressure") != null || pick("uv") != null || (aq && aq.src === "Open-Meteo"))) srcs.push("Open-Meteo");
-      parts.push(L.name + "｜資訊：" + srcs.join("、"));
+      parts.push(L.name + "｜資���：" + srcs.join("、"));
       var upd = new Date();
       parts.push("更新 " + pad(upd.getHours()) + ":" + pad(upd.getMinutes()));
       var label = parts.join("\n");
