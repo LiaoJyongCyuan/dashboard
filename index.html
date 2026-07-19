@@ -436,7 +436,7 @@
             <title id="sunTitle">日照時鐘</title>
             <path id="sunDayArc" d=""></path>
             <path id="sunNightArc" d=""></path>
-            <path id="sunHand" d="M 10 3.6 C 10.9 5.9 11.6 8.9 11.6 10.4 A 1.6 1.6 0 1 1 8.4 10.4 C 8.4 8.9 9.1 5.9 10 3.6 Z"></path>
+            <path id="sunHand" d="M 10 3.4 C 11.25 5.9 12.15 8.4 12.15 10.3 A 2.15 2.15 0 1 1 7.85 10.3 C 7.85 8.4 8.75 5.9 10 3.4 Z"></path>
           </svg>
           <svg class="dayring" id="dayring" viewBox="0 0 20 20" width="19" height="19" role="img" aria-label="今日進度">
             <title id="ringTitle">今日進度</title>
@@ -803,7 +803,7 @@
         if (!moonEl.hidden) {
           var mi = moonInfo(new Date());
           moonEl.title = "月相：" + mi.name + "（月齡 " + mi.age.toFixed(1) + " 天）"
-            + "\n月出 " + (moonRiseTxt || "—") + "｜月落 " + (moonSetTxt || "—");
+            + "\n月出 " + (moonRiseTxt || "—") + "｜月落 " + (moonSetTxt || "��");
         }
       })
       .catch(function () { /* 抓不到就先不顯示 */ });
@@ -899,7 +899,7 @@
     function (u) { return "https://api.allorigins.win/raw?url=" + encodeURIComponent(u); },
     function (u) { return "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u); }
   ];
-  function fetchJson(url) {
+  function fetchJson(url, check) {
     var i = 0;
     function attempt() {
       if (i >= PROXIES.length) return Promise.reject(new Error("all routes failed"));
@@ -908,6 +908,10 @@
         .then(function (r) {
           if (!r.ok) throw new Error("http " + r.status);
           return r.json();
+        })
+        .then(function (data) {
+          if (check && !check(data)) throw new Error("bad data");
+          return data;
         })
         .catch(attempt);
     }
@@ -1112,9 +1116,19 @@
   function renderStock(val, chg, pct, note) {
     setText("twVal", fmtK(val));
     var el = document.getElementById("twChg");
-    var arrow = chg > 0 ? "\u25B2" : chg < 0 ? "\u25BC" : "\u2013";
-    el.textContent = arrow + fmtK(Math.abs(chg)) + " " + (chg > 0 ? "+" : chg < 0 ? "-" : "") + Math.abs(pct).toFixed(2) + "%";
-    el.className = "wx-item " + (chg > 0 ? "wx-up" : chg < 0 ? "wx-down" : "wx-flat");
+    // 週末與週一開盤前（09:00 前）顯示的是舊收盤，標籤上不顯示漲跌幅（懸浮資訊仍保留）
+    var n0 = new Date(), dow0 = n0.getDay();
+    var staleClose = dow0 === 0 || dow0 === 6 || (dow0 === 1 && n0.getHours() * 60 + n0.getMinutes() < 540);
+    if (staleClose) {
+      el.textContent = "";
+      el.className = "wx-item wx-flat";
+      el.hidden = true;
+    } else {
+      el.hidden = false;
+      var arrow = chg > 0 ? "\u25B2" : chg < 0 ? "\u25BC" : "\u2013";
+      el.textContent = arrow + fmtK(Math.abs(chg)) + " " + (chg > 0 ? "+" : chg < 0 ? "-" : "") + Math.abs(pct).toFixed(2) + "%";
+      el.className = "wx-item " + (chg > 0 ? "wx-up" : chg < 0 ? "wx-down" : "wx-flat");
+    }
     var chip = document.getElementById("tw");
     // 盤中依漲跌上色，收盤後一律灰底
     chip.classList.remove("mkt-open-up", "mkt-open-down", "mkt-closed");
@@ -1168,22 +1182,41 @@
           .catch(function () { /* 保持隱藏 */ });
       });
   }
-  // ---- 全球市場（台指期、亞股、美股、商品、利率匯率、風險；Stooq／FRED／期交所／CNN，顯示於台股懸浮資訊） ----
-  function fetchText(url) {
+  // ---- 全球市場（台指期籌碼、美股、商品、利率匯率、風險；FinMind／CNN，顯示於台股懸浮資訊） ----
+  // FinMind 為台灣開源財經資料 API：免金鑰、開放 CORS，可由瀏覽器直連（毋須 Worker 白名單）
+  var FINMIND = "https://api.finmindtrade.com/api/v4/data";
+  function fetchFinmind(qs, check) {
+    var url = FINMIND + "?" + qs;
+    var routes = [
+      function (u) { return u; },
+      function (u) { return "https://corsproxy.io/?url=" + encodeURIComponent(u); },
+      function (u) { return "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u); }
+    ];
     var i = 0;
     function attempt() {
-      if (i >= PROXIES.length) return Promise.reject(new Error("all routes failed"));
-      var target = PROXIES[i++](url);
+      if (i >= routes.length) return Promise.reject(new Error("all routes failed"));
+      var target = routes[i++](url);
       return fetch(target)
         .then(function (r) {
           if (!r.ok) throw new Error("http " + r.status);
-          return r.text();
+          return r.json();
+        })
+        .then(function (j) {
+          var rows = j && j.data;
+          if (Object.prototype.toString.call(rows) !== "[object Array]" || !rows.length) throw new Error("no data");
+          if (check && !check(rows)) throw new Error("bad data");
+          return rows;
         })
         .catch(attempt);
     }
     return attempt();
   }
   function z2(n) { return (n < 10 ? "0" : "") + n; }
+  function ymdDash(d) { return d.getFullYear() + "-" + z2(d.getMonth() + 1) + "-" + z2(d.getDate()); }
+  function fmRange(days) {
+    var d2 = new Date(), d1 = new Date(d2.getTime() - days * 86400000);
+    return "&start_date=" + ymdDash(d1) + "&end_date=" + ymdDash(d2);
+  }
   function fmtNum(v) { return v.toLocaleString("zh-Hant-TW", { maximumFractionDigits: v >= 1000 ? 0 : 2 }); }
   function fmtChg(last, prev, abs) {
     if (!isFinite(prev)) return "";
@@ -1192,75 +1225,99 @@
     var pc = (last - prev) / prev * 100;
     return "（" + (pc >= 0 ? "+" : "") + pc.toFixed(2) + "%）";
   }
-  // Stooq 歷史日線 CSV（Date,Open,High,Low,Close,Volume）：取最近兩個收盤價計算漲跌
-  function stooqJob(sym, label, group, isRate) {
-    var d2 = new Date(), d1 = new Date(d2.getTime() - 21 * 86400000);
-    function ymd(d) { return "" + d.getFullYear() + z2(d.getMonth() + 1) + z2(d.getDate()); }
-    return fetchText("https://stooq.com/q/d/l/?s=" + encodeURIComponent(sym) + "&d1=" + ymd(d1) + "&d2=" + ymd(d2) + "&i=d")
-      .then(function (csv) {
-        var rows = String(csv).trim().split(/\r?\n/), closes = [];
-        for (var i = 1; i < rows.length; i++) {
-          var c = parseFloat(rows[i].split(",")[4]);
-          if (isFinite(c)) closes.push(c);
-        }
-        if (!closes.length) return null;
-        var last = closes[closes.length - 1];
-        var prev = closes.length > 1 ? closes[closes.length - 2] : NaN;
-        var txt = label + " " + (isRate ? last.toFixed(2) + "%" : fmtNum(last)) + fmtChg(last, prev, isRate);
-        return { g: group, t: txt };
+  // 美股指數／VIX：FinMind 美股日線（資料源同 Yahoo），取最近兩個收盤價計算漲跌
+  // mul：ETF 價 → 原值（指數點數或每桶油價）的換算比例，依 2026/07 實際收盤校準，漲跌%不受影響
+  // fmt："k" 以千點 K 取小數一位；"1" 取小數一位；省略則用 fmtNum
+  function usJob(sym, label, group, mul, fmt) {
+    return fetchFinmind("dataset=USStockPrice&data_id=" + encodeURIComponent(sym) + fmRange(12))
+      .then(function (rows) {
+        var last = parseFloat(rows[rows.length - 1].Close);
+        var prev = rows.length > 1 ? parseFloat(rows[rows.length - 2].Close) : NaN;
+        if (!isFinite(last)) return null;
+        var v = last * (mul || 1);
+        var shown = fmt === "k" ? (v / 1000).toFixed(1) + "K" : fmt === "1" ? v.toFixed(1) : fmtNum(v);
+        if (mul) shown = "\u2248" + shown;
+        return { g: group, t: label + " " + shown + fmtChg(last, prev, false) };
       })
       .catch(function () { return null; });
   }
-  var GLOBAL_SYMS = [
-    ["^nkx", "日經", "asia"], ["^kospi", "KOSPI", "asia"],
-    ["^ndq", "納指", "us"], ["^sox", "費半", "us"], ["^spx", "標普", "us"], ["^dji", "道瓊", "us"],
-    ["gc.f", "金價", "cmd"], ["cb.f", "布蘭特", "cmd"], ["cl.f", "西德州", "cmd"],
-    ["dx.f", "美元指數", "fx"], ["^vix", "VIX", "risk"]
-  ];
   function loadGlobal() {
-    var jobs = GLOBAL_SYMS.map(function (s) { return stooqJob(s[0], s[1], s[2], false); });
-    jobs.push(stooqJob("10usy.b", "美債10Y", "fx", true));
-    jobs.push(stooqJob("^bdi", "BDI", "ship", false));
-    var cosd = new Date(Date.now() - 45 * 86400000);
-    jobs.push(fetchText("https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFF&cosd=" + cosd.getFullYear() + "-" + z2(cosd.getMonth() + 1) + "-" + z2(cosd.getDate()))
-      .then(function (csv) {
-        var rows = String(csv).trim().split(/\r?\n/), vals = [];
-        for (var i = 1; i < rows.length; i++) {
-          var v = parseFloat(rows[i].split(",")[1]);
-          if (isFinite(v)) vals.push(v);
+    // 日韓股與油價指數本尊拿不到，改用美國掛牌 ETF 替身（EWJ 日本、EWY 韓國、BNO 布蘭特、USO 西德州）
+    var jobs = [
+      usJob("EWJ", "日經", "asia", 709, "k"),
+      usJob("EWY", "KOSPI", "asia", 41.8, "k"),
+      usJob("^GSPC", "標普", "us", null, "k"),
+      usJob("^DJI", "道瓊", "us", null, "k"),
+      usJob("^IXIC", "納指", "us", null, "k"),
+      usJob("^SOX", "費半", "us", null, "k"),
+      usJob("IWM", "羅素", "us", 10.1, "k"),
+      usJob("BNO", "布蘭特", "cmd", 1.81, "1"),
+      usJob("USO", "西德州", "cmd", 0.666, "1"),
+      usJob("^VIX", "VIX", "risk")
+    ];
+    // 台指期外資籌碼：FinMind 期貨三大法人（多空未平倉口數 → 淨空單，附前一交易日增減）
+    jobs.push(fetchFinmind("dataset=TaiwanFuturesInstitutionalInvestors&data_id=TX" + fmRange(12))
+      .then(function (rows) {
+        var byDate = {};
+        for (var i = 0; i < rows.length; i++) {
+          var r = rows[i];
+          if (String(r.institutional_investors).indexOf("外資") < 0) continue;
+          var lo = parseFloat(r.long_open_interest_balance_volume);
+          var so = parseFloat(r.short_open_interest_balance_volume);
+          if (isFinite(lo) && isFinite(so)) byDate[String(r.date)] = so - lo;
+        }
+        var dates = Object.keys(byDate).sort();
+        if (!dates.length) return null;
+        var net = byDate[dates[dates.length - 1]];
+        var prev = dates.length > 1 ? byDate[dates[dates.length - 2]] : NaN;
+        var txt = (net >= 0 ? "外資淨空單 " : "外資淨多單 ") + Math.round(Math.abs(net)).toLocaleString("zh-Hant-TW") + " 口";
+        if (isFinite(prev)) {
+          var d = net - prev;
+          txt += "（前日 " + (d >= 0 ? "+" : "") + Math.round(d).toLocaleString("zh-Hant-TW") + "）";
+        }
+        return { g: "txf", t: txt };
+      })
+      .catch(function () { return null; }));
+    // 金價：FinMind 每五分鐘報價，彙整為每日最後一筆再比較
+    jobs.push(fetchFinmind("dataset=GoldPrice" + fmRange(5))
+      .then(function (rows) {
+        var byDate = {};
+        for (var i = 0; i < rows.length; i++) {
+          var day = String(rows[i].date).slice(0, 10);
+          var p = parseFloat(rows[i].Price);
+          if (isFinite(p)) byDate[day] = p; // 依時間序覆蓋，留下每日最後一筆
+        }
+        var dates = Object.keys(byDate).sort();
+        if (!dates.length) return null;
+        var last = byDate[dates[dates.length - 1]];
+        var prev = dates.length > 1 ? byDate[dates[dates.length - 2]] : NaN;
+        return { g: "cmd", t: "金價 " + fmtNum(last) + fmtChg(last, prev, false) };
+      })
+      .catch(function () { return null; }));
+    // 美國十年期公債殖利率
+    jobs.push(fetchFinmind("dataset=GovernmentBondsYield&data_id=" + encodeURIComponent("United States 10-Year") + fmRange(12))
+      .then(function (rows) {
+        var last = parseFloat(rows[rows.length - 1].value);
+        var prev = rows.length > 1 ? parseFloat(rows[rows.length - 2].value) : NaN;
+        if (!isFinite(last)) return null;
+        return { g: "fx", t: "美債10Y " + last.toFixed(2) + "%" + fmtChg(last, prev, true) };
+      })
+      .catch(function () { return null; }));
+    // 美元兌台幣（台銀掛牌即期中價）
+    jobs.push(fetchFinmind("dataset=TaiwanExchangeRate&data_id=USD" + fmRange(12))
+      .then(function (rows) {
+        var vals = [];
+        for (var i = 0; i < rows.length; i++) {
+          var b = parseFloat(rows[i].spot_buy), s = parseFloat(rows[i].spot_sell);
+          if (isFinite(b) && isFinite(s)) vals.push((b + s) / 2);
         }
         if (!vals.length) return null;
         var last = vals[vals.length - 1];
         var prev = vals.length > 1 ? vals[vals.length - 2] : NaN;
-        return { g: "fx", t: "聯邦基金利率 " + last.toFixed(2) + "%" + fmtChg(last, prev, true) };
+        return { g: "fx", t: "美元/台幣 " + last.toFixed(2) + fmtChg(last, prev, false) };
       })
       .catch(function () { return null; }));
-    // 期交所三大法人：臺股期貨外資多空未平倉口數 → 淨空單
-    jobs.push(fetchJson("https://openapi.taifex.com.tw/v1/MarketDataOfMajorInstitutionalTradersDetailsOfFuturesContractsData")
-      .then(function (list) {
-        if (!list || !list.length) return null;
-        for (var i = 0; i < list.length; i++) {
-          var row = list[i], all = JSON.stringify(row);
-          if (all.indexOf("臺股期貨") < 0 || all.indexOf("外資") < 0 || all.indexOf("自營") >= 0) continue;
-          var longOi = NaN, shortOi = NaN;
-          for (var k in row) {
-            var v = parseFloat(String(row[k]).replace(/,/g, ""));
-            if (!isFinite(v)) continue;
-            var eng = k.toLowerCase().replace(/[^a-z]/g, "");
-            if (k.indexOf("金額") >= 0 || eng.indexOf("amount") >= 0 || eng.indexOf("value") >= 0) continue;
-            if ((k.indexOf("多方") >= 0 && k.indexOf("未平倉") >= 0) || (eng.indexOf("long") >= 0 && eng.indexOf("openinterest") >= 0)) longOi = v;
-            if ((k.indexOf("空方") >= 0 && k.indexOf("未平倉") >= 0) || (eng.indexOf("short") >= 0 && eng.indexOf("openinterest") >= 0)) shortOi = v;
-          }
-          if (isFinite(longOi) && isFinite(shortOi)) {
-            var net = shortOi - longOi;
-            var lab = net >= 0 ? "外資淨空單 " : "外資淨多單 ";
-            return { g: "txf", t: lab + Math.round(Math.abs(net)).toLocaleString("zh-Hant-TW") + " 口" };
-          }
-        }
-        return null;
-      })
-      .catch(function () { return null; }));
-    // CNN 恐懼與貪婪指數（非官方端點，抓不到時自動略過）
+    // CNN 恐懼與貪婪指數（走 Worker 專線；非官方端點，抓不到時自動略過）
     jobs.push(fetchJson("https://production.dataviz.cnn.io/index/fearandgreed/graphdata")
       .then(function (j) {
         var fg = j && j.fear_and_greed;
@@ -1268,12 +1325,12 @@
         var map = { "extreme fear": "極度恐懼", "fear": "恐懼", "neutral": "中性", "greed": "貪婪", "extreme greed": "極度貪婪" };
         var r = map[String(fg.rating || "").toLowerCase()];
         var pv = parseFloat(fg.previous_close);
-        var chg = isFinite(pv) ? fmtChg(fg.score, pv, true) : "";
+        var chg = isFinite(pv) ? fmtChg(fg.score, pv, false) : "";
         return { g: "risk", t: "CNN 恐懼貪婪 " + Math.round(fg.score) + (r ? "（" + r + "）" : "") + chg };
       })
       .catch(function () { return null; }));
     Promise.all(jobs).then(function (arr) {
-      var by = { txf: [], asia: [], us: [], cmd: [], fx: [], ship: [], risk: [] };
+      var by = { txf: [], asia: [], us: [], cmd: [], fx: [], risk: [] };
       for (var i = 0; i < arr.length; i++) if (arr[i]) by[arr[i].g].push(arr[i].t);
       var lines = [];
       if (by.txf.length) lines.push("台指期：" + by.txf.join("｜"));
@@ -1281,7 +1338,6 @@
       if (by.us.length) lines.push("美股：" + by.us.join("｜"));
       if (by.cmd.length) lines.push("商品：" + by.cmd.join("｜"));
       if (by.fx.length) lines.push("利率匯率：" + by.fx.join("｜"));
-      if (by.ship.length) lines.push("航運：" + by.ship.join("｜"));
       if (by.risk.length) lines.push("風險：" + by.risk.join("｜"));
       globalNote = lines.join("\n");
       if (lines.length) globalUpdT = new Date();
