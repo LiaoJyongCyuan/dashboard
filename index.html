@@ -254,23 +254,28 @@
     font-variant-numeric: tabular-nums;
   }
   .wx-chip[hidden] { display: none; }
-  /* 台股標籤右端四小三角：左→右 0050／0051／0052／0055，紅漲綠跌、深淺=幅度（淡雅配色） */
+
   .etf-tris { display: inline-flex; align-items: center; gap: 2px; font-size: 8px; line-height: 15px; }
   .etf-tris[hidden] { display: none; }
-  .etf-tris .t-u1 { color: #DDB6AC; }
-  .etf-tris .t-u2 { color: #CE8B7B; }
-  .etf-tris .t-u3 { color: #B85F4F; }
-  .etf-tris .t-d1 { color: #AFCBBB; }
-  .etf-tris .t-d2 { color: #86AE95; }
-  .etf-tris .t-d3 { color: #5C8F72; }
+  .etf-tris .t-u1 { color: #EFDAD3; }
+  .etf-tris .t-u2 { color: #E2B4A4; }
+  .etf-tris .t-u3 { color: #CD8266; }
+  .etf-tris .t-u4 { color: #A84228; }
+  .etf-tris .t-d1 { color: #D3E2D8; }
+  .etf-tris .t-d2 { color: #A8C9B3; }
+  .etf-tris .t-d3 { color: #74A88A; }
+  .etf-tris .t-d4 { color: #3D7A56; }
   .etf-tris .t-f  { color: #B9B4AC; }
   @media (prefers-color-scheme: dark) {
-    .etf-tris .t-u1 { color: #7A544B; }
-    .etf-tris .t-u2 { color: #A16757; }
-    .etf-tris .t-u3 { color: #CB7E69; }
-    .etf-tris .t-d1 { color: #50695B; }
-    .etf-tris .t-d2 { color: #6F937D; }
-    .etf-tris .t-d3 { color: #93BFA4; }
+    /* 深色模式以「灰淡→鮮濃」表現深淺：幅度越大色彩越濃越醒目 */
+    .etf-tris .t-u1 { color: #77655E; }
+    .etf-tris .t-u2 { color: #9A6D57; }
+    .etf-tris .t-u3 { color: #C57A5B; }
+    .etf-tris .t-u4 { color: #E98F62; }
+    .etf-tris .t-d1 { color: #66746B; }
+    .etf-tris .t-d2 { color: #6E9880; }
+    .etf-tris .t-d3 { color: #77BD93; }
+    .etf-tris .t-d4 { color: #85DFA7; }
     .etf-tris .t-f  { color: #6E6961; }
   }
   .wx-ic {
@@ -418,8 +423,8 @@
   .dot-lav   { --c: var(--dot-lav); }
   .dot-rose  { --c: var(--dot-rose); }
   .dot-teal  { --c: var(--dot-teal); }
-  /* ---- 響應式排版 ---- */
-  .lbrk { display: none; } /* 手���版換行器：桌面不顯�� */
+  /* ---- 響應���排版 ---- */
+  .lbrk { display: none; } /* 手���版換行���：桌面不顯�� */
   /* 中幅（窄視窗／平板）：先收掉右側雙週曆 */
   @media (max-width: 760px) {
     .weekcal, .vdiv { display: none; }
@@ -432,7 +437,7 @@
   @media (max-width: 520px) {
     body { padding: 8px 14px; }
     .line { row-gap: 7px; }
-    .time-group { order: 2; gap: 7px; }
+    .time-group { order: 2; gap: 7px; margin-right: 46px; /* 避開 Notion 手機版右上角的浮動選單 */ }
     .lbrk { display: block; order: 3; flex-basis: 100%; height: 0; }
     .wx-chip { order: 4; }
     .time { font-size: 19px; }
@@ -453,7 +458,7 @@
         <span class="date" id="date">—</span>
         <span class="wd-chip" id="wdchip" role="img" aria-label="星期">—</span>
         <span class="moon-ic" id="moon" role="img" aria-label="月相" hidden>—</span>
-        <span class="wx-chip" id="wx" hidden role="img" aria-label="台中即時天氣" title="點一下切換 大里／南屯">
+        <span class="wx-chip" id="wx" hidden role="img" aria-label="台中即時天氣">
           <span class="wx-item"><span class="wx-lab" id="wxLoc">—</span></span>
           <span class="wx-item"><span class="wx-ic" id="wxIcon">—</span><span class="wx-t" id="wxTemp">--°</span></span>
           <span class="wx-item"><span class="wx-lab">☔</span><span id="wxRain">--%</span></span>
@@ -480,7 +485,7 @@
             <title id="sunTitle">日照時鐘</title>
             <path id="sunDayArc" d=""></path>
             <path id="sunNightArc" d=""></path>
-            <path id="sunHand" d="M 10 3.4 C 11.25 5.9 12.15 8.4 12.15 10.3 A 2.15 2.15 0 1 1 7.85 10.3 C 7.85 8.4 8.75 5.9 10 3.4 Z"></path>
+            <circle id="sunHand" cx="10" cy="5.7" r="2.3"></circle>
           </svg>
           <span class="time"><span id="hm">--:--</span> <span class="sec" id="ss">--</span></span>
         </span>
@@ -801,7 +806,7 @@
   }
   // 24 節氣（壽星通用公式，21 世紀係數）
   var TERM_NAMES = ["小寒", "大寒", "立春", "雨水", "驚蟄", "春分", "清明", "穀雨", "立夏", "小滿", "芒種", "夏至",
-    "小暑", "大暑", "立秋", "處暑", "白露", "秋分", "寒露", "霜降", "立���", "小雪", "大雪", "冬至"];
+    "小暑", "大暑", "��秋", "處暑", "白露", "秋分", "寒露", "霜降", "立���", "小雪", "大雪", "冬至"];
   var TERM_C = [5.4055, 20.12, 3.87, 18.73, 5.63, 20.646, 4.81, 20.1, 5.52, 21.04, 5.678, 21.37,
     7.108, 22.83, 7.5, 23.13, 7.646, 23.042, 8.318, 23.438, 7.438, 22.36, 7.18, 21.94];
   function solarTermOf(d) {
@@ -889,7 +894,7 @@
   // 兩個常用地點：點天氣膠囊即可切換；週一至五 8-17 時預設南屯（上班），其餘時間預設大里
   var WX_LOCS = {
     dali:   { name: "大里", cwa: "大里區", lat: 24.0994, lon: 120.6781, aq: "大里" },
-    nantun: { name: "南屯", cwa: "南屯區", lat: 24.1383, lon: 120.6431, aq: "西屯" }
+    nantun: { name: "南屯", cwa: "���屯區", lat: 24.1383, lon: 120.6431, aq: "西屯" }
   };
   function wxDefaultLoc() {
     var d = new Date(), w = d.getDay(), h = d.getHours();
@@ -1108,12 +1113,12 @@
       if (cwa) srcs.push("氣象署");
       if (aq && aq.src === "環境部") srcs.push("環境部");
       if (om && (!cwa || pick("pressure") != null || pick("uv") != null || (aq && aq.src === "Open-Meteo"))) srcs.push("Open-Meteo");
-      parts.push(L.name + "｜資���：" + srcs.join("、"));
+      parts.push(L.name + "｜" + srcs.join("、"));
       var upd = new Date();
       parts.push("更新 " + pad(upd.getHours()) + ":" + pad(upd.getMinutes()));
       var label = parts.join("\n");
       var chip = document.getElementById("wx");
-      chip.title = label + "\n（點一下切換 大里／南屯）";
+      chip.title = label;
       chip.setAttribute("aria-label", label);
       chip.hidden = false;
     }).catch(function () { /* 連線失敗時保持隱藏，不影響儀表板 */ });
@@ -1189,7 +1194,7 @@
     chip.hidden = false;
   }
   function loadStock() {
-    // 首選：富果即時行情（金鑰由 Worker 專線自動附加；未設金鑰或失敗時自動退回證交所）
+    // 首選：富果即時行情（金鑰由 Worker 專線自動附加；未設��鑰或失敗時自動���回證交所）
     fetchJson("https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/IX0001")
       .then(function (j) {
         var y = parseFloat(j && j.previousClose);
@@ -1231,20 +1236,23 @@
   var TW_QUOTES = [
     ["0050", "台灣50"],
     ["0051", "中型100"],
-    ["0052", "富邦科技"],
+    ["0053", "元大電子"],
     ["0055", "MSCI金融"],
     ["0056", "高股息"],
     ["2330", "台積電"]
   ];
   var twEtfNote = "";
-  // 標籤右端四小三角：左→右 0050／0051／0052／0055；紅漲綠跌，深淺=幅度
-  // 幅度分級依大盤型 ETF 日波動特性：|漲跌| ≥1.5% 深（大漲跌）、0.5–1.5% 中、<0.5% 淺（小漲跌）
-  var TRI_CODES = ["0050", "0051", "0052", "0055"];
+  // 標籤右端小三角：左→右 0050／0051／0053／0055／台指近全；紅漲綠跌，深淺＝幅度（四階）
+  // 分級門檻依標的波動性質：大盤／中型／金融型 0.5／1.5／3%，電子型波動較大 0.75／2／4%
+  // （指數型 ETF 單日 ±3～4% 已屬罕見大行情，5% 門檻幾乎永遠點不到最深色）
+  var TRI_CODES = ["0050", "0051", "0053", "0055"];
+  var TRI_TIERS = { "0050": [0.5, 1.5, 3], "0051": [0.5, 1.5, 3], "0053": [0.75, 2, 4], "0055": [0.5, 1.5, 3], "TX": [0.5, 1.5, 3] };
   var twTriPcts = {};
-  function triClass(pc) {
+  function triClass(pc, code) {
     if (pc === null || !isFinite(pc)) return null;
+    var t = TRI_TIERS[code] || [0.5, 1.5, 3];
     var a = Math.abs(pc);
-    var lv = a >= 1.5 ? 3 : a >= 0.5 ? 2 : 1;
+    var lv = a >= t[2] ? 4 : a >= t[1] ? 3 : a >= t[0] ? 2 : 1;
     return pc > 0 ? "t-u" + lv : pc < 0 ? "t-d" + lv : "t-f";
   }
   function renderEtfTris() {
@@ -1253,9 +1261,15 @@
     var html = "";
     for (var i = 0; i < TRI_CODES.length; i++) {
       var pc = twTriPcts[TRI_CODES[i]];
-      var cls = triClass(pc);
+      var cls = triClass(pc, TRI_CODES[i]);
       if (!cls) { html = ""; break; } // 任一檔沒資料就整組不顯示，避免對位誤讀
       html += '<span class="' + cls + '">' + (pc > 0 ? "\u25B2" : pc < 0 ? "\u25BC" : "\u2013") + '</span>';
+    }
+    // 第五個三角：台指近全（資料到才附加，缺漏不影響前四檔 ETF）
+    if (html) {
+      var txPc = twTriPcts["TX"];
+      var txCls = triClass(txPc, "TX");
+      if (txCls) html += '<span class="' + txCls + '">' + (txPc > 0 ? "\u25B2" : txPc < 0 ? "\u25BC" : "\u2013") + '</span>';
     }
     el.innerHTML = html;
     el.hidden = !html || isStaleClose(); // 舊收盤時段（週末、週一開盤前）與漲跌幅一起隱藏
@@ -1361,10 +1375,13 @@
     var pc = (last - prev) / prev * 100;
     return "（" + (pc >= 0 ? "+" : "") + pc.toFixed(2) + "%）";
   }
+  // VIX 分級（依使用者定義）：<13 極度平靜、13–17 平靜、17–22 正常、22–30 警戒、30–40 恐慌、40–60 極度恐慌、>60 金融危機等級
+  function vixNote(v) { return v >= 60 ? "金融危機等級" : v >= 40 ? "極度恐慌" : v >= 30 ? "恐慌" : v >= 22 ? "警戒" : v >= 17 ? "正常" : v >= 13 ? "平靜" : "極度平靜"; }
   // 美股指數／VIX：FinMind 美股日線（資料源同 Yahoo），取最近兩個收盤價計算漲跌
+  // 銅用 CPER、美元指數用 UUP 替身：×0.156 ≈ 美元/磅、×3.65 ≈ DXY（估算常數，待實價校準，漲跌%不受影響）
   // mul：ETF 價 → 原值（指數點數或每桶油價）的換算比例，依 2026/07 實際收盤校準，漲跌%不受影響
   // fmt："k" 以千點 K 取小數一位；"1" 取小數一位；省略則用 fmtNum
-  function usJob(sym, label, group, mul, fmt) {
+  function usJob(sym, label, group, mul, fmt, note) {
     return fetchFinmind("dataset=USStockPrice&data_id=" + encodeURIComponent(sym) + fmRange(12))
       .then(function (rows) {
         var last = parseFloat(rows[rows.length - 1].Close);
@@ -1373,7 +1390,7 @@
         var v = last * (mul || 1);
         var shown = fmt === "k" ? (v / 1000).toFixed(1) + "K" : fmt === "1" ? v.toFixed(1) : fmtNum(v);
         if (mul) shown = "\u2248" + shown;
-        return { g: group, t: label + " " + shown + fmtChg(last, prev, false) };
+        return { g: group, t: label + " " + shown + (note ? "（" + note(v) + "）" : "") + fmtChg(last, prev, false) };
       })
       .catch(function () { return null; });
   }
@@ -1386,11 +1403,39 @@
       usJob("^DJI", "道瓊", "us", null, "k"),
       usJob("^IXIC", "納指", "us", null, "k"),
       usJob("^SOX", "費半", "us", null, "k"),
-      usJob("IWM", "羅素", "us", 10.1, "k"),
       usJob("BNO", "布蘭特", "cmd", 1.81, "1"),
       usJob("USO", "西德州", "cmd", 0.666, "1"),
-      usJob("^VIX", "VIX", "risk")
+      usJob("CPER", "銅", "cmd", 0.156, "1"),
+      usJob("UUP", "DXY", "fx", 3.65, "1"),
+      usJob("^VIX", "VIX", "risk", null, null, vixNote)
     ];
+    // 台指近全：FinMind 期貨日線（近月契約，優先夜盤 after_market，附漲跌%；同步餵給標籤小三角）
+    jobs.push(fetchFinmind("dataset=TaiwanFuturesDaily&data_id=TX" + fmRange(6))
+      .then(function (rows) {
+        var best = null;
+        for (var i = 0; i < rows.length; i++) {
+          var r = rows[i];
+          if (String(r.futures_id) !== "TX") continue;
+          var cd = String(r.contract_date);
+          if (!/^\d{6}$/.test(cd)) continue; // 跳過價差組合單
+          var c = parseFloat(r.close), vol = parseFloat(r.volume);
+          if (!isFinite(c) || c <= 0 || !(vol > 0)) continue;
+          if (!best) { best = r; continue; }
+          if (String(r.date) > String(best.date)) { best = r; continue; }
+          if (String(r.date) < String(best.date)) continue;
+          if (cd < String(best.contract_date)) { best = r; continue; }
+          if (cd > String(best.contract_date)) continue;
+          // 同日同近月：夜盤（after_market）比日盤晚，優先採用
+          if (String(r.trading_session) === "after_market" && String(best.trading_session) !== "after_market") best = r;
+        }
+        if (!best) return null;
+        var pc = parseFloat(best.spread_per);
+        twTriPcts["TX"] = isFinite(pc) ? pc : null;
+        renderEtfTris();
+        var chg = isFinite(pc) ? "（" + (pc >= 0 ? "+" : "") + pc.toFixed(2) + "%，" + (String(best.trading_session) === "after_market" ? "夜盤" : "日盤") + "）" : "";
+        return { g: "txf", t: "近全 " + fmtNum(parseFloat(best.close)) + chg };
+      })
+      .catch(function () { return null; }));
     // 台指期外資籌碼：FinMind 期貨三大法人（多空未平倉口數 → 淨空單，附前一交易日增減）
     jobs.push(fetchFinmind("dataset=TaiwanFuturesInstitutionalInvestors&data_id=TX" + fmRange(12))
       .then(function (rows) {
@@ -1412,6 +1457,42 @@
           txt += "（前日 " + (d >= 0 ? "+" : "") + Math.round(d).toLocaleString("zh-Hant-TW") + "）";
         }
         return { g: "txf", t: txt };
+      })
+      .catch(function () { return null; }));
+    // 台股成交金額：FinMind 加權指數日線 Trading_money（元 → 億，附前日增減%）
+    jobs.push(fetchFinmind("dataset=TaiwanStockPrice&data_id=TAIEX" + fmRange(8))
+      .then(function (rows) {
+        var vals = [];
+        for (var i = 0; i < rows.length; i++) {
+          var tm = parseFloat(rows[i].Trading_money);
+          if (isFinite(tm) && tm > 0) vals.push(tm);
+        }
+        if (!vals.length) return null;
+        var last = vals[vals.length - 1] / 1e8;
+        var prev = vals.length > 1 ? vals[vals.length - 2] / 1e8 : NaN;
+        return { g: "mgn", t: "成交 " + fmtNum(Math.round(last)) + " 億" + fmtChg(last, prev, false) };
+      })
+      .catch(function () { return null; }));
+    // 融資融券總餘額：FinMind 台股整體資券（融資原始單位＝元、融券＝張；換算億元／萬張，增減以%表示）
+    jobs.push(fetchFinmind("dataset=TaiwanStockTotalMarginPurchaseShortSale" + fmRange(8))
+      .then(function (rows) {
+        var latest = {};
+        for (var i = 0; i < rows.length; i++) {
+          var r = rows[i];
+          var cur = latest[String(r.name)];
+          if (!cur || String(r.date) > String(cur.date)) latest[String(r.name)] = r;
+        }
+        var seg = [];
+        var m = latest["MarginPurchaseMoney"];
+        if (m && isFinite(parseFloat(m.TodayBalance))) {
+          seg.push("融資 " + fmtNum(Math.round(parseFloat(m.TodayBalance) / 1e8)) + " 億" + fmtChg(parseFloat(m.TodayBalance), parseFloat(m.YesBalance), false));
+        }
+        var s = latest["ShortSale"];
+        if (s && isFinite(parseFloat(s.TodayBalance))) {
+          seg.push("融券 " + (parseFloat(s.TodayBalance) / 1e4).toFixed(1) + " 萬張" + fmtChg(parseFloat(s.TodayBalance), parseFloat(s.YesBalance), false));
+        }
+        if (!seg.length) return null;
+        return { g: "mgn", t: seg.join("｜") };
       })
       .catch(function () { return null; }));
     // 金價：FinMind 每五分鐘報價，彙整為每日最後一筆再比較
@@ -1439,7 +1520,16 @@
         return { g: "fx", t: "美債10Y " + last.toFixed(2) + "%" + fmtChg(last, prev, true) };
       })
       .catch(function () { return null; }));
-    // 美元兌台幣（台銀掛牌即期中價）
+    // 美國二年期公債殖利率（對聯準會利率預期最敏感）
+    jobs.push(fetchFinmind("dataset=GovernmentBondsYield&data_id=" + encodeURIComponent("United States 2-Year") + fmRange(12))
+      .then(function (rows) {
+        var last = parseFloat(rows[rows.length - 1].value);
+        var prev = rows.length > 1 ? parseFloat(rows[rows.length - 2].value) : NaN;
+        if (!isFinite(last)) return null;
+        return { g: "fx", t: "美債2Y " + last.toFixed(2) + "%" + fmtChg(last, prev, true) };
+      })
+      .catch(function () { return null; }));
+    // 美元兌台幣（台銀掛牌即期中價；匯率上升＝台幣貶、下降＝台幣升，直接標註升貶方向）
     jobs.push(fetchFinmind("dataset=TaiwanExchangeRate&data_id=USD" + fmRange(12))
       .then(function (rows) {
         var vals = [];
@@ -1450,7 +1540,9 @@
         if (!vals.length) return null;
         var last = vals[vals.length - 1];
         var prev = vals.length > 1 ? vals[vals.length - 2] : NaN;
-        return { g: "fx", t: "美元/台幣 " + last.toFixed(2) + fmtChg(last, prev, false) };
+        var pc2 = isFinite(prev) && prev !== 0 ? (last - prev) / prev * 100 : NaN;
+        var dir = isFinite(pc2) ? "（台幣" + (pc2 > 0 ? "貶" : pc2 < 0 ? "升" : "持平") + (pc2 ? " " + Math.abs(pc2).toFixed(2) + "%" : "") + "）" : "";
+        return { g: "fx", t: "美元兌台幣 " + last.toFixed(2) + dir };
       })
       .catch(function () { return null; }));
     // CNN 恐懼與貪婪指數（走 Worker 專線；非官方端點，抓不到時自動略過）
@@ -1458,18 +1550,20 @@
       .then(function (j) {
         var fg = j && j.fear_and_greed;
         if (!fg || fg.score == null) return null;
-        var map = { "extreme fear": "極度恐懼", "fear": "恐懼", "neutral": "中性", "greed": "貪婪", "extreme greed": "極度貪婪" };
-        var r = map[String(fg.rating || "").toLowerCase()];
+        // CNN 分級（依使用者定義，直接用分數判斷）：0–24 極度恐慌、25–44 恐慌、45–55 中性、56–74 貪婪、75–100 極度貪婪
+        var sc = Math.round(fg.score);
+        var r = sc >= 75 ? "極度貪婪" : sc >= 56 ? "貪婪" : sc >= 45 ? "中性" : sc >= 25 ? "恐慌" : "極度恐慌";
         var pv = parseFloat(fg.previous_close);
         var chg = isFinite(pv) ? fmtChg(fg.score, pv, false) : "";
-        return { g: "risk", t: "CNN 恐懼貪婪 " + Math.round(fg.score) + (r ? "（" + r + "）" : "") + chg };
+        return { g: "risk", t: "CNN 恐懼貪婪 " + sc + "（" + r + "）" + chg };
       })
       .catch(function () { return null; }));
     Promise.all(jobs).then(function (arr) {
-      var by = { txf: [], asia: [], us: [], cmd: [], fx: [], risk: [] };
+      var by = { txf: [], mgn: [], asia: [], us: [], cmd: [], fx: [], risk: [] };
       for (var i = 0; i < arr.length; i++) if (arr[i]) by[arr[i].g].push(arr[i].t);
       var lines = [];
       if (by.txf.length) lines.push("台指期：" + by.txf.join("｜"));
+      if (by.mgn.length) lines.push("量能資券：" + by.mgn.join("｜"));
       if (by.asia.length) lines.push("亞股：" + by.asia.join("｜"));
       if (by.us.length) lines.push("美股：" + by.us.join("｜"));
       if (by.cmd.length) lines.push("商品：" + by.cmd.join("｜"));
