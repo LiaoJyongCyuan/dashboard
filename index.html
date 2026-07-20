@@ -257,25 +257,25 @@
 
   .etf-tris { display: inline-flex; align-items: center; gap: 2px; font-size: 8px; line-height: 15px; }
   .etf-tris[hidden] { display: none; }
-  .etf-tris .t-u1 { color: #E3B7A6; }
-  .etf-tris .t-u2 { color: #D69478; }
-  .etf-tris .t-u3 { color: #C06A50; }
-  .etf-tris .t-u4 { color: #9E3D26; }
-  .etf-tris .t-d1 { color: #B9D3C3; }
-  .etf-tris .t-d2 { color: #93BCA3; }
-  .etf-tris .t-d3 { color: #699F81; }
-  .etf-tris .t-d4 { color: #3A7252; }
+  .etf-tris .t-u1 { color: #D89B85; }
+  .etf-tris .t-u2 { color: #C97757; }
+  .etf-tris .t-u3 { color: #B25538; }
+  .etf-tris .t-u4 { color: #8F2F18; }
+  .etf-tris .t-d1 { color: #8FB89F; }
+  .etf-tris .t-d2 { color: #6FA184; }
+  .etf-tris .t-d3 { color: #4F8A68; }
+  .etf-tris .t-d4 { color: #2F6647; }
   .etf-tris .t-f  { color: #B9B4AC; }
   @media (prefers-color-scheme: dark) {
     /* 深色模式以「灰淡→鮮濃」表現深淺：幅度越大色彩越濃越醒目 */
-    .etf-tris .t-u1 { color: #8A6A5B; }
-    .etf-tris .t-u2 { color: #A5735A; }
-    .etf-tris .t-u3 { color: #C97E5C; }
-    .etf-tris .t-u4 { color: #EC9366; }
-    .etf-tris .t-d1 { color: #6B8273; }
-    .etf-tris .t-d2 { color: #74A186; }
-    .etf-tris .t-d3 { color: #7EC397; }
-    .etf-tris .t-d4 { color: #8AE3AC; }
+    .etf-tris .t-u1 { color: #A17663; }
+    .etf-tris .t-u2 { color: #BA7E5E; }
+    .etf-tris .t-u3 { color: #D8885E; }
+    .etf-tris .t-u4 { color: #F29A68; }
+    .etf-tris .t-d1 { color: #7E9C8A; }
+    .etf-tris .t-d2 { color: #85B597; }
+    .etf-tris .t-d3 { color: #8CCFA5; }
+    .etf-tris .t-d4 { color: #93E9B4; }
     .etf-tris .t-f  { color: #6E6961; }
   }
   .wx-ic {
@@ -424,7 +424,7 @@
   .dot-rose  { --c: var(--dot-rose); }
   .dot-teal  { --c: var(--dot-teal); }
   /* ---- 響應���排版 ---- */
-  .lbrk { display: none; } /* 手���版換行���：桌面不顯�� */
+  .lbrk { display: none; } /* ������版換行���：桌面不顯�� */
   /* 中幅（窄視窗／平板）：先收掉右側雙週曆 */
   @media (max-width: 760px) {
     .weekcal, .vdiv { display: none; }
@@ -963,7 +963,7 @@
     }
     return attempt();
   }
-  // 從氣象署預��資料中挑出最接近現在時刻的數值
+  // 從氣象署預����資料中挑出最接近現在時刻的數值
   function cwaPick(els, name, key) {
     for (var i = 0; i < els.length; i++) {
       if (els[i].ElementName !== name) continue;
@@ -1550,7 +1550,7 @@
       .then(function (j) {
         var fg = j && j.fear_and_greed;
         if (!fg || fg.score == null) return null;
-        // CNN 分級（依使用者���義，直接用分數判斷）：0–24 極度恐慌、25–44 恐慌、45–55 中性、56–74 貪婪、75–100 極度貪婪
+        // CNN 分級（依使用者����義，直接用分數判斷）：0–24 極度恐慌、25–44 恐慌、45–55 中性、56–74 貪婪、75–100 極度貪婪
         var sc = Math.round(fg.score);
         var r = sc >= 75 ? "極度貪婪" : sc >= 56 ? "貪婪" : sc >= 45 ? "中性" : sc >= 25 ? "恐慌" : "極度恐慌";
         var pv = parseFloat(fg.previous_close);
