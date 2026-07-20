@@ -257,25 +257,25 @@
 
   .etf-tris { display: inline-flex; align-items: center; gap: 2px; font-size: 8px; line-height: 15px; }
   .etf-tris[hidden] { display: none; }
-  .etf-tris .t-u1 { color: #EFDAD3; }
-  .etf-tris .t-u2 { color: #E2B4A4; }
-  .etf-tris .t-u3 { color: #CD8266; }
-  .etf-tris .t-u4 { color: #A84228; }
-  .etf-tris .t-d1 { color: #D3E2D8; }
-  .etf-tris .t-d2 { color: #A8C9B3; }
-  .etf-tris .t-d3 { color: #74A88A; }
-  .etf-tris .t-d4 { color: #3D7A56; }
+  .etf-tris .t-u1 { color: #E3B7A6; }
+  .etf-tris .t-u2 { color: #D69478; }
+  .etf-tris .t-u3 { color: #C06A50; }
+  .etf-tris .t-u4 { color: #9E3D26; }
+  .etf-tris .t-d1 { color: #B9D3C3; }
+  .etf-tris .t-d2 { color: #93BCA3; }
+  .etf-tris .t-d3 { color: #699F81; }
+  .etf-tris .t-d4 { color: #3A7252; }
   .etf-tris .t-f  { color: #B9B4AC; }
   @media (prefers-color-scheme: dark) {
     /* 深色模式以「灰淡→鮮濃」表現深淺：幅度越大色彩越濃越醒目 */
-    .etf-tris .t-u1 { color: #77655E; }
-    .etf-tris .t-u2 { color: #9A6D57; }
-    .etf-tris .t-u3 { color: #C57A5B; }
-    .etf-tris .t-u4 { color: #E98F62; }
-    .etf-tris .t-d1 { color: #66746B; }
-    .etf-tris .t-d2 { color: #6E9880; }
-    .etf-tris .t-d3 { color: #77BD93; }
-    .etf-tris .t-d4 { color: #85DFA7; }
+    .etf-tris .t-u1 { color: #8A6A5B; }
+    .etf-tris .t-u2 { color: #A5735A; }
+    .etf-tris .t-u3 { color: #C97E5C; }
+    .etf-tris .t-u4 { color: #EC9366; }
+    .etf-tris .t-d1 { color: #6B8273; }
+    .etf-tris .t-d2 { color: #74A186; }
+    .etf-tris .t-d3 { color: #7EC397; }
+    .etf-tris .t-d4 { color: #8AE3AC; }
     .etf-tris .t-f  { color: #6E6961; }
   }
   .wx-ic {
@@ -485,7 +485,7 @@
             <title id="sunTitle">日照時鐘</title>
             <path id="sunDayArc" d=""></path>
             <path id="sunNightArc" d=""></path>
-            <circle id="sunHand" cx="10" cy="5.7" r="2.3"></circle>
+            <circle id="sunHand" cx="10" cy="5.35" r="2.1"></circle>
           </svg>
           <span class="time"><span id="hm">--:--</span> <span class="sec" id="ss">--</span></span>
         </span>
@@ -963,7 +963,7 @@
     }
     return attempt();
   }
-  // 從氣象署預報資料中挑出最接近現在時刻的數值
+  // 從氣象署預��資料中挑出最接近現在時刻的數值
   function cwaPick(els, name, key) {
     for (var i = 0; i < els.length; i++) {
       if (els[i].ElementName !== name) continue;
@@ -1262,7 +1262,7 @@
     for (var i = 0; i < TRI_CODES.length; i++) {
       var pc = twTriPcts[TRI_CODES[i]];
       var cls = triClass(pc, TRI_CODES[i]);
-      if (!cls) { html = ""; break; } // 任一檔沒資料就整組不顯示，避免對位誤讀
+      if (!cls) { html = ""; break; } // 任��檔沒資料就整組不顯示，避免對位誤讀
       html += '<span class="' + cls + '">' + (pc > 0 ? "\u25B2" : pc < 0 ? "\u25BC" : "\u2013") + '</span>';
     }
     // 第五個三角：台指近全（資料到才附加，缺漏不影響前四檔 ETF）
@@ -1550,7 +1550,7 @@
       .then(function (j) {
         var fg = j && j.fear_and_greed;
         if (!fg || fg.score == null) return null;
-        // CNN 分級（依使用者定義，直接用分數判斷）：0–24 極度恐慌、25–44 恐慌、45–55 中性、56–74 貪婪、75–100 極度貪婪
+        // CNN 分級（依使用者���義，直接用分數判斷）：0–24 極度恐慌、25–44 恐慌、45–55 中性、56–74 貪婪、75–100 極度貪婪
         var sc = Math.round(fg.score);
         var r = sc >= 75 ? "極度貪婪" : sc >= 56 ? "貪婪" : sc >= 45 ? "中性" : sc >= 25 ? "恐慌" : "極度恐慌";
         var pv = parseFloat(fg.previous_close);
