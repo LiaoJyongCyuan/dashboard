@@ -1408,7 +1408,7 @@
     var pc = (last - prev) / prev * 100;
     return "（" + (pc >= 0 ? "+" : "") + pc.toFixed(2) + "%）";
   }
-  // VIX 分級（依使用者定義）：<13 極度平靜、13–17 平靜、17–22 正常、22–30 警戒、30–40 恐慌、40–60 極度恐慌、>60 金融危機等級
+  // VIX 分級（依使用者定義）：<13 極度平靜、13–17 平靜、17–22 正常、22–30 警戒、30–40 恐���、40–60 極度恐慌、>60 金融危機等級
   function vixNote(v) { return v >= 60 ? "金融危機等級" : v >= 40 ? "極度恐慌" : v >= 30 ? "恐慌" : v >= 22 ? "警戒" : v >= 17 ? "正常" : v >= 13 ? "平靜" : "極度平靜"; }
   // 美股指數／VIX：FinMind 美�����日���（���料源同 Yahoo），取最近兩個收盤價計算漲跌
   // 銅用 CPER、美元��數用 UUP 替身：×0.156 ≈ 美元/磅、×3.65 ≈ DXY（估算常數，待實價校準，漲跌%不受影響）
@@ -1624,8 +1624,8 @@
   setInterval(function () { loadStock(); loadTwQuotes(); }, 10 * 60 * 1000);
   setInterval(loadGlobal, 30 * 60 * 1000);
   // ---- 新聞輪替列（Google News 台灣版 RSS）：即時、免金鑰；只留 36 小時內重要頭條，依 國際 > 財經 > 產業 優先排序 ----
-  var NEWS_CATS = [["WORLD", "國際"], ["BUSINESS", "財經"], ["TECHNOLOGY", "產業"]];
-  var NEWS_SKIP = /廣編|贊助|優惠|折扣|抽獎|開獎|團購|好康|盤點概念股|同學會/; // 擋掉廣宣・導購味標題
+  var NEWS_CATS = [["intworld", "國際"], ["finance", "財經"], ["technology", "產業"]];
+  var NEWS_SKIP = /廣編|贊助|優惠|折扣|抽獎|開獎|團購|好康|盤點概念股|同學會|樂透|今彩|威力彩|頭獎|發票/; // 擋掉廣宣・導購・樂透開獎類雜訊
   var newsItems = [], newsIdx = 0, newsTimer = null, newsHover = false;
   function newsAgo(iso) {
     var t0 = new Date(iso).getTime();
@@ -1674,8 +1674,8 @@
     startNewsTimer(); // 手動切換後重新計時，避免馬上又自動跳走
   }
   function fetchNewsFeed(topic) {
-    // Google News 台灣版 RSS：即時、免金鑰；優先走 Worker 專線，不通時自動改走公用代理（RSS 無金鑰，公用線路也安全）
-    var u = "https://news.google.com/rss/headlines/section/topic/" + topic + "?hl=zh-TW&gl=TW&ceid=TW:zh-Hant";
+    // 中央社官方 RSS（不經 Google，避開代理遭擋）：即時、免金鑰；優先走 Worker 專線，不通時自動改走公用代理
+    var u = "https://feeds.feedburner.com/rsscna/" + topic;
     var routes = [
       function (x) { return WORKER_URL + "/?url=" + encodeURIComponent(x); },
       function (x) { return "https://corsproxy.io/?url=" + encodeURIComponent(x); },
@@ -1706,7 +1706,7 @@
         var n = el.getElementsByTagName(name)[0];
         return n ? n.textContent : "";
       };
-      var title = get("title"), link = get("link"), pub = get("pubDate"), src = get("source");
+      var title = get("title"), link = get("link"), pub = get("pubDate"), src = get("source") || "中央社";
       var t0 = new Date(pub).getTime();
       if (!title || !isFinite(t0) || Date.now() - t0 > 36 * 60 * 60 * 1000) continue;
       if (NEWS_SKIP.test(title)) continue;
