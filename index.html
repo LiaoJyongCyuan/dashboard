@@ -793,7 +793,7 @@
       var Lm = rev(218.316 + 13.176396 * t);
       var Mm = rev(134.963 + 13.064993 * t);
       var D = rev(297.850 + 12.190749 * t);
-      // 月球真黃經：含中心差、出差、二均差等主要攝���項
+      // 月球真黃經：含中心差、出差、二均差等主要攝�����項
       var lon = Lm + 6.289 * Math.sin(Mm * rad) - 1.274 * Math.sin((Mm - 2 * D) * rad)
         + 0.658 * Math.sin(2 * D * rad) - 0.214 * Math.sin(2 * Mm * rad) - 0.186 * Math.sin(Ms * rad)
         - 0.059 * Math.sin((2 * Mm - 2 * D) * rad) - 0.057 * Math.sin((Mm - 2 * D + Ms) * rad)
@@ -1407,7 +1407,7 @@
   }
   // VIX 分級（依使用者定義）：<13 極度平靜、13–17 平靜、17–22 正常、22–30 警戒、30–40 恐慌、40–60 極度恐慌、>60 金融危機等級
   function vixNote(v) { return v >= 60 ? "金融危機等級" : v >= 40 ? "極度恐慌" : v >= 30 ? "恐慌" : v >= 22 ? "警戒" : v >= 17 ? "正常" : v >= 13 ? "平靜" : "極度平靜"; }
-  // 美股指數／VIX：FinMind 美股日線（���料源同 Yahoo），取最近兩個收盤價計算漲跌
+  // 美股指數／VIX：FinMind 美���日���（���料源同 Yahoo），取最近兩個收盤價計算漲跌
   // 銅用 CPER、美元��數用 UUP 替身：×0.156 ≈ 美元/磅、×3.65 ≈ DXY（估算常數，待實價校準，漲跌%不受影響）
   // mul：ETF 價 → 原值（指數點數或每桶油價）的換算比例，依 2026/07 實際收盤校準，漲跌%不受影響
   // fmt："k" 以千點 K 取小數一位；"1" 取小數一位；省略則用 fmtNum
@@ -1620,8 +1620,9 @@
   }, 30 * 60 * 1000);
   setInterval(function () { loadStock(); loadTwQuotes(); }, 10 * 60 * 1000);
   setInterval(loadGlobal, 30 * 60 * 1000);
-  // ---- 新聞輪替列（GNews 免費版，內容約有 12 小時延遲）：金鑰藏在 Worker（機密 GNEWS_KEY），45 分鐘快取共用額度 ----
-  var NEWS_CATS = [["world", "國際"], ["business", "財經"], ["technology", "產業"]];
+  // ---- 新聞輪替列（Google News 台灣版 RSS）：即時、免金鑰；只留 36 小時內重要頭條，依 國際 > 財經 > 產業 優先排序 ----
+  var NEWS_CATS = [["WORLD", "國際"], ["BUSINESS", "財經"], ["TECHNOLOGY", "產業"]];
+  var NEWS_SKIP = /廣編|贊助|優惠|折扣|抽獎|開獎|團購|好康|盤點概念股|同學會/; // 擋掉廣宣・導購味標題
   var newsItems = [], newsIdx = 0, newsTimer = null, newsHover = false;
   function newsAgo(iso) {
     var t0 = new Date(iso).getTime();
@@ -1660,40 +1661,56 @@
       showNews(newsIdx);
     }, 9000);
   }
-  function fetchGnews(cat) {
-    // 一律改走 Worker 專線：金鑰由 Worker 自動附加，不出現在網頁原始碼
-    var u = "https://gnews.io/api/v4/top-headlines?category=" + cat + "&lang=zh&country=tw&max=8";
+  function fetchNewsFeed(topic) {
+    // Google News 台灣版 RSS：即時、免金鑰，經 Worker 專線轉發（邊緣快取 15 分鐘）
+    var u = "https://news.google.com/rss/headlines/section/topic/" + topic + "?hl=zh-TW&gl=TW&ceid=TW:zh-Hant";
     return fetch(WORKER_URL + "/?url=" + encodeURIComponent(u)).then(function (r) {
-      if (!r.ok) throw new Error("gnews " + r.status);
-      return r.json();
+      if (!r.ok) throw new Error("news " + r.status);
+      return r.text();
     });
+  }
+  // 解析 RSS：標題尾端「 - 來源」拆出來源名；只留 36 小時內、非廣宣的頭條
+  function parseNewsRss(xml, tag) {
+    var doc = new DOMParser().parseFromString(xml, "text/xml");
+    var items = doc.getElementsByTagName("item");
+    var out = [];
+    for (var i = 0; i < items.length; i++) {
+      var el = items[i];
+      var get = function (name) {
+        var n = el.getElementsByTagName(name)[0];
+        return n ? n.textContent : "";
+      };
+      var title = get("title"), link = get("link"), pub = get("pubDate"), src = get("source");
+      var t0 = new Date(pub).getTime();
+      if (!title || !isFinite(t0) || Date.now() - t0 > 36 * 60 * 60 * 1000) continue;
+      if (NEWS_SKIP.test(title)) continue;
+      var sfx = " - " + src;
+      if (src && title.length > sfx.length && title.slice(-sfx.length) === sfx) title = title.slice(0, -sfx.length);
+      out.push({ tag: tag, title: title, url: link || "#", src: src, at: pub });
+    }
+    return out;
   }
   function loadNews() {
     try {
-      var c = JSON.parse(localStorage.getItem("gnews24") || "null");
-      if (c && c.items && c.items.length && Date.now() - c.t < 45 * 60 * 1000) { applyNews(c.items); return; }
+      var c = JSON.parse(localStorage.getItem("gnews24b") || "null");
+      if (c && c.items && c.items.length && Date.now() - c.t < 25 * 60 * 1000) { applyNews(c.items); return; }
     } catch (e) {}
     Promise.all(NEWS_CATS.map(function (cp) {
-      return fetchGnews(cp[0]).then(function (j) {
-        return ((j && j.articles) || []).map(function (a) {
-          return { tag: cp[1], title: a.title || "", url: a.url || "#", src: (a.source && a.source.name) || "", at: a.publishedAt || "" };
-        });
+      return fetchNewsFeed(cp[0]).then(function (xml) {
+        return parseNewsRss(xml, cp[1]);
       }).catch(function () { return []; });
     })).then(function (groups) {
-      // 三類交錯排列＋標題去重，最多 18 則
-      var out = [], seen = {}, k = 0, more = true;
-      while (more && out.length < 18) {
-        more = false;
-        for (var g = 0; g < groups.length; g++) {
-          var a2 = groups[g][k];
-          if (!a2) continue;
-          more = true;
-          if (a2.title && !seen[a2.title]) { seen[a2.title] = 1; out.push(a2); }
+      // 依 國際 > 財經 > 產業 優先序排列，每類最多 6 則、共 18 則，標題去重
+      var out = [], seen = {};
+      for (var g = 0; g < groups.length; g++) {
+        var n = 0;
+        for (var i = 0; i < groups[g].length && n < 6; i++) {
+          var a2 = groups[g][i];
+          if (a2.title && !seen[a2.title]) { seen[a2.title] = 1; out.push(a2); n++; }
         }
-        k++;
       }
       if (!out.length) return;
-      try { localStorage.setItem("gnews24", JSON.stringify({ t: Date.now(), items: out })); } catch (e) {}
+      try { localStorage.setItem("gnews24b", JSON.stringify({ t: Date.now(), items: out })); } catch (e) {}
       applyNews(out);
     });
   }
@@ -1713,7 +1730,7 @@
     setOn(pref !== "0");
   })();
   loadNews();
-  setInterval(loadNews, 60 * 60 * 1000); // 每小時檢查一次（快取未過期就不打 API，額度用不到一半）
+  setInterval(loadNews, 30 * 60 * 1000); // 每 30 分鐘更新一次（RSS 免額度，搭配快取保持新鮮）
 })();
 </script>
 </body>
