@@ -1162,7 +1162,7 @@
     loadWeather();
   });
 
-  // ---- 台股加權指數（盤中延遲報價，失敗時退回證交所 OpenAPI ���盤資料） ----
+  // ---- 台股加權指數（盤���延遲報價，失敗時退回證交所 OpenAPI ���盤資料） ----
   function fmtIdx(n) {
     return n.toLocaleString("zh-Hant-TW", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
@@ -1594,7 +1594,7 @@
     Promise.all(jobs).then(function (arr) {
       var by = { txf: [], mgn: [], asia: [], us: [], cmd: [], fx: [], risk: [] };
       for (var i = 0; i < arr.length; i++) if (arr[i]) by[arr[i].g].push(arr[i].t);
-      // 依性質分段���台股期現貨量能／國際行情／利匯率與風險，段落間空一行較易讀
+      // 依性質分段：台股期現貨量能／國際行情／利匯率與風險，段落間空一行較易讀
       var s1 = [], s2 = [], s3 = [];
       if (by.txf.length) s1.push("台指期：" + by.txf.join("｜"));
       if (by.mgn.length) s1.push("量能資券：" + by.mgn.join("｜"));
@@ -1674,12 +1674,26 @@
     startNewsTimer(); // 手動切換後重新計時，避免馬上又自動跳走
   }
   function fetchNewsFeed(topic) {
-    // Google News 台灣版 RSS：即時、免金鑰，經 Worker 專線轉發（邊緣快取 15 分鐘）
+    // Google News 台灣版 RSS：即時、免金鑰；優先走 Worker 專線，不通時自動改走公用代理（RSS 無金鑰，公用線路也安全）
     var u = "https://news.google.com/rss/headlines/section/topic/" + topic + "?hl=zh-TW&gl=TW&ceid=TW:zh-Hant";
-    return fetch(WORKER_URL + "/?url=" + encodeURIComponent(u)).then(function (r) {
-      if (!r.ok) throw new Error("news " + r.status);
-      return r.text();
-    });
+    var routes = [
+      function (x) { return WORKER_URL + "/?url=" + encodeURIComponent(x); },
+      function (x) { return "https://corsproxy.io/?url=" + encodeURIComponent(x); },
+      function (x) { return "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(x); }
+    ];
+    var i = 0;
+    function next() {
+      if (i >= routes.length) return Promise.reject(new Error("news unavailable"));
+      var mk = routes[i++];
+      return fetch(mk(u)).then(function (r) {
+        if (!r.ok) throw new Error("news " + r.status);
+        return r.text();
+      }).then(function (tx) {
+        if (tx.indexOf("<item>") < 0) throw new Error("bad rss");
+        return tx;
+      }).catch(next);
+    }
+    return next();
   }
   // 解析 RSS：標題尾端「 - 來源」拆出來源名；只留 36 小時內、非廣宣的頭條
   function parseNewsRss(xml, tag) {
