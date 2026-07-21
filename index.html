@@ -463,8 +463,9 @@
   .news-src { flex: none; color: var(--text2); opacity: .75; font-size: 10px; }
   .news-btn { flex: none; border: 0; background: none; cursor: pointer; padding: 0 2px; color: var(--text2); font-size: 10px; line-height: 16px; opacity: .5; }
   .news-btn:hover { opacity: 1; }
+  .news-nav { font-size: 9px; padding: 0 1px; }
   .news-row.off { border-top-color: transparent; margin-top: 2px; padding-top: 0; justify-content: flex-end; }
-  .news-row.off .news-tag, .news-row.off .news-item { display: none; }
+  .news-row.off .news-tag, .news-row.off .news-item, .news-row.off .news-nav { display: none; }
   @media (prefers-color-scheme: dark) {
     .news-row { border-top-color: rgba(255,255,255,0.09); }
     .news-tag { background: rgba(255,255,255,0.08); color: #B9AB94; }
@@ -542,6 +543,8 @@
     <a class="news-a" id="newsA" href="#" target="_blank" rel="noopener noreferrer">—</a>
     <span class="news-src" id="newsSrc"></span>
   </span>
+  <button type="button" class="news-btn news-nav" id="newsPrev" aria-label="上一則">▴</button>
+  <button type="button" class="news-btn news-nav" id="newsNext" aria-label="下一則">▾</button>
   <button type="button" class="news-btn" id="newsBtn" aria-label="隱藏新聞">✕</button>
 </div>
 <script>
@@ -1407,7 +1410,7 @@
   }
   // VIX 分級（依使用者定義）：<13 極度平靜、13–17 平靜、17–22 正常、22–30 警戒、30–40 恐慌、40–60 極度恐慌、>60 金融危機等級
   function vixNote(v) { return v >= 60 ? "金融危機等級" : v >= 40 ? "極度恐慌" : v >= 30 ? "恐慌" : v >= 22 ? "警戒" : v >= 17 ? "正常" : v >= 13 ? "平靜" : "極度平靜"; }
-  // 美股指數／VIX：FinMind 美���日���（���料源同 Yahoo），取最近兩個收盤價計算漲跌
+  // 美股指數／VIX：FinMind 美�����日���（���料源同 Yahoo），取最近兩個收盤價計算漲跌
   // 銅用 CPER、美元��數用 UUP 替身：×0.156 ≈ 美元/磅、×3.65 ≈ DXY（估算常數，待實價校準，漲跌%不受影響）
   // mul：ETF 價 → 原值（指數點數或每桶油價）的換算比例，依 2026/07 實際收盤校準，漲跌%不受影響
   // fmt："k" 以千點 K 取小數一位；"1" 取小數一位；省略則用 fmtNum
@@ -1591,7 +1594,7 @@
     Promise.all(jobs).then(function (arr) {
       var by = { txf: [], mgn: [], asia: [], us: [], cmd: [], fx: [], risk: [] };
       for (var i = 0; i < arr.length; i++) if (arr[i]) by[arr[i].g].push(arr[i].t);
-      // 依性質分段：台股期現貨量能／國際行情／利匯率與風險，段落間空一行較易讀
+      // 依性質分段���台股期現貨量能／國際行情／利匯率與風險，段落間空一行較易讀
       var s1 = [], s2 = [], s3 = [];
       if (by.txf.length) s1.push("台指期：" + by.txf.join("｜"));
       if (by.mgn.length) s1.push("量能資券：" + by.mgn.join("｜"));
@@ -1653,6 +1656,9 @@
     if (!items.length) return;
     document.getElementById("newsRow").hidden = false;
     showNews(0, true);
+    startNewsTimer();
+  }
+  function startNewsTimer() {
     if (newsTimer) clearInterval(newsTimer);
     newsTimer = setInterval(function () {
       var row = document.getElementById("newsRow");
@@ -1660,6 +1666,12 @@
       newsIdx = (newsIdx + 1) % newsItems.length;
       showNews(newsIdx);
     }, 9000);
+  }
+  function newsStep(d) {
+    if (!newsItems.length) return;
+    newsIdx = (newsIdx + d + newsItems.length) % newsItems.length;
+    showNews(newsIdx);
+    startNewsTimer(); // 手動切換後重新計時，避免馬上又自動跳走
   }
   function fetchNewsFeed(topic) {
     // Google News 台灣版 RSS：即時、免金鑰，經 Worker 專線轉發（邊緣快取 15 分鐘）
@@ -1725,6 +1737,8 @@
       try { localStorage.setItem("newsOn24", on ? "1" : "0"); } catch (e) {}
     }
     btn.addEventListener("click", function () { setOn(row.classList.contains("off")); });
+    document.getElementById("newsPrev").addEventListener("click", function () { newsStep(-1); });
+    document.getElementById("newsNext").addEventListener("click", function () { newsStep(1); });
     var pref = "1";
     try { pref = localStorage.getItem("newsOn24") || "1"; } catch (e) {}
     setOn(pref !== "0");
