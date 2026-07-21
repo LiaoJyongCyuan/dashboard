@@ -128,6 +128,7 @@
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
     display: flex;
+    flex-wrap: wrap; /* 讓新聞列可換行到儀表下方 */
     align-items: center;
     justify-content: center;
     padding: 8px 24px;
@@ -257,26 +258,28 @@
 
   .etf-tris { display: inline-flex; align-items: center; gap: 2px; font-size: 8px; line-height: 15px; }
   .etf-tris[hidden] { display: none; }
-  .etf-tris .t-u1 { color: #D89B85; }
-  .etf-tris .t-u2 { color: #C97757; }
-  .etf-tris .t-u3 { color: #B25538; }
-  .etf-tris .t-u4 { color: #8F2F18; }
-  .etf-tris .t-d1 { color: #8FB89F; }
-  .etf-tris .t-d2 { color: #6FA184; }
-  .etf-tris .t-d3 { color: #4F8A68; }
-  .etf-tris .t-d4 { color: #2F6647; }
-  .etf-tris .t-f  { color: #B9B4AC; }
+  /* 階層色以台股指數漲跌色為基準（第2階＝#C1867D／#7FA98E 本色），向淺深兩端拉開 */
+  .etf-tris .t-u1, #twChg.t-u1 { color: #DCB3AC; }
+  .etf-tris .t-u2, #twChg.t-u2 { color: #C1867D; }
+  .etf-tris .t-u3, #twChg.t-u3 { color: #A2584E; }
+  .etf-tris .t-u4, #twChg.t-u4 { color: #7E2E24; }
+  .etf-tris .t-d1, #twChg.t-d1 { color: #ABC8B6; }
+  .etf-tris .t-d2, #twChg.t-d2 { color: #7FA98E; }
+  .etf-tris .t-d3, #twChg.t-d3 { color: #578466; }
+  .etf-tris .t-d4, #twChg.t-d4 { color: #305C41; }
+  .etf-tris .t-f, #twChg.t-f { color: #B9B4AC; }
+  #twChg { font-weight: 600; }
   @media (prefers-color-scheme: dark) {
     /* 深色模式以「灰淡→鮮濃」表現深淺：幅度越大色彩越濃越醒目 */
-    .etf-tris .t-u1 { color: #A17663; }
-    .etf-tris .t-u2 { color: #BA7E5E; }
-    .etf-tris .t-u3 { color: #D8885E; }
-    .etf-tris .t-u4 { color: #F29A68; }
-    .etf-tris .t-d1 { color: #7E9C8A; }
-    .etf-tris .t-d2 { color: #85B597; }
-    .etf-tris .t-d3 { color: #8CCFA5; }
-    .etf-tris .t-d4 { color: #93E9B4; }
-    .etf-tris .t-f  { color: #6E6961; }
+    .etf-tris .t-u1, #twChg.t-u1 { color: #8F6D67; }
+    .etf-tris .t-u2, #twChg.t-u2 { color: #B4867D; }
+    .etf-tris .t-u3, #twChg.t-u3 { color: #D8A093; }
+    .etf-tris .t-u4, #twChg.t-u4 { color: #F8BCA9; }
+    .etf-tris .t-d1, #twChg.t-d1 { color: #6E8B7A; }
+    .etf-tris .t-d2, #twChg.t-d2 { color: #8BAE97; }
+    .etf-tris .t-d3, #twChg.t-d3 { color: #A8D2B6; }
+    .etf-tris .t-d4, #twChg.t-d4 { color: #C5F5D5; }
+    .etf-tris .t-f, #twChg.t-f { color: #6E6961; }
   }
   .wx-ic {
     font-size: 11px;
@@ -449,6 +452,24 @@
     .bar-row { margin-top: 8px; }
     .segments { gap: 2px; }
   }
+  /* ---- 新聞輪替列（GNews）：一次一則、淡入淡出輪替，可收合 ---- */
+  .news-row { flex: 1 1 100%; display: flex; align-items: center; gap: 7px; margin: 7px 4px 0; padding-top: 6px; border-top: 1px solid rgba(0,0,0,0.07); font-size: 11px; line-height: 16px; min-height: 17px; }
+  .news-row[hidden] { display: none; }
+  .news-tag { flex: none; font-size: 9px; line-height: 14px; padding: 0 6px; border-radius: 7px; background: #EFE9DF; color: #8A7A62; font-weight: 600; letter-spacing: 1px; }
+  .news-item { flex: 1 1 auto; min-width: 0; display: inline-flex; align-items: baseline; gap: 7px; opacity: 1; transform: translateY(0); transition: opacity .4s ease, transform .4s ease; }
+  .news-item.fading { opacity: 0; transform: translateY(3px); }
+  .news-a { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: inherit; opacity: .85; text-decoration: none; font-weight: 500; }
+  .news-a:hover { opacity: 1; text-decoration: underline; }
+  .news-src { flex: none; color: var(--text2); opacity: .75; font-size: 10px; }
+  .news-btn { flex: none; border: 0; background: none; cursor: pointer; padding: 0 2px; color: var(--text2); font-size: 10px; line-height: 16px; opacity: .5; }
+  .news-btn:hover { opacity: 1; }
+  .news-row.off { border-top-color: transparent; margin-top: 2px; padding-top: 0; justify-content: flex-end; }
+  .news-row.off .news-tag, .news-row.off .news-item { display: none; }
+  @media (prefers-color-scheme: dark) {
+    .news-row { border-top-color: rgba(255,255,255,0.09); }
+    .news-tag { background: rgba(255,255,255,0.08); color: #B9AB94; }
+  }
+  @media (max-width: 520px) { .news-src { display: none; } }
 </style>
 </head>
 <body>
@@ -460,7 +481,7 @@
         <span class="moon-ic" id="moon" role="img" aria-label="月相" hidden>—</span>
         <span class="wx-chip" id="wx" hidden role="img" aria-label="台中即時天氣">
           <span class="wx-item"><span class="wx-lab" id="wxLoc">—</span></span>
-          <span class="wx-item"><span class="wx-ic" id="wxIcon">—</span><span class="wx-t" id="wxTemp">--°</span></span>
+          <span class="wx-item"><span class="wx-ic" id="wxIcon">—</span><span class="wx-t" id="wxTemp">--��</span></span>
           <span class="wx-item"><span class="wx-lab">☔</span><span id="wxRain">--%</span></span>
           <span class="wx-item"><span class="wx-aqi-dot" id="wxAqiDot" aria-hidden="true"></span><span id="wxAqi">--</span></span>
         </span>
@@ -515,6 +536,14 @@
     </div>
   </div>
 
+<div class="news-row" id="newsRow" hidden>
+  <span class="news-tag" id="newsTag">新聞</span>
+  <span class="news-item" id="newsItem">
+    <a class="news-a" id="newsA" href="#" target="_blank" rel="noopener noreferrer">—</a>
+    <span class="news-src" id="newsSrc"></span>
+  </span>
+  <button type="button" class="news-btn" id="newsBtn" aria-label="隱藏新聞">✕</button>
+</div>
 <script>
 (function () {
   "use strict";
@@ -764,7 +793,7 @@
       var Lm = rev(218.316 + 13.176396 * t);
       var Mm = rev(134.963 + 13.064993 * t);
       var D = rev(297.850 + 12.190749 * t);
-      // 月球真黃經：含中心差、出差、二均差等主要攝動項
+      // 月球真黃經：含中心差、出差、二均差等主要攝���項
       var lon = Lm + 6.289 * Math.sin(Mm * rad) - 1.274 * Math.sin((Mm - 2 * D) * rad)
         + 0.658 * Math.sin(2 * D * rad) - 0.214 * Math.sin(2 * Mm * rad) - 0.186 * Math.sin(Ms * rad)
         - 0.059 * Math.sin((2 * Mm - 2 * D) * rad) - 0.057 * Math.sin((Mm - 2 * D + Ms) * rad)
@@ -992,7 +1021,7 @@
   }
   function windDirText(deg) {
     if (deg == null || !isFinite(deg)) return null;
-    var dirs = ["北", "東北", "東", "東南", "南", "西南", "西", "西北"];
+    var dirs = ["北", "東北", "東", "東南", "南", "���南", "西", "西北"];
     return dirs[Math.round(deg / 45) % 8] + "風";
   }
   function uvText(v) {
@@ -1004,7 +1033,7 @@
     var L = WX_LOCS[wxLocKey];
     var wxUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + L.lat + "&longitude=" + L.lon +
       "&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,surface_pressure,uv_index,wind_speed_10m,wind_direction_10m&hourly=precipitation_probability&daily=precipitation_sum&forecast_days=1&timezone=Asia%2FTaipei";
-    // 空品：優先環境部官方測站（大里→大里站、南屯→西屯站），失敗時退回 Open-Meteo 估計
+    // 空品：優先環境部官方測站（大里→大里站、南屯→西屯站）��失敗時退回 Open-Meteo 估計
     var aqPromise = ((MOENV_API_KEY || WORKER_URL)
       ? fetchJson("https://data.moenv.gov.tw/api/v2/aqx_p_432?language=zh&limit=250" + (MOENV_API_KEY ? "&api_key=" + MOENV_API_KEY : ""))
           .then(function (j) {
@@ -1159,9 +1188,9 @@
       var a = fmtClock(twUpdT);
       var b = globalUpdT ? fmtClock(globalUpdT) : "";
       // 台股與全球拓時間一致就合併，不一致則分列
-      tail = "\n更新：" + (b ? (b === a ? a : "台股 " + a + "｜全球 " + b) : "台股 " + a);
+      tail = "\n\n更新：" + (b ? (b === a ? a : "台股 " + a + "｜全球 " + b) : "台股 " + a);
     }
-    chip.title = twTitleBase + (twEtfNote ? "\n" + twEtfNote : "") + (globalNote ? "\n" + globalNote : "") + tail;
+    chip.title = twTitleBase + (twEtfNote ? "\n" + twEtfNote : "") + (globalNote ? "\n\n" + globalNote : "") + tail;
     chip.setAttribute("aria-label", twTitleBase);
   }
   function renderStock(val, chg, pct, note) {
@@ -1177,7 +1206,8 @@
       el.hidden = false;
       var arrow = chg > 0 ? "\u25B2" : chg < 0 ? "\u25BC" : "\u2013";
       el.textContent = arrow + fmtK(Math.abs(chg)) + " " + (chg > 0 ? "+" : chg < 0 ? "-" : "") + Math.abs(pct).toFixed(2) + "%";
-      el.className = "wx-item " + (chg > 0 ? "wx-up" : chg < 0 ? "wx-down" : "wx-flat");
+      // 指數漲跌文字同樣套用階層色（幅度越大顏色越深）
+      el.className = "wx-item " + (triClass(pct, "TWII") || (chg > 0 ? "wx-up" : chg < 0 ? "wx-down" : "wx-flat"));
     }
     var chip = document.getElementById("tw");
     // 盤中依漲跌上色，收盤後一律灰底
@@ -1246,7 +1276,7 @@
   // 分級門檻依標的波動性質：大盤／中型／金融型 0.5／1.5／3%，電子型波動較大 0.75／2／4%
   // （指數型 ETF 單日 ±3～4% 已屬罕見大行情，5% 門檻幾乎永遠點不到最深色）
   var TRI_CODES = ["0050", "0051", "0053", "0055"];
-  var TRI_TIERS = { "0050": [0.5, 1.5, 3], "0051": [0.5, 1.5, 3], "0053": [0.75, 2, 4], "0055": [0.5, 1.5, 3], "TX": [0.5, 1.5, 3] };
+  var TRI_TIERS = { "0050": [0.5, 1.5, 3], "0051": [0.5, 1.5, 3], "0053": [0.75, 2, 4], "0055": [0.5, 1.5, 3], "TX": [0.5, 1.5, 3], "TWII": [0.5, 1.5, 3] };
   var twTriPcts = {};
   function triClass(pc, code) {
     if (pc === null || !isFinite(pc)) return null;
@@ -1377,8 +1407,8 @@
   }
   // VIX 分級（依使用者定義）：<13 極度平靜、13–17 平靜、17–22 正常、22–30 警戒、30–40 恐慌、40–60 極度恐慌、>60 金融危機等級
   function vixNote(v) { return v >= 60 ? "金融危機等級" : v >= 40 ? "極度恐慌" : v >= 30 ? "恐慌" : v >= 22 ? "警戒" : v >= 17 ? "正常" : v >= 13 ? "平靜" : "極度平靜"; }
-  // 美股指數／VIX：FinMind 美股日線（資料源同 Yahoo），取最近兩個收盤價計算漲跌
-  // 銅用 CPER、美元指數用 UUP 替身：×0.156 ≈ 美元/磅、×3.65 ≈ DXY（估算常數，待實價校準，漲跌%不受影響）
+  // 美股指數／VIX：FinMind 美股日線（���料源同 Yahoo），取最近兩個收盤價計算漲跌
+  // 銅用 CPER、美元��數用 UUP 替身：×0.156 ≈ 美元/磅、×3.65 ≈ DXY（估算常數，待實價校準，漲跌%不受影響）
   // mul：ETF 價 → 原值（指數點數或每桶油價）的換算比例，依 2026/07 實際收盤校準，漲跌%不受影響
   // fmt："k" 以千點 K 取小數一位；"1" 取小數一位；省略則用 fmtNum
   function usJob(sym, label, group, mul, fmt, note) {
@@ -1395,18 +1425,25 @@
       .catch(function () { return null; });
   }
   function loadGlobal() {
-    // 日韓股與油價指數本尊拿不到，改用美國掛牌 ETF 替身（EWJ 日本、EWY 韓國、BNO 布蘭特、USO 西德州）
+    // 日股改追台股掛牌 00661 元大日經225（富果即時，看得到當日盤中漲跌）；韓股暫以 EWY 原值呈現
     var jobs = [
-      usJob("EWJ", "日經", "asia", 709, "k"),
-      usJob("EWY", "KOSPI", "asia", 41.8, "k"),
+      fetchJson("https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/00661")
+        .then(function (j) {
+          var y = parseFloat(j && j.previousClose);
+          var z = parseFloat(j && (j.closePrice != null ? j.closePrice : j.lastPrice));
+          if (!isFinite(z) || z <= 0) return null;
+          return { g: "asia", t: "日股(00661) " + z.toFixed(2) + fmtChg(z, y, false) };
+        })
+        .catch(function () { return null; }),
+      usJob("EWY", "韓股ETF(EWY)", "asia", null, "1"),
       usJob("^GSPC", "標普", "us", null, "k"),
       usJob("^DJI", "道瓊", "us", null, "k"),
       usJob("^IXIC", "納指", "us", null, "k"),
       usJob("^SOX", "費半", "us", null, "k"),
-      usJob("BNO", "布蘭特", "cmd", 1.81, "1"),
-      usJob("USO", "西德州", "cmd", 0.666, "1"),
-      usJob("CPER", "銅", "cmd", 0.156, "1"),
-      usJob("UUP", "DXY", "fx", 3.65, "1"),
+      usJob("BNO", "布蘭特ETF(BNO)", "cmd", null, "1"),
+      usJob("USO", "西德州ETF(USO)", "cmd", null, "1"),
+      usJob("CPER", "銅ETF(CPER)", "cmd", null, "1"),
+      usJob("UUP", "美元ETF(UUP)", "fx", null, "1"),
       usJob("^VIX", "VIX", "risk", null, null, vixNote)
     ];
     // 台指近全：FinMind 期貨日線（近月契約，優先夜盤 after_market，附漲跌%；同步餵給標籤小三角）
@@ -1425,7 +1462,7 @@
           if (String(r.date) < String(best.date)) continue;
           if (cd < String(best.contract_date)) { best = r; continue; }
           if (cd > String(best.contract_date)) continue;
-          // 同日同近月：夜盤（after_market）比日盤晚，優先採用
+          // 同日同近月：夜盤（after_market）比日盤晚，優先採��
           if (String(r.trading_session) === "after_market" && String(best.trading_session) !== "after_market") best = r;
         }
         if (!best) return null;
@@ -1473,7 +1510,7 @@
         return { g: "mgn", t: "成交 " + fmtNum(Math.round(last)) + " 億" + fmtChg(last, prev, false) };
       })
       .catch(function () { return null; }));
-    // 融資融券總餘額：FinMind 台股整體資券（融資原始單位＝元、融券＝張；換算億元／萬張，增減以%表示）
+    // 融資融券���餘額：FinMind 台股整體資券（融資原始單位＝元、融券＝張；換算億元／萬張，增減以%表示）
     jobs.push(fetchFinmind("dataset=TaiwanStockTotalMarginPurchaseShortSale" + fmRange(8))
       .then(function (rows) {
         var latest = {};
@@ -1511,24 +1548,17 @@
         return { g: "cmd", t: "金價 " + fmtNum(last) + fmtChg(last, prev, false) };
       })
       .catch(function () { return null; }));
-    // 美國十年期公債殖利率
-    jobs.push(fetchFinmind("dataset=GovernmentBondsYield&data_id=" + encodeURIComponent("United States 10-Year") + fmRange(12))
-      .then(function (rows) {
-        var last = parseFloat(rows[rows.length - 1].value);
-        var prev = rows.length > 1 ? parseFloat(rows[rows.length - 2].value) : NaN;
-        if (!isFinite(last)) return null;
-        return { g: "fx", t: "美債10Y " + last.toFixed(2) + "%" + fmtChg(last, prev, true) };
-      })
-      .catch(function () { return null; }));
-    // 美國二年期公債殖利率（對聯準會利率預期最敏感）
-    jobs.push(fetchFinmind("dataset=GovernmentBondsYield&data_id=" + encodeURIComponent("United States 2-Year") + fmRange(12))
-      .then(function (rows) {
-        var last = parseFloat(rows[rows.length - 1].value);
-        var prev = rows.length > 1 ? parseFloat(rows[rows.length - 2].value) : NaN;
-        if (!isFinite(last)) return null;
-        return { g: "fx", t: "美債2Y " + last.toFixed(2) + "%" + fmtChg(last, prev, true) };
-      })
-      .catch(function () { return null; }));
+    // 美國公債殖利率：2Y（利率預期最敏感）→ 10Y（定價之錨）→ 20Y（長端）
+    [["2-Year", "美債2Y"], ["10-Year", "美債10Y"], ["20-Year", "美債20Y"]].forEach(function (bp) {
+      jobs.push(fetchFinmind("dataset=GovernmentBondsYield&data_id=" + encodeURIComponent("United States " + bp[0]) + fmRange(12))
+        .then(function (rows) {
+          var last = parseFloat(rows[rows.length - 1].value);
+          var prev = rows.length > 1 ? parseFloat(rows[rows.length - 2].value) : NaN;
+          if (!isFinite(last)) return null;
+          return { g: "fx", t: bp[1] + " " + last.toFixed(2) + "%" + fmtChg(last, prev, true) };
+        })
+        .catch(function () { return null; }));
+    });
     // 美元兌台幣（台銀掛牌即期中價；匯率上升＝台幣貶、下降＝台幣升，直接標註升貶方向）
     jobs.push(fetchFinmind("dataset=TaiwanExchangeRate&data_id=USD" + fmRange(12))
       .then(function (rows) {
@@ -1561,16 +1591,21 @@
     Promise.all(jobs).then(function (arr) {
       var by = { txf: [], mgn: [], asia: [], us: [], cmd: [], fx: [], risk: [] };
       for (var i = 0; i < arr.length; i++) if (arr[i]) by[arr[i].g].push(arr[i].t);
-      var lines = [];
-      if (by.txf.length) lines.push("台指期：" + by.txf.join("｜"));
-      if (by.mgn.length) lines.push("量能資券：" + by.mgn.join("｜"));
-      if (by.asia.length) lines.push("亞股：" + by.asia.join("｜"));
-      if (by.us.length) lines.push("美股：" + by.us.join("｜"));
-      if (by.cmd.length) lines.push("商品：" + by.cmd.join("｜"));
-      if (by.fx.length) lines.push("利率匯率：" + by.fx.join("｜"));
-      if (by.risk.length) lines.push("風險：" + by.risk.join("｜"));
-      globalNote = lines.join("\n");
-      if (lines.length) globalUpdT = new Date();
+      // 依性質分段：台股期現貨量能／國際行情／利匯率與風險，段落間空一行較易讀
+      var s1 = [], s2 = [], s3 = [];
+      if (by.txf.length) s1.push("台指期：" + by.txf.join("｜"));
+      if (by.mgn.length) s1.push("量能資券：" + by.mgn.join("｜"));
+      if (by.asia.length) s2.push("亞股：" + by.asia.join("｜"));
+      if (by.us.length) s2.push("美股：" + by.us.join("｜"));
+      if (by.cmd.length) s2.push("商品：" + by.cmd.join("｜"));
+      if (by.fx.length) s3.push("利率匯率：" + by.fx.join("｜"));
+      if (by.risk.length) s3.push("風險：" + by.risk.join("｜"));
+      var secs = [];
+      if (s1.length) secs.push(s1.join("\n"));
+      if (s2.length) secs.push(s2.join("\n"));
+      if (s3.length) secs.push(s3.join("\n"));
+      globalNote = secs.join("\n\n");
+      if (secs.length) globalUpdT = new Date();
       if (twTitleBase) applyTwTitle();
     });
   }
@@ -1585,6 +1620,100 @@
   }, 30 * 60 * 1000);
   setInterval(function () { loadStock(); loadTwQuotes(); }, 10 * 60 * 1000);
   setInterval(loadGlobal, 30 * 60 * 1000);
+  // ---- 新聞輪替列（GNews 免費版，內容約有 12 小時延遲）：金鑰藏在 Worker（機密 GNEWS_KEY），45 分鐘快取共用額度 ----
+  var NEWS_CATS = [["world", "國際"], ["business", "財經"], ["technology", "產業"]];
+  var newsItems = [], newsIdx = 0, newsTimer = null, newsHover = false;
+  function newsAgo(iso) {
+    var t0 = new Date(iso).getTime();
+    if (!isFinite(t0)) return "";
+    var m = Math.max(1, Math.round((Date.now() - t0) / 60000));
+    return m < 60 ? m + " 分鐘前" : m < 1440 ? Math.round(m / 60) + " 小時前" : Math.round(m / 1440) + " 天前";
+  }
+  function showNews(i, instant) {
+    var it = newsItems[i];
+    if (!it) return;
+    var box = document.getElementById("newsItem");
+    var apply = function () {
+      document.getElementById("newsTag").textContent = it.tag;
+      var a = document.getElementById("newsA");
+      a.textContent = it.title;
+      a.href = it.url;
+      var ago = newsAgo(it.at);
+      document.getElementById("newsSrc").textContent = it.src + (ago ? "・" + ago : "");
+      box.classList.remove("fading");
+    };
+    if (instant) { apply(); return; }
+    box.classList.add("fading");
+    setTimeout(apply, 420);
+  }
+  function applyNews(items) {
+    newsItems = items;
+    newsIdx = 0;
+    if (!items.length) return;
+    document.getElementById("newsRow").hidden = false;
+    showNews(0, true);
+    if (newsTimer) clearInterval(newsTimer);
+    newsTimer = setInterval(function () {
+      var row = document.getElementById("newsRow");
+      if (row.classList.contains("off") || newsHover || newsItems.length < 2) return;
+      newsIdx = (newsIdx + 1) % newsItems.length;
+      showNews(newsIdx);
+    }, 9000);
+  }
+  function fetchGnews(cat) {
+    // 一律改走 Worker 專線：金鑰由 Worker 自動附加，不出現在網頁原始碼
+    var u = "https://gnews.io/api/v4/top-headlines?category=" + cat + "&lang=zh&country=tw&max=8";
+    return fetch(WORKER_URL + "/?url=" + encodeURIComponent(u)).then(function (r) {
+      if (!r.ok) throw new Error("gnews " + r.status);
+      return r.json();
+    });
+  }
+  function loadNews() {
+    try {
+      var c = JSON.parse(localStorage.getItem("gnews24") || "null");
+      if (c && c.items && c.items.length && Date.now() - c.t < 45 * 60 * 1000) { applyNews(c.items); return; }
+    } catch (e) {}
+    Promise.all(NEWS_CATS.map(function (cp) {
+      return fetchGnews(cp[0]).then(function (j) {
+        return ((j && j.articles) || []).map(function (a) {
+          return { tag: cp[1], title: a.title || "", url: a.url || "#", src: (a.source && a.source.name) || "", at: a.publishedAt || "" };
+        });
+      }).catch(function () { return []; });
+    })).then(function (groups) {
+      // 三類交錯排列＋標題去重，最多 18 則
+      var out = [], seen = {}, k = 0, more = true;
+      while (more && out.length < 18) {
+        more = false;
+        for (var g = 0; g < groups.length; g++) {
+          var a2 = groups[g][k];
+          if (!a2) continue;
+          more = true;
+          if (a2.title && !seen[a2.title]) { seen[a2.title] = 1; out.push(a2); }
+        }
+        k++;
+      }
+      if (!out.length) return;
+      try { localStorage.setItem("gnews24", JSON.stringify({ t: Date.now(), items: out })); } catch (e) {}
+      applyNews(out);
+    });
+  }
+  (function () {
+    var row = document.getElementById("newsRow"), btn = document.getElementById("newsBtn");
+    row.addEventListener("mouseenter", function () { newsHover = true; });
+    row.addEventListener("mouseleave", function () { newsHover = false; });
+    function setOn(on) {
+      row.classList.toggle("off", !on);
+      btn.textContent = on ? "\u2715" : "\uD83D\uDCF0";
+      btn.setAttribute("aria-label", on ? "隱藏新聞" : "顯示新聞");
+      try { localStorage.setItem("newsOn24", on ? "1" : "0"); } catch (e) {}
+    }
+    btn.addEventListener("click", function () { setOn(row.classList.contains("off")); });
+    var pref = "1";
+    try { pref = localStorage.getItem("newsOn24") || "1"; } catch (e) {}
+    setOn(pref !== "0");
+  })();
+  loadNews();
+  setInterval(loadNews, 60 * 60 * 1000); // 每小時檢查一次（快取未過期就不打 API，額度用不到一半）
 })();
 </script>
 </body>
