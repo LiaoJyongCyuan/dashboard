@@ -459,12 +459,12 @@
   .news-tag.nt-intl { background: #EAF3FB; color: #5B8FC7; }
   .news-tag.nt-fin { background: #FAF2DF; color: #A98938; }
   .news-tag.nt-tech { background: #E9F5F4; color: #4E9C99; }
-  .news-item { flex: 1 1 auto; min-width: 0; display: inline-flex; align-items: baseline; gap: 7px; opacity: 1; transform: translateY(0); transition: opacity .4s ease, transform .4s ease; }
+  .news-item { flex: 1 1 auto; min-width: 0; display: inline-flex; justify-content: flex-start; text-align: left; align-items: baseline; gap: 7px; opacity: 1; transform: translateY(0); transition: opacity .4s ease, transform .4s ease; }
   .news-item.fading { opacity: 0; transform: translateY(3px); }
-  .news-a { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: inherit; opacity: .85; text-decoration: none; font-weight: 500; }
+  .news-a { min-width: 0; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: inherit; opacity: .85; text-decoration: none; font-weight: 500; }
   .news-a:hover { opacity: 1; text-decoration: underline; }
   .news-src { flex: none; color: var(--text2); opacity: .75; font-size: 10.5px; }
-  .news-btn { flex: none; border: 0; background: none; cursor: pointer; padding: 0 2px; color: var(--text2); font-size: 10px; line-height: 16px; opacity: .5; }
+  .news-btn { flex: none; border: 0; background: none; cursor: pointer; padding: 0 2px; color: var(--text2); font-size: 10px; line-height: 16px; opacity: .35; }
   .news-btn:hover { opacity: 1; }
   .news-nav { font-size: 11px; padding: 0 1px; }
   .news-row.off { display: none; }
@@ -474,6 +474,8 @@
   .news-pop[hidden] { display: none; }
   .news-pop .np-t { display: block; font-weight: 600; margin-bottom: 3px; }
   .news-pop .np-m { display: block; margin-top: 5px; font-size: 10.5px; color: var(--text2); opacity: .85; }
+  .news-pop .np-a { display: inline-block; margin-top: 6px; font-size: 11px; font-weight: 600; color: #5B8FC7; text-decoration: none; }
+  .news-pop .np-a:hover { text-decoration: underline; }
   #tw { cursor: pointer; }
   @media (prefers-color-scheme: dark) {
     .news-row { border-top-color: rgba(255,255,255,0.09); }
@@ -482,6 +484,7 @@
     .news-tag.nt-fin { background: rgba(224,190,114,0.14); color: #DCC183; }
     .news-tag.nt-tech { background: rgba(78,156,153,0.16); color: #7FC4C1; }
     .news-pop { background: #33322E; border-color: rgba(255,255,255,0.12); box-shadow: 0 8px 26px rgba(0,0,0,0.5); }
+    .news-pop .np-a { color: #8FB8E8; }
   }
   @media (max-width: 520px) { .news-src { display: none; } .news-row { margin: 4px 4px 0; padding-top: 4px; } }
 </style>
@@ -1771,6 +1774,7 @@
         var cut0 = desc.slice(0, 500), p1 = Math.max(cut0.lastIndexOf("。"), cut0.lastIndexOf("！"), cut0.lastIndexOf("？"));
         desc = p1 > 100 ? cut0.slice(0, p1 + 1) : cut0 + "…";
       }
+      if (desc && !/[一-鿿]/.test(desc)) desc = ""; // 純外文摘要（如路透聚合源）無法直接閱讀，不彈卡
       var t0 = new Date(pub).getTime();
       if (!title || !isFinite(t0) || Date.now() - t0 > 36 * 60 * 60 * 1000) continue;
       if (NEWS_SKIP.test(title)) continue;
@@ -1783,7 +1787,7 @@
   }
   function loadNews() {
     try {
-      var c = JSON.parse(localStorage.getItem("news24e") || "null");
+      var c = JSON.parse(localStorage.getItem("news24f") || "null");
       if (c && c.items && c.items.length && Date.now() - c.t < 25 * 60 * 1000) { applyNews(c.items); return; }
     } catch (e) {}
     Promise.all(NEWS_FEEDS.map(function (f) {
@@ -1809,7 +1813,7 @@
         }
       }
       if (!out.length) return;
-      try { localStorage.setItem("news24e", JSON.stringify({ t: Date.now(), items: out })); } catch (e) {}
+      try { localStorage.setItem("news24f", JSON.stringify({ t: Date.now(), items: out })); } catch (e) {}
       applyNews(out);
     });
   }
@@ -1823,27 +1827,26 @@
     var popHideT = null;
     function popHide() { popHideT = setTimeout(function () { pop.hidden = true; newsHover = false; }, 200); }
     function popCancel() { if (popHideT) { clearTimeout(popHideT); popHideT = null; } }
-    function popPlace(ev) {
-      if (pop.hidden) return;
-      var vw = window.innerWidth, vh = window.innerHeight;
-      var w = pop.offsetWidth, h = pop.offsetHeight;
-      var x = Math.min(Math.max(8, ev.clientX - 24), Math.max(8, vw - w - 8));
-      var y = ev.clientY + 16;                              // 首選：滑鼠指標下方
-      if (y + h > vh - 6) y = Math.max(6, vh - h - 6);      // 下方放不下就往上收，保持整卡可見
-      pop.style.left = x + "px";
-      pop.style.top = y + "px";
+    function popPlace() {
+      // 固定錮定：嵌入框下緣緊貼新聞列，下方無空間可彈，改貼齊新聞列上方且不跟滑鼠移動
+      var r = row.getBoundingClientRect(), vw = window.innerWidth, vh = window.innerHeight;
+      pop.style.maxHeight = Math.max(80, r.top - 14) + "px"; // 吃滿新聞列上方的可用高度
+      pop.style.bottom = (vh - r.top + 7) + "px";
+      pop.style.top = "auto";
+      var a0 = document.getElementById("newsA").getBoundingClientRect();
+      pop.style.left = Math.min(Math.max(8, a0.left - 10), Math.max(8, vw - pop.offsetWidth - 8)) + "px";
     }
-    itemBox.addEventListener("mouseenter", function (ev) {
+    var linkEl = document.getElementById("newsA");
+    linkEl.addEventListener("mouseenter", function () {   // 回應區只限標題文字，不再整條橫幅觸發
       var it = newsItems[newsIdx];
       if (!it || !it.d || it.d.length < 40) return;         // 摘要太短沒內容可讀，不彈卡
       popCancel();
       var ago = newsAgo(it.at);
-      pop.innerHTML = '<span class="np-t">' + escHtml(it.title) + '</span>' + escHtml(it.d) + '<span class="np-m">' + escHtml(it.src) + (ago ? "・" + ago : "") + '</span>';
+      pop.innerHTML = '<span class="np-t">' + escHtml(it.title) + '</span>' + escHtml(it.d) + '<a class="np-a" href="' + escHtml(it.url) + '" target="_blank" rel="noopener noreferrer">閱讀全文 ↗</a><span class="np-m">' + escHtml(it.src) + (ago ? "・" + ago : "") + '</span>';
       pop.hidden = false;
-      popPlace(ev);
+      popPlace();
     });
-    itemBox.addEventListener("mousemove", popPlace);
-    itemBox.addEventListener("mouseleave", popHide);
+    linkEl.addEventListener("mouseleave", popHide);
     pop.addEventListener("mouseenter", function () { popCancel(); newsHover = true; }); // 滑進卡片繼續閱讀，輪替暫停
     pop.addEventListener("mouseleave", popHide);
     function setOn(on) {
