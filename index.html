@@ -471,7 +471,7 @@
   .news-row.off { display: none; }
   .news-toggle { border: 0; background: none; cursor: pointer; padding: 0 2px; font-size: 12px; line-height: 15px; align-self: center; opacity: .9; transition: opacity .25s ease, filter .25s ease; }
   .news-toggle.off { opacity: .3; filter: grayscale(1); }
-  .news-pop { position: fixed; z-index: 30; width: min(560px, calc(100vw - 20px)); max-height: calc(100vh - 14px); overflow-y: auto; background: #FFFEFB; border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; box-shadow: 0 8px 26px rgba(0,0,0,0.12); padding: 10px 13px; font-size: 12px; line-height: 1.7; color: inherit; }
+  .news-pop { box-sizing: border-box; position: fixed; z-index: 30; width: min(560px, calc(100vw - 20px)); max-height: calc(100vh - 14px); overflow-y: auto; background: #FFFEFB; border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; box-shadow: 0 8px 26px rgba(0,0,0,0.12); padding: 10px 13px; font-size: 12px; line-height: 1.7; color: inherit; }
   .news-pop[hidden] { display: none; }
   .news-pop .np-t { display: block; font-weight: 600; margin-bottom: 3px; }
   .news-pop .np-m { display: block; margin-top: 5px; font-size: 10.5px; color: var(--text2); opacity: .85; }
@@ -1679,13 +1679,12 @@
     ["國際", "https://feeds.bbci.co.uk/zhongwen/trad/rss.xml", "BBC中文"],
     ["國際", "https://news.ltn.com.tw/rss/world.xml", "自由時報"],
     ["國際", "https://cn.nytimes.com/rss/", "紐時中文"],
-    ["觀點", "https://feeds.feedburner.com/TheNewsLens", "關鍵評論"],
     ["財經", "https://feeds.feedburner.com/rsscna/finance", "中央社"],
     ["財經", "https://news.ltn.com.tw/rss/business.xml", "自由時報"],
     ["產業", "https://feeds.feedburner.com/rsscna/technology", "中央社"]
   ];
-  var NEWS_ORDER = [["國際", 8], ["財經", 6], ["產業", 5], ["觀點", 3]]; // 每類上限，同類單一來源最多 3 則，避免單家洗版
-  var NEWS_TAGCLS = { "國際": "nt-intl", "財經": "nt-fin", "產業": "nt-tech", "觀點": "nt-op" };
+  var NEWS_ORDER = [["國際", 8], ["財經", 6], ["產業", 5]]; // 每類上限，同類單一來源最多 3 則，避免單家洗版
+  var NEWS_TAGCLS = { "國際": "nt-intl", "財經": "nt-fin", "產業": "nt-tech" };
   var NEWS_SKIP = /廣編|贊助|優惠|折扣|抽獎|開獎|團購|好康|盤點概念股|同學會|樂透|今彩|威力彩|頭獎|發票|新聞360|自由說新聞|請見影片|書摘|推薦序/;
   var NEWS_LINKSKIP = /cn\.nytimes\.com\/(opinion|health|culture|travel|style|obits|realestate|education|dining|fashion|magazine)\//; // 路透聚合源：略過體育・查核・非英文版重複條目 // 擋掉廣宣・導購・樂透開獎類雜訊
   var newsItems = [], newsIdx = 0, newsTimer = null, newsHover = false;
@@ -1792,7 +1791,7 @@
   }
   function loadNews() {
     try {
-      var c = JSON.parse(localStorage.getItem("news24g") || "null");
+      var c = JSON.parse(localStorage.getItem("news24h") || "null");
       if (c && c.items && c.items.length && Date.now() - c.t < 25 * 60 * 1000) { applyNews(c.items); return; }
     } catch (e) {}
     Promise.all(NEWS_FEEDS.map(function (f) {
@@ -1818,7 +1817,7 @@
         }
       }
       if (!out.length) return;
-      try { localStorage.setItem("news24g", JSON.stringify({ t: Date.now(), items: out })); } catch (e) {}
+      try { localStorage.setItem("news24h", JSON.stringify({ t: Date.now(), items: out })); } catch (e) {}
       applyNews(out);
     });
   }
@@ -1835,8 +1834,8 @@
     function popPlace() {
       // 固定錮定：嵌入框下緣緊貼新聞列，下方無空間可彈，改貼齊新聞列上方且不跟滑鼠移動
       var r = row.getBoundingClientRect(), vw = window.innerWidth, vh = window.innerHeight;
-      pop.style.maxHeight = Math.max(80, Math.min(r.top - 14, vh - 24)) + "px"; // 吃滿新聞列上方的可用高度
-      pop.style.bottom = (vh - r.top + 7) + "px";
+      pop.style.maxHeight = Math.max(80, Math.min(r.top - 10, vh - 16)) + "px"; // 嚴格限在嵌入框內
+      pop.style.bottom = (vh - r.top + 2) + "px"; // 下緣貼近標題與鼠標
       pop.style.top = "auto";
       var a0 = document.getElementById("newsA").getBoundingClientRect();
       pop.style.left = Math.min(Math.max(8, a0.left - 10), Math.max(8, vw - pop.offsetWidth - 8)) + "px";
@@ -1847,7 +1846,7 @@
       if (!it || !it.d || it.d.length < 40) return;         // 摘要太短沒內容可讀，不彈卡
       popCancel();
       var ago = newsAgo(it.at);
-      pop.innerHTML = '<span class="np-t">' + escHtml(it.title) + '</span>' + escHtml(it.d) + '<a class="np-a" href="' + escHtml(it.url) + '" target="_blank" rel="noopener noreferrer">閱讀全文 ↗</a><span class="np-m">' + escHtml(it.src) + (ago ? "・" + ago : "") + '</span>';
+      pop.innerHTML = escHtml(it.d) + '<a class="np-a" href="' + escHtml(it.url) + '" target="_blank" rel="noopener noreferrer">閱讀全文 ↗</a><span class="np-m">' + escHtml(it.src) + (ago ? "・" + ago : "") + '</span>';
       pop.hidden = false;
       popPlace();
     });
