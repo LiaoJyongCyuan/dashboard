@@ -453,22 +453,35 @@
     .segments { gap: 2px; }
   }
   /* ---- 新聞輪替列（GNews）：一次一則、淡入淡出輪替，可收合 ---- */
-  .news-row { flex: 1 1 100%; display: flex; align-items: center; gap: 7px; margin: 7px 4px 0; padding-top: 6px; border-top: 1px solid rgba(0,0,0,0.07); font-size: 11px; line-height: 16px; min-height: 17px; }
+  .news-row { position: relative; flex: 1 1 100%; display: flex; align-items: center; gap: 7px; margin: 7px 4px 0; padding-top: 6px; border-top: 1px solid rgba(0,0,0,0.07); font-size: 12px; line-height: 17px; min-height: 18px; }
   .news-row[hidden] { display: none; }
-  .news-tag { flex: none; font-size: 9px; line-height: 14px; padding: 0 6px; border-radius: 7px; background: #EFE9DF; color: #8A7A62; font-weight: 600; letter-spacing: 1px; }
+  .news-tag { flex: none; font-size: 10px; line-height: 15px; padding: 0 7px; border-radius: 8px; background: #EFE9DF; color: #8A7A62; font-weight: 600; letter-spacing: 1px; }
+  .news-tag.nt-intl { background: #EAF3FB; color: #5B8FC7; }
+  .news-tag.nt-fin { background: #FAF2DF; color: #A98938; }
+  .news-tag.nt-tech { background: #E9F5F4; color: #4E9C99; }
   .news-item { flex: 1 1 auto; min-width: 0; display: inline-flex; align-items: baseline; gap: 7px; opacity: 1; transform: translateY(0); transition: opacity .4s ease, transform .4s ease; }
   .news-item.fading { opacity: 0; transform: translateY(3px); }
   .news-a { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: inherit; opacity: .85; text-decoration: none; font-weight: 500; }
   .news-a:hover { opacity: 1; text-decoration: underline; }
-  .news-src { flex: none; color: var(--text2); opacity: .75; font-size: 10px; }
+  .news-src { flex: none; color: var(--text2); opacity: .75; font-size: 10.5px; }
   .news-btn { flex: none; border: 0; background: none; cursor: pointer; padding: 0 2px; color: var(--text2); font-size: 10px; line-height: 16px; opacity: .5; }
   .news-btn:hover { opacity: 1; }
-  .news-nav { font-size: 9px; padding: 0 1px; }
-  .news-row.off { border-top-color: transparent; margin-top: 2px; padding-top: 0; justify-content: flex-end; }
-  .news-row.off .news-tag, .news-row.off .news-item, .news-row.off .news-nav { display: none; }
+  .news-nav { font-size: 11px; padding: 0 1px; }
+  .news-row.off { display: none; }
+  .news-toggle { border: 0; background: none; cursor: pointer; padding: 0 2px; font-size: 12px; line-height: 15px; align-self: center; opacity: .9; transition: opacity .25s ease, filter .25s ease; }
+  .news-toggle.off { opacity: .3; filter: grayscale(1); }
+  .news-pop { position: absolute; left: 48px; right: 48px; bottom: calc(100% + 8px); z-index: 30; background: #FFFEFB; border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; box-shadow: 0 8px 26px rgba(0,0,0,0.12); padding: 10px 13px; font-size: 12px; line-height: 1.7; color: inherit; }
+  .news-pop[hidden] { display: none; }
+  .news-pop .np-t { display: block; font-weight: 600; margin-bottom: 3px; }
+  .news-pop .np-m { display: block; margin-top: 5px; font-size: 10.5px; color: var(--text2); opacity: .85; }
+  #tw { cursor: pointer; }
   @media (prefers-color-scheme: dark) {
     .news-row { border-top-color: rgba(255,255,255,0.09); }
     .news-tag { background: rgba(255,255,255,0.08); color: #B9AB94; }
+    .news-tag.nt-intl { background: rgba(94,159,232,0.14); color: #8FB8E8; }
+    .news-tag.nt-fin { background: rgba(224,190,114,0.14); color: #DCC183; }
+    .news-tag.nt-tech { background: rgba(78,156,153,0.16); color: #7FC4C1; }
+    .news-pop { background: #33322E; border-color: rgba(255,255,255,0.12); box-shadow: 0 8px 26px rgba(0,0,0,0.5); }
   }
   @media (max-width: 520px) { .news-src { display: none; } }
 </style>
@@ -518,6 +531,7 @@
         <span class="bar-pct" id="yearpct">--%</span>
         <span class="doy-chip" id="yearline">—</span>
         <span class="doy-chip" id="lunar" hidden>—</span>
+        <button type="button" class="news-toggle" id="newsBtn" aria-label="隱藏新聞">📰</button>
       </div>
     </div>
     <div class="vdiv" aria-hidden="true"></div>
@@ -543,9 +557,9 @@
     <a class="news-a" id="newsA" href="#" target="_blank" rel="noopener noreferrer">—</a>
     <span class="news-src" id="newsSrc"></span>
   </span>
-  <button type="button" class="news-btn news-nav" id="newsPrev" aria-label="上一則">▴</button>
-  <button type="button" class="news-btn news-nav" id="newsNext" aria-label="下一則">▾</button>
-  <button type="button" class="news-btn" id="newsBtn" aria-label="隱藏新聞">✕</button>
+  <button type="button" class="news-btn news-nav" id="newsPrev" aria-label="上一則">▲</button>
+  <button type="button" class="news-btn news-nav" id="newsNext" aria-label="下一則">▼</button>
+  <div class="news-pop" id="newsPop" hidden></div>
 </div>
 <script>
 (function () {
@@ -1193,7 +1207,7 @@
       // 台股與全球拓時間一致就合併，不一致則分列
       tail = "\n\n更新：" + (b ? (b === a ? a : "台股 " + a + "｜全球 " + b) : "台股 " + a);
     }
-    chip.title = twTitleBase + (twEtfNote ? "\n" + twEtfNote : "") + (globalNote ? "\n\n" + globalNote : "") + tail;
+    chip.title = twTitleBase + (otcNote ? "\n" + otcNote : "") + (twEtfNote ? "\n" + twEtfNote : "") + (globalNote ? "\n\n" + globalNote : "") + tail;
     chip.setAttribute("aria-label", twTitleBase);
   }
   function renderStock(val, chg, pct, note) {
@@ -1265,21 +1279,48 @@
           .catch(function () { /* 保持隱藏 */ });
       });
   }
+  // 櫃買指數（上櫃大盤）：富果即時為主，失敗退證交所 MIS 延遲報價；餵給標籤第 2 個小三角
+  function loadOtcIdx() {
+    function putOtc(z, y) {
+      if (!isFinite(z) || !isFinite(y) || y <= 0) return;
+      var pc = (z - y) / y * 100;
+      twTriPcts["OTC"] = pc;
+      otcNote = "櫃買指數 " + fmtNum(z) + "（" + (pc >= 0 ? "+" : "") + pc.toFixed(2) + "%）";
+      if (twTitleBase) applyTwTitle();
+      renderEtfTris();
+    }
+    fetchJson("https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/IX0043")
+      .then(function (j) {
+        var y = parseFloat(j && j.previousClose);
+        var z = parseFloat(j && (j.closePrice != null ? j.closePrice : j.lastPrice));
+        if (!isFinite(z) || !isFinite(y) || y <= 0) throw new Error("no data");
+        putOtc(z, y);
+      })
+      .catch(function () {
+        return fetchJson("https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=otc_o00.tw&json=1&delay=0")
+          .then(function (j) {
+            var m = j.msgArray && j.msgArray[0];
+            putOtc(parseFloat(m && m.z), parseFloat(m && m.y));
+          })
+          .catch(function () { /* 缺料時以灰「–」佔位 */ });
+      });
+  }
   // ---- 台股 ETF／台積電（顯示於台股懸浮資訊；富果為主、證交所批次備援） ----
   var TW_QUOTES = [
     ["0050", "台灣50"],
     ["0051", "中型100"],
+    ["0052", "富邦科技"],
     ["0053", "元大電子"],
     ["0055", "MSCI金融"],
     ["0056", "高股息"],
     ["2330", "台積電"]
   ];
-  var twEtfNote = "";
-  // 標籤右端小三角：左→右 0050／0051／0053／0055／台指近全；紅漲綠跌，深淺＝幅度（四階）
+  var twEtfNote = "", otcNote = "";
+  // 標籤右端小三角：左→右 0050／櫃買／0052／0055／0056；紅漲綠跌，深淺＝幅度（四階）
   // 分級門檻依標的波動性質：大盤／中型／金融型 0.5／1.5／3%，電子型波動較大 0.75／2／4%
   // （指數型 ETF 單日 ±3～4% 已屬罕見大行情，5% 門檻幾乎永遠點不到最深色）
-  var TRI_CODES = ["0050", "0051", "0053", "0055"];
-  var TRI_TIERS = { "0050": [0.5, 1.5, 3], "0051": [0.5, 1.5, 3], "0053": [0.75, 2, 4], "0055": [0.5, 1.5, 3], "TX": [0.5, 1.5, 3], "TWII": [0.5, 1.5, 3] };
+  var TRI_CODES = ["0050", "OTC", "0052", "0055", "0056"];
+  var TRI_TIERS = { "0050": [0.5, 1.5, 3], "OTC": [0.5, 1.5, 3], "0051": [0.5, 1.5, 3], "0052": [0.75, 2, 4], "0053": [0.75, 2, 4], "0055": [0.5, 1.5, 3], "0056": [0.5, 1.5, 3], "TX": [0.5, 1.5, 3], "TWII": [0.5, 1.5, 3] };
   var twTriPcts = {};
   function triClass(pc, code) {
     if (pc === null || !isFinite(pc)) return null;
@@ -1291,21 +1332,15 @@
   function renderEtfTris() {
     var el = document.getElementById("etfTris");
     if (!el) return;
-    var html = "";
+    var html = "", got = 0;
     for (var i = 0; i < TRI_CODES.length; i++) {
       var pc = twTriPcts[TRI_CODES[i]];
       var cls = triClass(pc, TRI_CODES[i]);
-      if (!cls) { html = ""; break; } // 任��檔沒資料就整組不顯示，避免對位誤讀
-      html += '<span class="' + cls + '">' + (pc > 0 ? "\u25B2" : pc < 0 ? "\u25BC" : "\u2013") + '</span>';
-    }
-    // 第五個三角：台指近全（資料到才附加，缺漏不影響前四檔 ETF）
-    if (html) {
-      var txPc = twTriPcts["TX"];
-      var txCls = triClass(txPc, "TX");
-      if (txCls) html += '<span class="' + txCls + '">' + (txPc > 0 ? "\u25B2" : txPc < 0 ? "\u25BC" : "\u2013") + '</span>';
+      if (cls) got++; // 有成交資料才計數；開盤初低量 ETF 尚無成交時以灰「–」佔位，不再整組隱藏
+      html += '<span class="' + (cls || "t-f") + '">' + (pc > 0 ? "\u25B2" : pc < 0 ? "\u25BC" : "\u2013") + '</span>';
     }
     el.innerHTML = html;
-    el.hidden = !html || isStaleClose(); // 舊收盤時段（週末、週一開盤前）與漲跌幅一起隱藏
+    el.hidden = !got || isStaleClose(); // 全數無資料或舊收盤時段（週末、週一開盤前）才隱藏
   }
   function fmtTwQuote(code, name, z, y) {
     var s = code + " " + name + " " + fmtNum(z);
@@ -1615,17 +1650,38 @@
   updateCalendarChips(); // 月相與農曆資料就緒後立即補顯示
   loadWeather();
   loadStock();
-  loadTwQuotes();
+  loadTwQuotes(); loadOtcIdx();
   loadGlobal();
   setInterval(function () {
     if (!wxManualLoc) wxLocKey = wxDefaultLoc(); // 未手動切換時，依上班時段自動回到預設地��
     loadWeather();
   }, 30 * 60 * 1000);
-  setInterval(function () { loadStock(); loadTwQuotes(); }, 10 * 60 * 1000);
+  setInterval(function () { loadStock(); loadTwQuotes(); loadOtcIdx(); }, 10 * 60 * 1000);
+  // 點一下台股膠囊立即更新（台股＋全球行情；5 秒內重複點擊不重抓）
+  (function () {
+    var twChip = document.getElementById("tw"), lastTap = 0;
+    twChip.addEventListener("click", function () {
+      var n2 = Date.now();
+      if (n2 - lastTap < 5000) return;
+      lastTap = n2;
+      loadStock(); loadTwQuotes(); loadOtcIdx(); loadGlobal();
+    });
+  })();
   setInterval(loadGlobal, 30 * 60 * 1000);
-  // ---- 新聞輪替列（Google News 台灣版 RSS）：即時、免金鑰；只留 36 小時內重要頭條，依 國際 > 財經 > 產業 優先排序 ----
-  var NEWS_CATS = [["intworld", "國際"], ["finance", "財經"], ["technology", "產業"]];
-  var NEWS_SKIP = /廣編|贊助|優惠|折扣|抽獎|開獎|團購|好康|盤點概念股|同學會|樂透|今彩|威力彩|頭獎|發票/; // 擋掉廣宣・導購・樂透開獎類雜訊
+  // ---- 新聞輪替列（中央社／BBC 中文／自由時報 官方 RSS）：即時、免金鑰；只留 36 小時內頭條，依 國際 > 財經 > 產業 優先排序 ----
+  var NEWS_FEEDS = [
+    ["國際", "https://feeds.feedburner.com/rsscna/intworld", "中央社"],
+    ["國際", "https://feeds.bbci.co.uk/zhongwen/trad/rss.xml", "BBC中文"],
+    ["國際", "https://news.ltn.com.tw/rss/world.xml", "自由時報"],
+    ["國際", "https://reutersnew.buzzing.cc/zh-Hant/feed.xml", "路透社"],
+    ["財經", "https://feeds.feedburner.com/rsscna/finance", "中央社"],
+    ["財經", "https://news.ltn.com.tw/rss/business.xml", "自由時報"],
+    ["產業", "https://feeds.feedburner.com/rsscna/technology", "中央社"]
+  ];
+  var NEWS_ORDER = [["國際", 8], ["財經", 6], ["產業", 5]]; // 每類上限，同類單一來源最多 3 則，避免單家洗版
+  var NEWS_TAGCLS = { "國際": "nt-intl", "財經": "nt-fin", "產業": "nt-tech" };
+  var NEWS_SKIP = /廣編|贊助|優惠|折扣|抽獎|開獎|團購|好康|盤點概念股|同學會|樂透|今彩|威力彩|頭獎|發票|新聞360|自由說新聞|請見影片/;
+  var NEWS_LINKSKIP = /reuters\.com\/(sports|fact-check|lifestyle|pt|es|de|fr|it|ja|ar|he|ru)\//; // 路透聚合源：略過體育・查核・非英文版重複條目 // 擋掉廣宣・導購・樂透開獎類雜訊
   var newsItems = [], newsIdx = 0, newsTimer = null, newsHover = false;
   function newsAgo(iso) {
     var t0 = new Date(iso).getTime();
@@ -1638,7 +1694,9 @@
     if (!it) return;
     var box = document.getElementById("newsItem");
     var apply = function () {
-      document.getElementById("newsTag").textContent = it.tag;
+      var tagEl = document.getElementById("newsTag");
+      tagEl.textContent = it.tag;
+      tagEl.className = "news-tag " + (NEWS_TAGCLS[it.tag] || "");
       var a = document.getElementById("newsA");
       a.textContent = it.title;
       a.href = it.url;
@@ -1673,9 +1731,8 @@
     showNews(newsIdx);
     startNewsTimer(); // 手動切換後重新計時，避免馬上又自動跳走
   }
-  function fetchNewsFeed(topic) {
-    // 中央社官方 RSS（不經 Google，避開代理遭擋）：即時、免金鑰；優先走 Worker 專線，不通時自動改走公用代理
-    var u = "https://feeds.feedburner.com/rsscna/" + topic;
+  function fetchNewsFeed(u) {
+    // 各家官方 RSS（不經 Google，避開代理遭擋）：即時、免金鑰；優先走 Worker 專線，不通時自動改走公用代理
     var routes = [
       function (x) { return WORKER_URL + "/?url=" + encodeURIComponent(x); },
       function (x) { return "https://corsproxy.io/?url=" + encodeURIComponent(x); },
@@ -1689,16 +1746,17 @@
         if (!r.ok) throw new Error("news " + r.status);
         return r.text();
       }).then(function (tx) {
-        if (tx.indexOf("<item>") < 0) throw new Error("bad rss");
+        if (tx.indexOf("<item>") < 0 && tx.indexOf("<entry") < 0) throw new Error("bad rss");
         return tx;
       }).catch(next);
     }
     return next();
   }
   // 解析 RSS：標題尾端「 - 來源」拆出來源名；只留 36 小時內、非廣宣的頭條
-  function parseNewsRss(xml, tag) {
+  function parseNewsRss(xml, tag, srcName) {
     var doc = new DOMParser().parseFromString(xml, "text/xml");
     var items = doc.getElementsByTagName("item");
+    if (!items.length) items = doc.getElementsByTagName("entry"); // Atom 格式相容
     var out = [];
     for (var i = 0; i < items.length; i++) {
       var el = items[i];
@@ -1706,37 +1764,49 @@
         var n = el.getElementsByTagName(name)[0];
         return n ? n.textContent : "";
       };
-      var title = get("title"), link = get("link"), pub = get("pubDate"), src = get("source") || "中央社";
+      var title = get("title"), link = get("link"), pub = get("pubDate") || get("published") || get("updated"), src = get("source") || srcName || "中央社";
+      if (!link) { var ln0 = el.getElementsByTagName("link")[0]; link = ln0 ? (ln0.getAttribute("href") || "") : ""; }
+      var desc = (get("description") || get("summary") || "").replace(/<[^>]+>/g, " ").replace(/\(www\.reuters\.com[\s\S]*$/, "").replace(/\s+/g, " ").trim();
+      if (desc.length > 190) desc = desc.slice(0, 190) + "…";
       var t0 = new Date(pub).getTime();
       if (!title || !isFinite(t0) || Date.now() - t0 > 36 * 60 * 60 * 1000) continue;
       if (NEWS_SKIP.test(title)) continue;
+      if (link && NEWS_LINKSKIP.test(link)) continue;
       var sfx = " - " + src;
       if (src && title.length > sfx.length && title.slice(-sfx.length) === sfx) title = title.slice(0, -sfx.length);
-      out.push({ tag: tag, title: title, url: link || "#", src: src, at: pub });
+      out.push({ tag: tag, title: title, url: link || "#", src: src, at: pub, d: desc });
     }
     return out;
   }
   function loadNews() {
     try {
-      var c = JSON.parse(localStorage.getItem("gnews24b") || "null");
+      var c = JSON.parse(localStorage.getItem("news24d") || "null");
       if (c && c.items && c.items.length && Date.now() - c.t < 25 * 60 * 1000) { applyNews(c.items); return; }
     } catch (e) {}
-    Promise.all(NEWS_CATS.map(function (cp) {
-      return fetchNewsFeed(cp[0]).then(function (xml) {
-        return parseNewsRss(xml, cp[1]);
+    Promise.all(NEWS_FEEDS.map(function (f) {
+      return fetchNewsFeed(f[1]).then(function (xml) {
+        return parseNewsRss(xml, f[0], f[2]);
       }).catch(function () { return []; });
     })).then(function (groups) {
-      // 依 國際 > 財經 > 產業 優先序排列，每類最多 6 則、共 18 則，標題去重
+      // 同類多來源合併後依時間新→舊排序，再依 國際 > 財經 > 產業 優先序串接；標題去重，單一來源每類最多 3 則
       var out = [], seen = {};
-      for (var g = 0; g < groups.length; g++) {
-        var n = 0;
-        for (var i = 0; i < groups[g].length && n < 6; i++) {
-          var a2 = groups[g][i];
-          if (a2.title && !seen[a2.title]) { seen[a2.title] = 1; out.push(a2); n++; }
+      for (var g = 0; g < NEWS_ORDER.length; g++) {
+        var pool = [];
+        for (var f2 = 0; f2 < NEWS_FEEDS.length; f2++) {
+          if (NEWS_FEEDS[f2][0] === NEWS_ORDER[g][0]) pool = pool.concat(groups[f2]);
+        }
+        pool.sort(function (a, b) { return new Date(b.at).getTime() - new Date(a.at).getTime(); });
+        var n = 0, perSrc = {};
+        for (var i = 0; i < pool.length && n < NEWS_ORDER[g][1]; i++) {
+          var a2 = pool[i];
+          if (!a2.title || seen[a2.title]) continue;
+          if ((perSrc[a2.src] || 0) >= 3) continue;
+          perSrc[a2.src] = (perSrc[a2.src] || 0) + 1;
+          seen[a2.title] = 1; out.push(a2); n++;
         }
       }
       if (!out.length) return;
-      try { localStorage.setItem("gnews24b", JSON.stringify({ t: Date.now(), items: out })); } catch (e) {}
+      try { localStorage.setItem("news24d", JSON.stringify({ t: Date.now(), items: out })); } catch (e) {}
       applyNews(out);
     });
   }
@@ -1744,9 +1814,20 @@
     var row = document.getElementById("newsRow"), btn = document.getElementById("newsBtn");
     row.addEventListener("mouseenter", function () { newsHover = true; });
     row.addEventListener("mouseleave", function () { newsHover = false; });
+    // 懸浮閱讀：滑鼠移到新聞標題上，浮出摘要卡直接閱讀（RSS 內文首段）
+    var pop = document.getElementById("newsPop"), itemBox = document.getElementById("newsItem");
+    function escHtml(t) { return String(t).replace(/[&<>"]/g, function (c) { return c === "&" ? "&amp;" : c === "<" ? "&lt;" : c === ">" ? "&gt;" : "&quot;"; }); }
+    itemBox.addEventListener("mouseenter", function () {
+      var it = newsItems[newsIdx];
+      if (!it || !it.d) return;
+      var ago = newsAgo(it.at);
+      pop.innerHTML = '<span class="np-t">' + escHtml(it.title) + '</span>' + escHtml(it.d) + '<span class="np-m">' + escHtml(it.src) + (ago ? "・" + ago : "") + '</span>';
+      pop.hidden = false;
+    });
+    itemBox.addEventListener("mouseleave", function () { pop.hidden = true; });
     function setOn(on) {
       row.classList.toggle("off", !on);
-      btn.textContent = on ? "\u2715" : "\uD83D\uDCF0";
+      btn.classList.toggle("off", !on);
       btn.setAttribute("aria-label", on ? "隱藏新聞" : "顯示新聞");
       try { localStorage.setItem("newsOn24", on ? "1" : "0"); } catch (e) {}
     }
