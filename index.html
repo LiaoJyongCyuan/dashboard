@@ -459,6 +459,7 @@
   .news-tag.nt-intl { background: #EAF3FB; color: #5B8FC7; }
   .news-tag.nt-fin { background: #FAF2DF; color: #A98938; }
   .news-tag.nt-tech { background: #E9F5F4; color: #4E9C99; }
+  .news-tag.nt-op { background: #F2EDFA; color: #8371B8; }
   .news-item { flex: 1 1 auto; min-width: 0; display: inline-flex; justify-content: flex-start; text-align: left; align-items: baseline; gap: 7px; opacity: 1; transform: translateY(0); transition: opacity .4s ease, transform .4s ease; }
   .news-item.fading { opacity: 0; transform: translateY(3px); }
   .news-a { min-width: 0; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: inherit; opacity: .85; text-decoration: none; font-weight: 500; }
@@ -483,6 +484,7 @@
     .news-tag.nt-intl { background: rgba(94,159,232,0.14); color: #8FB8E8; }
     .news-tag.nt-fin { background: rgba(224,190,114,0.14); color: #DCC183; }
     .news-tag.nt-tech { background: rgba(78,156,153,0.16); color: #7FC4C1; }
+    .news-tag.nt-op { background: rgba(150,130,220,0.16); color: #B4A5E0; }
     .news-pop { background: #33322E; border-color: rgba(255,255,255,0.12); box-shadow: 0 8px 26px rgba(0,0,0,0.5); }
     .news-pop .np-a { color: #8FB8E8; }
   }
@@ -1676,15 +1678,16 @@
     ["國際", "https://feeds.feedburner.com/rsscna/intworld", "中央社"],
     ["國際", "https://feeds.bbci.co.uk/zhongwen/trad/rss.xml", "BBC中文"],
     ["國際", "https://news.ltn.com.tw/rss/world.xml", "自由時報"],
-    ["國際", "https://reutersnew.buzzing.cc/zh-Hant/feed.xml", "路透社"],
+    ["國際", "https://cn.nytimes.com/rss/", "紐時中文"],
+    ["觀點", "https://feeds.feedburner.com/TheNewsLens", "關鍵評論"],
     ["財經", "https://feeds.feedburner.com/rsscna/finance", "中央社"],
     ["財經", "https://news.ltn.com.tw/rss/business.xml", "自由時報"],
     ["產業", "https://feeds.feedburner.com/rsscna/technology", "中央社"]
   ];
-  var NEWS_ORDER = [["國際", 8], ["財經", 6], ["產業", 5]]; // 每類上限，同類單一來源最多 3 則，避免單家洗版
-  var NEWS_TAGCLS = { "國際": "nt-intl", "財經": "nt-fin", "產業": "nt-tech" };
-  var NEWS_SKIP = /廣編|贊助|優惠|折扣|抽獎|開獎|團購|好康|盤點概念股|同學會|樂透|今彩|威力彩|頭獎|發票|新聞360|自由說新聞|請見影片/;
-  var NEWS_LINKSKIP = /reuters\.com\/(sports|fact-check|lifestyle|pt|es|de|fr|it|ja|ar|he|ru)\//; // 路透聚合源：略過體育・查核・非英文版重複條目 // 擋掉廣宣・導購・樂透開獎類雜訊
+  var NEWS_ORDER = [["國際", 8], ["財經", 6], ["產業", 5], ["觀點", 3]]; // 每類上限，同類單一來源最多 3 則，避免單家洗版
+  var NEWS_TAGCLS = { "國際": "nt-intl", "財經": "nt-fin", "產業": "nt-tech", "觀點": "nt-op" };
+  var NEWS_SKIP = /廣編|贊助|優惠|折扣|抽獎|開獎|團購|好康|盤點概念股|同學會|樂透|今彩|威力彩|頭獎|發票|新聞360|自由說新聞|請見影片|書摘|推薦序/;
+  var NEWS_LINKSKIP = /cn\.nytimes\.com\/(opinion|health|culture|travel|style|obits|realestate|education|dining|fashion|magazine)\//; // 路透聚合源：略過體育・查核・非英文版重複條目 // 擋掉廣宣・導購・樂透開獎類雜訊
   var newsItems = [], newsIdx = 0, newsTimer = null, newsHover = false;
   function newsAgo(iso) {
     var t0 = new Date(iso).getTime();
@@ -1769,6 +1772,7 @@
       };
       var title = get("title"), link = get("link"), pub = get("pubDate") || get("published") || get("updated"), src = get("source") || srcName || "中央社";
       if (!link) { var ln0 = el.getElementsByTagName("link")[0]; link = ln0 ? (ln0.getAttribute("href") || "") : ""; }
+      if (link.indexOf("cn.nytimes.com") >= 0) link = link.replace(/[?#].*$/, "").replace(/\/?$/, "/") + "zh-hant/"; // 紐時導向繁體版全文
       var desc = (get("description") || get("summary") || "").replace(/<[^>]+>/g, " ").replace(/\(www\.reuters\.com[\s\S]*$/, "").replace(/\s+/g, " ").trim();
       if (desc.length > 500) { // 盡量收在句號，避免斷在句中
         var cut0 = desc.slice(0, 500), p1 = Math.max(cut0.lastIndexOf("。"), cut0.lastIndexOf("！"), cut0.lastIndexOf("？"));
@@ -1778,6 +1782,7 @@
       var t0 = new Date(pub).getTime();
       if (!title || !isFinite(t0) || Date.now() - t0 > 36 * 60 * 60 * 1000) continue;
       if (NEWS_SKIP.test(title)) continue;
+      if (!/[一-鿿]/.test(title)) continue; // 無中文標題（英文廣編等）不列入
       if (link && NEWS_LINKSKIP.test(link)) continue;
       var sfx = " - " + src;
       if (src && title.length > sfx.length && title.slice(-sfx.length) === sfx) title = title.slice(0, -sfx.length);
@@ -1787,7 +1792,7 @@
   }
   function loadNews() {
     try {
-      var c = JSON.parse(localStorage.getItem("news24f") || "null");
+      var c = JSON.parse(localStorage.getItem("news24g") || "null");
       if (c && c.items && c.items.length && Date.now() - c.t < 25 * 60 * 1000) { applyNews(c.items); return; }
     } catch (e) {}
     Promise.all(NEWS_FEEDS.map(function (f) {
@@ -1813,7 +1818,7 @@
         }
       }
       if (!out.length) return;
-      try { localStorage.setItem("news24f", JSON.stringify({ t: Date.now(), items: out })); } catch (e) {}
+      try { localStorage.setItem("news24g", JSON.stringify({ t: Date.now(), items: out })); } catch (e) {}
       applyNews(out);
     });
   }
@@ -1830,7 +1835,7 @@
     function popPlace() {
       // 固定錮定：嵌入框下緣緊貼新聞列，下方無空間可彈，改貼齊新聞列上方且不跟滑鼠移動
       var r = row.getBoundingClientRect(), vw = window.innerWidth, vh = window.innerHeight;
-      pop.style.maxHeight = Math.max(80, r.top - 14) + "px"; // 吃滿新聞列上方的可用高度
+      pop.style.maxHeight = Math.max(80, Math.min(r.top - 14, vh - 24)) + "px"; // 吃滿新聞列上方的可用高度
       pop.style.bottom = (vh - r.top + 7) + "px";
       pop.style.top = "auto";
       var a0 = document.getElementById("newsA").getBoundingClientRect();
