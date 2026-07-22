@@ -438,8 +438,8 @@
      第三行：今年進度列
      隱藏：週／日進度環、秒數、雙週曆、主題色點、第N天／農曆膠囊 */
   @media (max-width: 520px) {
-    body { padding: 8px 14px; }
-    .line { row-gap: 7px; }
+    body { padding: 5px 14px 4px; }
+    .line { row-gap: 5px; }
     .time-group { order: 2; gap: 7px; margin-right: 46px; /* 避開 Notion 手機版右上角的浮動選單 */ }
     .lbrk { display: block; order: 3; flex-basis: 100%; height: 0; }
     .wx-chip { order: 4; }
@@ -449,7 +449,7 @@
     .dots { display: none; }
     .doy-chip { display: none; }
     .wx-chip .wx-lab { display: none; }
-    .bar-row { margin-top: 8px; }
+    .bar-row { margin-top: 5px; }
     .segments { gap: 2px; }
   }
   /* ---- 新聞輪替列（GNews）：一次一則、淡入淡出輪替，可收合 ---- */
@@ -470,7 +470,7 @@
   .news-row.off { display: none; }
   .news-toggle { border: 0; background: none; cursor: pointer; padding: 0 2px; font-size: 12px; line-height: 15px; align-self: center; opacity: .9; transition: opacity .25s ease, filter .25s ease; }
   .news-toggle.off { opacity: .3; filter: grayscale(1); }
-  .news-pop { position: absolute; left: 48px; right: 48px; bottom: calc(100% + 8px); z-index: 30; background: #FFFEFB; border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; box-shadow: 0 8px 26px rgba(0,0,0,0.12); padding: 10px 13px; font-size: 12px; line-height: 1.7; color: inherit; }
+  .news-pop { position: fixed; z-index: 30; width: min(560px, calc(100vw - 20px)); max-height: calc(100vh - 14px); overflow-y: auto; background: #FFFEFB; border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; box-shadow: 0 8px 26px rgba(0,0,0,0.12); padding: 10px 13px; font-size: 12px; line-height: 1.7; color: inherit; }
   .news-pop[hidden] { display: none; }
   .news-pop .np-t { display: block; font-weight: 600; margin-bottom: 3px; }
   .news-pop .np-m { display: block; margin-top: 5px; font-size: 10.5px; color: var(--text2); opacity: .85; }
@@ -483,7 +483,7 @@
     .news-tag.nt-tech { background: rgba(78,156,153,0.16); color: #7FC4C1; }
     .news-pop { background: #33322E; border-color: rgba(255,255,255,0.12); box-shadow: 0 8px 26px rgba(0,0,0,0.5); }
   }
-  @media (max-width: 520px) { .news-src { display: none; } }
+  @media (max-width: 520px) { .news-src { display: none; } .news-row { margin: 4px 4px 0; padding-top: 4px; } }
 </style>
 </head>
 <body>
@@ -1767,7 +1767,10 @@
       var title = get("title"), link = get("link"), pub = get("pubDate") || get("published") || get("updated"), src = get("source") || srcName || "中央社";
       if (!link) { var ln0 = el.getElementsByTagName("link")[0]; link = ln0 ? (ln0.getAttribute("href") || "") : ""; }
       var desc = (get("description") || get("summary") || "").replace(/<[^>]+>/g, " ").replace(/\(www\.reuters\.com[\s\S]*$/, "").replace(/\s+/g, " ").trim();
-      if (desc.length > 190) desc = desc.slice(0, 190) + "…";
+      if (desc.length > 500) { // 盡量收在句號，避免斷在句中
+        var cut0 = desc.slice(0, 500), p1 = Math.max(cut0.lastIndexOf("。"), cut0.lastIndexOf("！"), cut0.lastIndexOf("？"));
+        desc = p1 > 100 ? cut0.slice(0, p1 + 1) : cut0 + "…";
+      }
       var t0 = new Date(pub).getTime();
       if (!title || !isFinite(t0) || Date.now() - t0 > 36 * 60 * 60 * 1000) continue;
       if (NEWS_SKIP.test(title)) continue;
@@ -1780,7 +1783,7 @@
   }
   function loadNews() {
     try {
-      var c = JSON.parse(localStorage.getItem("news24d") || "null");
+      var c = JSON.parse(localStorage.getItem("news24e") || "null");
       if (c && c.items && c.items.length && Date.now() - c.t < 25 * 60 * 1000) { applyNews(c.items); return; }
     } catch (e) {}
     Promise.all(NEWS_FEEDS.map(function (f) {
@@ -1806,7 +1809,7 @@
         }
       }
       if (!out.length) return;
-      try { localStorage.setItem("news24d", JSON.stringify({ t: Date.now(), items: out })); } catch (e) {}
+      try { localStorage.setItem("news24e", JSON.stringify({ t: Date.now(), items: out })); } catch (e) {}
       applyNews(out);
     });
   }
@@ -1817,14 +1820,32 @@
     // 懸浮閱讀：滑鼠移到新聞標題上，浮出摘要卡直接閱讀（RSS 內文首段）
     var pop = document.getElementById("newsPop"), itemBox = document.getElementById("newsItem");
     function escHtml(t) { return String(t).replace(/[&<>"]/g, function (c) { return c === "&" ? "&amp;" : c === "<" ? "&lt;" : c === ">" ? "&gt;" : "&quot;"; }); }
-    itemBox.addEventListener("mouseenter", function () {
+    var popHideT = null;
+    function popHide() { popHideT = setTimeout(function () { pop.hidden = true; newsHover = false; }, 200); }
+    function popCancel() { if (popHideT) { clearTimeout(popHideT); popHideT = null; } }
+    function popPlace(ev) {
+      if (pop.hidden) return;
+      var vw = window.innerWidth, vh = window.innerHeight;
+      var w = pop.offsetWidth, h = pop.offsetHeight;
+      var x = Math.min(Math.max(8, ev.clientX - 24), Math.max(8, vw - w - 8));
+      var y = ev.clientY + 16;                              // 首選：滑鼠指標下方
+      if (y + h > vh - 6) y = Math.max(6, vh - h - 6);      // 下方放不下就往上收，保持整卡可見
+      pop.style.left = x + "px";
+      pop.style.top = y + "px";
+    }
+    itemBox.addEventListener("mouseenter", function (ev) {
       var it = newsItems[newsIdx];
-      if (!it || !it.d) return;
+      if (!it || !it.d || it.d.length < 40) return;         // 摘要太短沒內容可讀，不彈卡
+      popCancel();
       var ago = newsAgo(it.at);
       pop.innerHTML = '<span class="np-t">' + escHtml(it.title) + '</span>' + escHtml(it.d) + '<span class="np-m">' + escHtml(it.src) + (ago ? "・" + ago : "") + '</span>';
       pop.hidden = false;
+      popPlace(ev);
     });
-    itemBox.addEventListener("mouseleave", function () { pop.hidden = true; });
+    itemBox.addEventListener("mousemove", popPlace);
+    itemBox.addEventListener("mouseleave", popHide);
+    pop.addEventListener("mouseenter", function () { popCancel(); newsHover = true; }); // 滑進卡片繼續閱讀，輪替暫停
+    pop.addEventListener("mouseleave", popHide);
     function setOn(on) {
       row.classList.toggle("off", !on);
       btn.classList.toggle("off", !on);
