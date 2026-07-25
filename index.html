@@ -10,6 +10,7 @@
     --text2: #7D7A75;
     --seg-empty: #F0EFED;
     --dot-ring: rgba(0,0,0,0.18);
+    --sea-sp: #7FBE8B; --sea-su: #E5A898; --sea-au: #E0BE8A; --sea-wi: #82A8DB; --sea-hand: #C6892B;
     --sun-day: #EBB670;
     --sun-night: #96A8C9;
     --mkt-closed: #EDEDEB;
@@ -73,6 +74,7 @@
       --text2: rgba(255,255,255,0.65);
       --seg-empty: rgba(255,255,255,0.13);
       --dot-ring: rgba(255,255,255,0.35);
+      --sea-sp: #6C9A77; --sea-su: #906860; --sea-au: #867150; --sea-wi: #5D80A8; --sea-hand: #EDB85C;
       --sun-day: rgba(236,175,110,0.78);
       --sun-night: rgba(135,158,205,0.7);
       --mkt-closed: rgba(170,170,170,0.2);
@@ -255,6 +257,8 @@
     font-variant-numeric: tabular-nums;
   }
   .wx-chip[hidden] { display: none; }
+  #wx { cursor: pointer; }
+  #wxLoc { text-decoration: underline dotted 1px; text-underline-offset: 2px; }
 
   .etf-tris { display: inline-flex; align-items: center; gap: 2px; font-size: 8px; line-height: 15px; }
   .etf-tris[hidden] { display: none; }
@@ -333,6 +337,12 @@
   #sunNightArc { fill: none; stroke: var(--sun-night); stroke-width: 5.8; }
   #sunHand { fill: var(--sun-hand); }
   #sunring.night #sunHand { fill: var(--sun-hand-night); }
+  /* 四季輪：一年一圈，四色＝天文四季 */
+  .sea-spring { fill: none; stroke: var(--sea-sp); stroke-width: 5.8; }
+  .sea-summer { fill: none; stroke: var(--sea-su); stroke-width: 5.8; }
+  .sea-autumn { fill: none; stroke: var(--sea-au); stroke-width: 5.8; }
+  .sea-winter { fill: none; stroke: var(--sea-wi); stroke-width: 5.8; }
+  #seasonHand { fill: var(--sea-hand); }
   .time {
     font-size: 21px;
     font-weight: 650;
@@ -445,7 +455,7 @@
     .wx-chip { order: 4; }
     .time { font-size: 19px; }
     .time .sec { display: none; }
-    #weekring, #dayring { display: none; }
+    #weekring, #dayring, #seasonring { display: none; }
     .dots { display: none; }
     .doy-chip { display: none; }
     .wx-chip .wx-lab { display: none; }
@@ -520,6 +530,11 @@
             <title id="ringTitle">今日進度</title>
             <circle class="ring-base" cx="10" cy="10" r="9"></circle>
             <circle class="ring-fill" id="ringFill" cx="10" cy="10" r="4.5"></circle>
+          </svg>
+          <svg class="dayring" id="seasonring" viewBox="0 0 20 20" width="19" height="19" role="img" aria-label="四季輪">
+            <title id="seasonTitle">四季輪</title>
+            <g id="seasonArcs"></g>
+            <circle id="seasonHand" cx="10" cy="5.35" r="2.1"></circle>
           </svg>
           <svg class="dayring" id="sunring" viewBox="0 0 20 20" width="19" height="19" role="img" aria-label="日照時鐘">
             <title id="sunTitle">日照時鐘</title>
@@ -625,6 +640,47 @@
     var m = Math.round(h * 60);
     var hh = Math.floor(m / 60), mm = m % 60;
     return (hh > 0 ? hh + " 小時 " : "") + mm + " 分";
+  }
+  // 四季輪：天文四季（春分→夏至→秋分→冬至），一年一圈、1/1 在正上方順時針
+  var seaDayKey = "";
+  function updateSeasonRing(now) {
+    var g = document.getElementById("seasonArcs");
+    if (!g) return;
+    var key = now.getFullYear() + "-" + now.getMonth() + "-" + now.getDate();
+    if (key === seaDayKey) return;
+    seaDayKey = key;
+    var yr = now.getFullYear();
+    var eq = [new Date(yr, 2, 20), new Date(yr, 5, 21), new Date(yr, 8, 22), new Date(yr, 11, 21)];
+    var y0 = new Date(yr, 0, 1);
+    var total = (new Date(yr + 1, 0, 1) - y0) / 864e5;
+    function frac(d) { return ((d - y0) / 864e5) / total; }
+    var R = (typeof SUN_R !== "undefined") ? SUN_R : 4.65;
+    var C = 2 * Math.PI * R;
+    var segs = [[0, frac(eq[0]), "winter"], [frac(eq[0]), frac(eq[1]), "spring"], [frac(eq[1]), frac(eq[2]), "summer"], [frac(eq[2]), frac(eq[3]), "autumn"], [frac(eq[3]), 1, "winter"]];
+    var html = "";
+    for (var i = 0; i < segs.length; i++) {
+      var len = (segs[i][1] - segs[i][0]) * C;
+      html += '<circle class="sea-' + segs[i][2] + '" cx="10" cy="10" r="' + R + '" stroke-dasharray="' + len.toFixed(3) + ' ' + C.toFixed(3) + '" stroke-dashoffset="' + (-segs[i][0] * C).toFixed(3) + '"></circle>';
+    }
+    g.innerHTML = html;
+    var f = Math.min(0.9999, Math.max(0, frac(now)));
+    var ang = f * 2 * Math.PI;
+    var hand = document.getElementById("seasonHand");
+    hand.setAttribute("cx", (10 + 4.65 * Math.cos(ang)).toFixed(2));
+    hand.setAttribute("cy", (10 + 4.65 * Math.sin(ang)).toFixed(2));
+    var names = { spring: "春", summer: "夏", autumn: "秋", winter: "冬" };
+    var nextName = { winter: "春分", spring: "夏至", summer: "秋分", autumn: "冬至" };
+    var bounds = [[new Date(yr - 1, 11, 21), eq[0], "winter"], [eq[0], eq[1], "spring"], [eq[1], eq[2], "summer"], [eq[2], eq[3], "autumn"], [eq[3], new Date(yr + 1, 2, 20), "winter"]];
+    for (var b = 0; b < bounds.length; b++) {
+      if (now >= bounds[b][0] && now < bounds[b][1]) {
+        var sn = bounds[b][2];
+        var dTot = Math.round((bounds[b][1] - bounds[b][0]) / 864e5);
+        var dIn = Math.floor((now - bounds[b][0]) / 864e5) + 1;
+        var left = Math.ceil((bounds[b][1] - now) / 864e5);
+        setText("seasonTitle", "四季輪：" + names[sn] + "季 第 " + dIn + "／" + dTot + " 天（" + Math.round(dIn / dTot * 100) + "%），距" + nextName[sn] + "（" + (bounds[b][1].getMonth() + 1) + "/" + bounds[b][1].getDate() + "）還有 " + left + " 天");
+        break;
+      }
+    }
   }
   function updateSunRing(now) {
     var key = now.getFullYear() + "-" + now.getMonth() + "-" + now.getDate();
@@ -733,6 +789,7 @@
     weekFill.style.strokeDasharray = (weekRatio * RING_C).toFixed(2) + " " + RING_C.toFixed(2);
     setText("weekTitle", "本週進度 " + (weekRatio * 100).toFixed(1) + "%");
     updateSunRing(now);
+    updateSeasonRing(now);
 
     // 今年進度（分段��
     var yearStart = new Date(now.getFullYear(), 0, 1);
@@ -1175,9 +1232,19 @@
     }).catch(function () { /* 連線失敗時保持隱藏，不影響儀表板 */ });
   }
   // 點一下天氣膠囊切換大里／南屯（手動選擇後，本次開啟期間不再自動改回預設）
-  document.getElementById("wx").addEventListener("click", function () {
-    wxManualLoc = true;
-    wxLocKey = wxLocKey === "dali" ? "nantun" : "dali";
+  // 點地點名稱→切換大里／南屯；點其餘天氣資訊→重新整理目前地點（5 秒防連點）
+  var wxRefLast = 0;
+  document.getElementById("wx").addEventListener("click", function (ev) {
+    var locEl = document.getElementById("wxLoc");
+    if (locEl && (ev.target === locEl || locEl.contains(ev.target))) {
+      wxManualLoc = true;
+      wxLocKey = wxLocKey === "dali" ? "nantun" : "dali";
+      loadWeather();
+      return;
+    }
+    var t = Date.now();
+    if (t - wxRefLast < 5000) return;
+    wxRefLast = t;
     loadWeather();
   });
 
@@ -1212,7 +1279,7 @@
       // 台股與全球拓時間一致就合併，不一致則分列
       tail = "\n\n更新：" + (b ? (b === a ? a : "台股 " + a + "｜全球 " + b) : "台股 " + a);
     }
-    chip.title = twTitleBase + (otcNote ? "\n" + otcNote : "") + (twEtfNote ? "\n" + twEtfNote : "") + (globalNote ? "\n\n" + globalNote : "") + tail;
+    chip.title = twTitleBase + (twEtfNote ? "\n" + twEtfNote : "") + (globalNote ? "\n\n" + globalNote : "") + tail;
     chip.setAttribute("aria-label", twTitleBase);
   }
   function renderStock(val, chg, pct, note) {
@@ -1290,9 +1357,8 @@
       if (!isFinite(z) || !isFinite(y) || y <= 0) return;
       var pc = (z - y) / y * 100;
       twTriPcts["OTC"] = pc;
-      otcNote = "櫃買指數 " + fmtNum(z) + "（" + (pc >= 0 ? "+" : "") + pc.toFixed(2) + "%）";
-      if (twTitleBase) applyTwTitle();
-      renderEtfTris();
+      otcPart = "櫃買 " + fmtNum(z) + "（" + (pc >= 0 ? "+" : "") + pc.toFixed(2) + "%）";
+      applyTwQuotes(null);
     }
     fetchJson("https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/IX0043")
       .then(function (j) {
@@ -1313,14 +1379,12 @@
   // ---- 台股 ETF／台積電（顯示於台股懸浮資訊；富果為主、證交所批次備援） ----
   var TW_QUOTES = [
     ["0050", "台灣50"],
-    ["0051", "中型100"],
     ["0052", "富邦科技"],
-    ["0053", "元大電子"],
     ["0055", "MSCI金融"],
     ["0056", "高股息"],
     ["2330", "台積電"]
   ];
-  var twEtfNote = "", otcNote = "";
+  var twEtfNote = "", otcPart = "", twParts = [];
   // 標籤右端小三角：左→右 0050／櫃買／0052／0055／0056；紅漲綠跌，深淺＝幅度（四階）
   // 分級門檻依標的波動性質：大盤／中型／金融型 0.5／1.5／3%，電子型波動較大 0.75／2／4%
   // （指數型 ETF 單日 ±3～4% 已屬罕見大行情，5% 門檻幾乎永遠點不到最深色）
@@ -1356,13 +1420,15 @@
     return s;
   }
   function applyTwQuotes(parts) {
+    if (parts) twParts = parts;
+    var byCode = {};
+    for (var i = 0; i < twParts.length; i++) if (twParts[i]) byCode[TW_QUOTES[i][0]] = twParts[i];
+    if (otcPart) byCode["OTC"] = otcPart;
     var etf = [], stk = [];
-    for (var i = 0; i < parts.length; i++) {
-      if (!parts[i]) continue;
-      (TW_QUOTES[i][0] === "2330" ? stk : etf).push(parts[i]);
-    }
+    for (var j = 0; j < TRI_CODES.length; j++) if (byCode[TRI_CODES[j]]) etf.push(byCode[TRI_CODES[j]]);
+    if (byCode["2330"]) stk.push(byCode["2330"]);
     var lines = [];
-    if (etf.length) lines.push("ETF：" + etf.join("｜"));
+    if (etf.length) lines.push("三角標的：" + etf.join("｜"));
     if (stk.length) lines.push("個股：" + stk.join("｜"));
     twEtfNote = lines.join("\n");
     if (twTitleBase) applyTwTitle();
@@ -1679,9 +1745,12 @@
     ["國際", "https://feeds.bbci.co.uk/zhongwen/trad/rss.xml", "BBC中文"],
     ["國際", "https://news.ltn.com.tw/rss/world.xml", "自由時報"],
     ["國際", "https://cn.nytimes.com/rss/", "紐時中文"],
+    ["國際", "https://crossing.cw.com.tw/rss", "換日線"],
     ["財經", "https://feeds.feedburner.com/rsscna/finance", "中央社"],
     ["財經", "https://news.ltn.com.tw/rss/business.xml", "自由時報"],
-    ["產業", "https://feeds.feedburner.com/rsscna/technology", "中央社"]
+    ["產業", "https://feeds.feedburner.com/rsscna/technology", "中央社"],
+    ["產業", "https://buzzorange.com/techorange/feed/", "TechOrange"],
+    ["產業", "https://technews.tw/feed/", "科技新報"]
   ];
   var NEWS_ORDER = [["國際", 8], ["財經", 6], ["產業", 5]]; // 每類上限，同類單一來源最多 3 則，避免單家洗版
   var NEWS_TAGCLS = { "國際": "nt-intl", "財經": "nt-fin", "產業": "nt-tech" };
@@ -1791,7 +1860,7 @@
   }
   function loadNews() {
     try {
-      var c = JSON.parse(localStorage.getItem("news24h") || "null");
+      var c = JSON.parse(localStorage.getItem("news24i") || "null");
       if (c && c.items && c.items.length && Date.now() - c.t < 25 * 60 * 1000) { applyNews(c.items); return; }
     } catch (e) {}
     Promise.all(NEWS_FEEDS.map(function (f) {
@@ -1817,7 +1886,7 @@
         }
       }
       if (!out.length) return;
-      try { localStorage.setItem("news24h", JSON.stringify({ t: Date.now(), items: out })); } catch (e) {}
+      try { localStorage.setItem("news24i", JSON.stringify({ t: Date.now(), items: out })); } catch (e) {}
       applyNews(out);
     });
   }
