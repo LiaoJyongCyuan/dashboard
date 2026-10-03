@@ -435,8 +435,8 @@
   .dot-lav   { --c: var(--dot-lav); }
   .dot-rose  { --c: var(--dot-rose); }
   .dot-teal  { --c: var(--dot-teal); }
-  /* ---- 響應���排版 ---- */
-  .lbrk { display: none; } /* ������版換行���：桌面不顯�� */
+  /* ---- 響應式排版 ---- */
+  .lbrk { display: none; } /* 手機版換行器：桌面不顯示 */
   /* 中幅（窄視窗／平板）：先收掉右側雙週曆 */
   @media (max-width: 760px) {
     .weekcal, .vdiv { display: none; }
@@ -461,7 +461,7 @@
     .bar-row { margin-top: 5px; }
     .segments { gap: 2px; }
   }
-  /* ---- 新聞輪替列（GNews）：一次一則、淡入淡出輪替，可收合 ---- */
+  /* ---- 新聞輪替列（各家官方 RSS）：一次一則、淡入淡出輪替，可收合 ---- */
   .news-row { position: relative; flex: 1 1 100%; display: flex; align-items: center; gap: 7px; margin: 7px 4px 0; padding-top: 6px; border-top: 1px solid rgba(0,0,0,0.07); font-size: 12px; line-height: 17px; min-height: 18px; }
   .news-row[hidden] { display: none; }
   .news-tag { flex: none; font-size: 10px; line-height: 15px; padding: 0 7px; border-radius: 8px; background: #EFE9DF; color: #8A7A62; font-weight: 600; letter-spacing: 1px; }
@@ -509,7 +509,7 @@
         <span class="moon-ic" id="moon" role="img" aria-label="月相" hidden>—</span>
         <span class="wx-chip" id="wx" hidden role="img" aria-label="台中即時天氣">
           <span class="wx-item"><span class="wx-lab" id="wxLoc">—</span></span>
-          <span class="wx-item"><span class="wx-ic" id="wxIcon">—</span><span class="wx-t" id="wxTemp">--��</span></span>
+          <span class="wx-item"><span class="wx-ic" id="wxIcon">—</span><span class="wx-t" id="wxTemp">--°</span></span>
           <span class="wx-item"><span class="wx-lab">☔</span><span id="wxRain">--%</span></span>
           <span class="wx-item"><span class="wx-aqi-dot" id="wxAqiDot" aria-hidden="true"></span><span id="wxAqi">--</span></span>
         </span>
@@ -589,6 +589,73 @@
   var RING_C = 2 * Math.PI * 4.5;
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
   function setText(id, v) { document.getElementById(id).textContent = v; }
+  function ymdLocal(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+
+  // ---- 國定假日（行政院人事行政總處辦公日曆表；含補假）----
+  // 用途：台股休市判斷、上班地點預設、雙週曆標色。每年 6 月人事總處公告隔年日曆後補上新一年
+  var TW_HOLIDAYS = {
+    "2026-01-01": "開國紀念日", "2026-02-16": "除夕", "2026-02-17": "春節", "2026-02-18": "春節", "2026-02-19": "春節",
+    "2026-02-20": "春節補假", "2026-02-27": "和平紀念日補假", "2026-02-28": "和平紀念日", "2026-04-03": "兒童節補假",
+    "2026-04-04": "兒童節", "2026-04-05": "清明節", "2026-04-06": "清明節補假", "2026-05-01": "勞動節", "2026-06-19": "端午節",
+    "2026-09-25": "中秋節", "2026-09-28": "教師節", "2026-10-09": "國慶日補假", "2026-10-10": "國慶日",
+    "2026-10-25": "光復節", "2026-10-26": "光復節補假", "2026-12-25": "行憲紀念日",
+    "2027-01-01": "開國紀念日", "2027-02-04": "小年夜", "2027-02-05": "除夕", "2027-02-06": "春節", "2027-02-07": "春節",
+    "2027-02-08": "春節", "2027-02-09": "春節補假", "2027-02-10": "春節補假", "2027-02-28": "和平紀念日",
+    "2027-03-01": "和平紀念日補假", "2027-04-04": "兒童節", "2027-04-05": "清明節", "2027-04-06": "兒童節補假",
+    "2027-04-30": "勞動節補假", "2027-05-01": "勞動節", "2027-06-09": "端午節", "2027-09-15": "中秋節", "2027-09-28": "教師節",
+    "2027-10-10": "國慶日", "2027-10-11": "國慶日補假", "2027-10-25": "光復節", "2027-12-24": "行憲紀念日補假",
+    "2027-12-25": "行憲紀念日", "2027-12-31": "開國紀念日補假"
+  };
+  // 證交所另訂的「上班日但不交易」（春節前僅辦結算交割）；隔年日期待證交所公告後補上
+  var TW_MKT_CLOSED = { "2026-02-12": 1, "2026-02-13": 1 };
+  function isWorkday(d) { var w = d.getDay(); return w >= 1 && w <= 5 && !TW_HOLIDAYS[ymdLocal(d)]; }
+  function isTradingDay(d) { return isWorkday(d) && !TW_MKT_CLOSED[ymdLocal(d)]; }
+
+  // ---- 24 節氣（壽星通用公式，21 世紀係數；台灣與北京同為 UTC+8）----
+  var TERM_NAMES = ["小寒", "大寒", "立春", "雨水", "驚蟄", "春分", "清明", "穀雨", "立夏", "小滿", "芒種", "夏至",
+    "小暑", "大暑", "立秋", "處暑", "白露", "秋分", "寒露", "霜降", "立冬", "小雪", "大雪", "冬至"];
+  var TERM_C = [5.4055, 20.12, 3.87, 18.73, 5.63, 20.646, 4.81, 20.1, 5.52, 21.04, 5.678, 21.37,
+    7.108, 22.83, 7.5, 23.13, 7.646, 23.042, 8.318, 23.438, 7.438, 22.36, 7.18, 21.94];
+  // 第 i 個節氣（0＝小寒…23＝冬至）落在 yr 年的日期
+  function termDate(yr, i) {
+    var y = yr % 100;
+    var L = i < 4 ? Math.floor((y - 1) / 4) : Math.floor(y / 4);
+    return new Date(yr, Math.floor(i / 2), Math.floor(y * 0.2422 + TERM_C[i]) - L);
+  }
+
+  // ---- 朔（新月）時刻：Meeus《天文算法》第 49 章，誤差約 1 分鐘內 ----
+  // 用來校正瀏覽器內建農曆（ICU）在「朔接近午夜」時會錯一天的問題（例：2027/2/6 春節初一被算成臘月三十）
+  function newMoonAt(k) {
+    var rad = Math.PI / 180, T = k / 1236.85, T2 = T * T, T3 = T2 * T, T4 = T3 * T, s = Math.sin;
+    var jde = 2451550.09766 + 29.530588861 * k + 0.00015437 * T2 - 0.00000015 * T3 + 0.00000000073 * T4;
+    var E = 1 - 0.002516 * T - 0.0000074 * T2;
+    var M = (2.5534 + 29.1053567 * k - 0.0000014 * T2 - 0.00000011 * T3) * rad;
+    var Mp = (201.5643 + 385.81693528 * k + 0.0107582 * T2 + 0.00001238 * T3 - 0.000000058 * T4) * rad;
+    var F = (160.7108 + 390.67050284 * k - 0.0016118 * T2 - 0.00000227 * T3 + 0.000000011 * T4) * rad;
+    var Om = (124.7746 - 1.56375588 * k + 0.0020672 * T2 + 0.00000215 * T3) * rad;
+    jde += -0.4072 * s(Mp) + 0.17241 * E * s(M) + 0.01608 * s(2 * Mp) + 0.01039 * s(2 * F) + 0.00739 * E * s(Mp - M)
+      - 0.00514 * E * s(Mp + M) + 0.00208 * E * E * s(2 * M) - 0.00111 * s(Mp - 2 * F) - 0.00057 * s(Mp + 2 * F)
+      + 0.00056 * E * s(2 * Mp + M) - 0.00042 * s(3 * Mp) + 0.00042 * E * s(M + 2 * F) + 0.00038 * E * s(M - 2 * F)
+      - 0.00024 * E * s(2 * Mp - M) - 0.00017 * s(Om) - 0.00007 * s(Mp + 2 * M) + 0.00004 * s(2 * Mp - 2 * F)
+      + 0.00004 * s(3 * M) + 0.00003 * s(Mp + M - 2 * F) + 0.00003 * s(2 * Mp + 2 * F) - 0.00003 * s(Mp + M + 2 * F)
+      + 0.00003 * s(Mp - M + 2 * F) - 0.00002 * s(Mp - M - 2 * F) - 0.00002 * s(3 * Mp + M) + 0.00002 * s(4 * Mp);
+    var A = [[299.77, 0.107408, 325], [251.88, 0.016321, 165], [251.83, 26.651886, 164], [349.42, 36.412478, 126],
+      [84.66, 18.206239, 110], [141.74, 53.303771, 62], [207.14, 2.453732, 60], [154.84, 7.30686, 56],
+      [34.52, 27.261239, 47], [207.19, 0.121824, 42], [291.34, 1.844379, 40], [161.72, 24.198154, 37],
+      [239.56, 25.513099, 35], [331.55, 3.592518, 23]];
+    for (var i = 0; i < A.length; i++) jde += A[i][2] * 1e-6 * s((A[i][0] + A[i][1] * k - (i === 0 ? 0.009173 * T2 : 0)) * rad);
+    return new Date((jde - 2440587.5) * 864e5 - 69e3); // 力學時 → 世界時（ΔT 約 69 秒）
+  }
+  // 回傳 d 之前最近一次朔的時刻
+  function lastNewMoon(d) {
+    var k = Math.floor((d.getTime() - 947182440000) / (29.530588861 * 864e5)) + 1; // 947182440000＝2000/1/6 朔
+    var nm = newMoonAt(k);
+    while (nm > d) { k--; nm = newMoonAt(k); }
+    var nx = newMoonAt(k + 1);
+    while (nx <= d) { k++; nm = nx; nx = newMoonAt(k + 1); }
+    return nm;
+  }
+  function taipeiDayNo(t) { return Math.floor((t.getTime() + 8 * 3600000) / 864e5); } // 以台灣時間切日
 
   var segContainer = document.getElementById("segments");
   var ringFill = document.getElementById("ringFill");
@@ -649,7 +716,8 @@
     if (key === seaDayKey) return;
     seaDayKey = key;
     var yr = now.getFullYear();
-    var eq = [new Date(yr, 2, 20), new Date(yr, 5, 21), new Date(yr, 8, 22), new Date(yr, 11, 21)];
+    // 春分／夏至／秋分／冬至改用節氣公式逐年計算（原寫死 3/20、6/21、9/22、12/21，2026 年秋分、冬至各差一天）
+    var eq = [termDate(yr, 5), termDate(yr, 11), termDate(yr, 17), termDate(yr, 23)];
     var y0 = new Date(yr, 0, 1);
     var total = (new Date(yr + 1, 0, 1) - y0) / 864e5;
     function frac(d) { return ((d - y0) / 864e5) / total; }
@@ -669,7 +737,7 @@
     hand.setAttribute("cy", (10 + 4.65 * Math.sin(ang)).toFixed(2));
     var names = { spring: "春", summer: "夏", autumn: "秋", winter: "冬" };
     var nextName = { winter: "春分", spring: "夏至", summer: "秋分", autumn: "冬至" };
-    var bounds = [[new Date(yr - 1, 11, 21), eq[0], "winter"], [eq[0], eq[1], "spring"], [eq[1], eq[2], "summer"], [eq[2], eq[3], "autumn"], [eq[3], new Date(yr + 1, 2, 20), "winter"]];
+    var bounds = [[termDate(yr - 1, 23), eq[0], "winter"], [eq[0], eq[1], "spring"], [eq[1], eq[2], "summer"], [eq[2], eq[3], "autumn"], [eq[3], termDate(yr + 1, 5), "winter"]];
     for (var b = 0; b < bounds.length; b++) {
       if (now >= bounds[b][0] && now < bounds[b][1]) {
         var sn = bounds[b][2];
@@ -763,6 +831,8 @@
         el.textContent = cell.getDate();
         var col = d % 7;
         if (col === 0 || col === 6) el.classList.add("wknd");
+        var hn = TW_HOLIDAYS[ymdLocal(cell)];
+        if (hn) { el.classList.add("wknd"); el.title = hn; } // 國定假日與補假也標成假日色
         if (d === day) el.classList.add("today");
         wcDays.appendChild(el);
       }
@@ -790,7 +860,7 @@
     updateSunRing(now);
     updateSeasonRing(now);
 
-    // 今年進度（分段��
+    // 今年進度（分段）
     var yearStart = new Date(now.getFullYear(), 0, 1);
     var yearEnd = new Date(now.getFullYear() + 1, 0, 1);
     var yearRatio = (now - yearStart) / (yearEnd - yearStart);
@@ -871,7 +941,7 @@
       var Lm = rev(218.316 + 13.176396 * t);
       var Mm = rev(134.963 + 13.064993 * t);
       var D = rev(297.850 + 12.190749 * t);
-      // 月球真黃經：含中心差、出差、二均差等主要攝�����項
+      // 月球真黃經：含中心差、出差、二均差等主要攝動項
       var lon = Lm + 6.289 * Math.sin(Mm * rad) - 1.274 * Math.sin((Mm - 2 * D) * rad)
         + 0.658 * Math.sin(2 * D * rad) - 0.214 * Math.sin(2 * Mm * rad) - 0.186 * Math.sin(Ms * rad)
         - 0.059 * Math.sin((2 * Mm - 2 * D) * rad) - 0.057 * Math.sin((Mm - 2 * D + Ms) * rad)
@@ -881,13 +951,8 @@
     }
     var t = (d.getTime() - 946728000000) / 86400000; // J2000 起算天數
     var elong = elongAt(t);
-    // 月齡＝距上次朔（新月）的實際天數，用牛頓法回推朔的時刻
-    var tNew = t - elong / 12.190749;
-    for (var i = 0; i < 4; i++) {
-      var e2 = elongAt(tNew);
-      tNew -= ((e2 + 180) % 360 - 180) / 12.190749;
-    }
-    var age = t - tNew;
+    // 月齡＝距上次朔（新月）的實際天數（Meeus 朔望公式，與農曆共用同一個朔）
+    var age = (d.getTime() - lastNewMoon(d).getTime()) / 864e5;
     var idx = Math.floor(elong / 45 + 0.5) % 8;
     return { emoji: MOON_EMOJI[idx], name: MOON_NAMES[idx], age: age };
   }
@@ -897,11 +962,16 @@
   var LUNAR_MONTHS = ["正月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
   function lunarText(d) {
     try {
-      var parts = new Intl.DateTimeFormat("zh-Hant-u-ca-chinese", { month: "long", day: "numeric" }).formatToParts(d);
-      var mon = "", day = 0;
+      // 農曆日＝距上次朔的天數（台灣時間切日）；月名取該月月中的 ICU 結果，避開 ICU 在月初交界的誤差
+      // 朔日當天整天都算初一（即使朔在當晚才發生），所以取「當天結束前」最近一次朔
+      var dayNo = taipeiDayNo(d);
+      var nm = lastNewMoon(new Date((dayNo + 1) * 864e5 - 8 * 3600000 - 1));
+      var day = dayNo - taipeiDayNo(nm) + 1;
+      var parts = new Intl.DateTimeFormat("zh-Hant-u-ca-chinese", { month: "long", day: "numeric", timeZone: "Asia/Taipei" })
+        .formatToParts(new Date(nm.getTime() + 15 * 864e5));
+      var mon = "";
       for (var i = 0; i < parts.length; i++) {
         if (parts[i].type === "month") mon = parts[i].value;
-        if (parts[i].type === "day") day = parseInt(parts[i].value, 10);
       }
       if (!mon || !day || !LUNAR_DAYS[day]) return null;
       if (mon.indexOf("月") < 0) {
@@ -911,17 +981,10 @@
       return mon + LUNAR_DAYS[day];
     } catch (e) { return null; }
   }
-  // 24 節氣（壽星通用公式，21 世紀係數）
-  var TERM_NAMES = ["小寒", "大寒", "立春", "雨水", "驚蟄", "春分", "清明", "穀雨", "立夏", "小滿", "芒種", "夏至",
-    "小暑", "大暑", "��秋", "處暑", "白露", "秋分", "寒露", "霜降", "立���", "小雪", "大雪", "冬至"];
-  var TERM_C = [5.4055, 20.12, 3.87, 18.73, 5.63, 20.646, 4.81, 20.1, 5.52, 21.04, 5.678, 21.37,
-    7.108, 22.83, 7.5, 23.13, 7.646, 23.042, 8.318, 23.438, 7.438, 22.36, 7.18, 21.94];
   function solarTermOf(d) {
-    var y = d.getFullYear() % 100, day = d.getDate();
     for (var k = 0; k < 2; k++) {
       var i = d.getMonth() * 2 + k;
-      var L = i < 4 ? Math.floor((y - 1) / 4) : Math.floor(y / 4);
-      if (day === Math.floor(y * 0.2422 + TERM_C[i]) - L) return TERM_NAMES[i];
+      if (d.getDate() === termDate(d.getFullYear(), i).getDate()) return TERM_NAMES[i];
     }
     return null;
   }
@@ -956,17 +1019,17 @@
         if (!moonEl.hidden) {
           var mi = moonInfo(new Date());
           moonEl.title = "月相：" + mi.name + "（月齡 " + mi.age.toFixed(1) + " 天）"
-            + "\n月出 " + (moonRiseTxt || "—") + "｜月落 " + (moonSetTxt || "��");
+            + "\n月出 " + (moonRiseTxt || "—") + "｜月落 " + (moonSetTxt || "—");
         }
       })
       .catch(function () { /* 抓不到就先不顯示 */ });
   }
   function seasonOf(d) {
-    // 以四立（立春 2/4、立夏 5/5、立秋 8/7、立冬 11/7 前後）劃分四季
-    var md = (d.getMonth() + 1) * 100 + d.getDate();
-    if (md >= 204 && md < 505) return "s-spring";
-    if (md >= 505 && md < 807) return "s-summer";
-    if (md >= 807 && md < 1107) return "s-autumn";
+    // 以四立（立春、立夏、立秋、立冬）劃分四季，日期逐年依節氣公式計算
+    var yr = d.getFullYear(), t = new Date(yr, d.getMonth(), d.getDate());
+    if (t >= termDate(yr, 2) && t < termDate(yr, 8)) return "s-spring";
+    if (t >= termDate(yr, 8) && t < termDate(yr, 14)) return "s-summer";
+    if (t >= termDate(yr, 14) && t < termDate(yr, 20)) return "s-autumn";
     return "s-winter";
   }
   var calChipKey = "";
@@ -997,15 +1060,16 @@
     }
   }
 
-  // ---- 即時天氣（氣象署官方預報為主，Open-Meteo 補充，每 30 分鐘更新） ----
+  // ---- 即時天氣（氣象署測站實測＋鄉鎮預報為主，Open-Meteo 補充，每 30 分鐘更新） ----
   // 兩個常用地點：點天氣膠囊即可切換；週一至五 8-17 時預設南屯（上班），其餘時間預設大里
   var WX_LOCS = {
-    dali:   { name: "大里", cwa: "大里區", lat: 24.0994, lon: 120.6781, aq: "大里" },
-    nantun: { name: "南屯", cwa: "���屯區", lat: 24.1383, lon: 120.6431, aq: "西屯" }
+    // obs：氣象署自動氣象站代碼（大里 C0F9N0、南屯 C0F9U0），提供實測氣溫／濕度／風
+    dali:   { name: "大里", cwa: "大里區", obs: "C0F9N0", lat: 24.0994, lon: 120.6781, aq: "大里" },
+    nantun: { name: "南屯", cwa: "南屯區", obs: "C0F9U0", lat: 24.1383, lon: 120.6431, aq: "西屯" }
   };
   function wxDefaultLoc() {
-    var d = new Date(), w = d.getDay(), h = d.getHours();
-    return (w >= 1 && w <= 5 && h >= 8 && h < 17) ? "nantun" : "dali";
+    var d = new Date(), h = d.getHours();
+    return (isWorkday(d) && h >= 8 && h < 17) ? "nantun" : "dali"; // 國定假日與補假視同週末
   }
   var wxLocKey = wxDefaultLoc();
   var wxManualLoc = false;
@@ -1041,14 +1105,14 @@
     if (v <= 100) return ["#EAC26B", "普通"];
     if (v <= 150) return ["#D5803B", "對敏感族群不健康"];
     if (v <= 200) return ["#E56458", "對所有族群不健康"];
-    return ["#8E44AD", "非常不健康"];
+    if (v <= 300) return ["#8E44AD", "非常不健康"];
+    return ["#7E2335", "危害"];
   }
   // 部分政府網站不允許瀏覽器跨網域直接讀取（CORS）；
-  // 直連失敗時，依序改走多條公開轉發線路，哪條活著用哪條
+  // 依序：自架 Worker → 直連 → 公用代理（corsproxy.io 已改為付費金鑰制，2026/10 移除）
   var PROXIES = [
     function (u) { return WORKER_URL ? WORKER_URL + "/?url=" + encodeURIComponent(u) : u; },
     function (u) { return u; },
-    function (u) { return "https://corsproxy.io/?url=" + encodeURIComponent(u); },
     function (u) { return "https://api.allorigins.win/raw?url=" + encodeURIComponent(u); },
     function (u) { return "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u); }
   ];
@@ -1070,7 +1134,7 @@
     }
     return attempt();
   }
-  // 從氣象署預����資料中挑出最接近現在時刻的數值
+  // 從氣象署預報資料中挑出最接近現在時刻的數值
   function cwaPick(els, name, key) {
     for (var i = 0; i < els.length; i++) {
       if (els[i].ElementName !== name) continue;
@@ -1099,7 +1163,7 @@
   }
   function windDirText(deg) {
     if (deg == null || !isFinite(deg)) return null;
-    var dirs = ["北", "東北", "東", "東南", "南", "���南", "西", "西北"];
+    var dirs = ["北", "東北", "東", "東南", "南", "西南", "西", "西北"];
     return dirs[Math.round(deg / 45) % 8] + "風";
   }
   function uvText(v) {
@@ -1111,7 +1175,7 @@
     var L = WX_LOCS[wxLocKey];
     var wxUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + L.lat + "&longitude=" + L.lon +
       "&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,surface_pressure,uv_index,wind_speed_10m,wind_direction_10m&hourly=precipitation_probability&daily=precipitation_sum&forecast_days=1&timezone=Asia%2FTaipei";
-    // 空品：優先環境部官方測站（大里→大里站、南屯→西屯站）��失敗時退回 Open-Meteo 估計
+    // 空品：優先環境部官方測站（大里→大里站、南屯→西屯站），失敗時退回 Open-Meteo 估計
     var aqPromise = ((MOENV_API_KEY || WORKER_URL)
       ? fetchJson("https://data.moenv.gov.tw/api/v2/aqx_p_432?language=zh&limit=250" + (MOENV_API_KEY ? "&api_key=" + MOENV_API_KEY : ""))
           .then(function (j) {
@@ -1175,22 +1239,48 @@
       })
       .catch(function () { return null; });
 
+    // 氣象署自動氣象站實測（每 10 分鐘～1 小時更新）：氣溫、濕度、風以實測為準，預報只補降雨機率與天氣描述
+    var obsPromise = fetchJson("https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0001-001?StationId=" + L.obs +
+        "&WeatherElement=Weather,AirTemperature,RelativeHumidity,WindSpeed,WindDirection")
+      .then(function (j) {
+        var st = j && j.records && j.records.Station && j.records.Station[0];
+        var at = st && st.ObsTime && new Date(st.ObsTime.DateTime).getTime();
+        if (!st || !isFinite(at) || Date.now() - at > 2 * 3600000) throw new Error("no obs");
+        var we = st.WeatherElement || {};
+        function ok(v) { v = parseFloat(v); return isFinite(v) && v > -90 ? v : null; } // -99＝儀器缺測
+        var w = we.Weather && String(we.Weather).indexOf("-99") < 0 ? String(we.Weather) : "";
+        var ws = ok(we.WindSpeed);
+        return {
+          temp: ok(we.AirTemperature), hum: ok(we.RelativeHumidity), desc: w, icon: w ? cwaIcon(w) : null,
+          wind: ws === 0 ? "靜風" : windDirText(ok(we.WindDirection)), windSpd: ws,
+          at: at, name: st.StationName || L.name
+        };
+      })
+      .catch(function () { return null; });
+
     var reqLoc = wxLocKey;
-    Promise.all([cwaPromise, omPromise, aqPromise]).then(function (res) {
+    Promise.all([cwaPromise, omPromise, aqPromise, obsPromise]).then(function (res) {
       if (reqLoc !== wxLocKey) return; // 使用者已切換地點，捨棄舊資料
-      var cwa = res[0], om = res[1], aq = res[2];
-      if (!cwa && !om) throw new Error("no weather");
-      var main = cwa || om, sub = (cwa && om) ? om : {};
+      var cwa = res[0], om = res[1], aq = res[2], obs = res[3];
+      if (!cwa && !om && !obs) throw new Error("no weather");
+      var layers = [obs, cwa, om].filter(Boolean); // 優先序：測站實測 → 氣象署預報 → Open-Meteo
       function pick(k) {
-        var v = main[k];
-        if (v != null && v !== "" && (typeof v !== "number" || isFinite(v))) return v;
-        v = sub[k];
-        return (v != null && v !== "" && (typeof v !== "number" || isFinite(v))) ? v : null;
+        for (var li = 0; li < layers.length; li++) {
+          var v = layers[li][k];
+          if (v != null && v !== "" && (typeof v !== "number" || isFinite(v))) return v;
+        }
+        return null;
       }
       var temp = pick("temp");
       temp = temp != null ? Math.round(temp) : null;
       setText("wxLoc", L.name);
-      setText("wxIcon", pick("icon") || "\uD83C\uDF21\uFE0F");
+      var icon = pick("icon") || "\uD83C\uDF21\uFE0F";
+      var hNow = new Date().getHours() + new Date().getMinutes() / 60;
+      if (hNow < sunRise || hNow >= sunSet) { // 夜間：晴天改月亮、晴時多雲改雲
+        if (icon === "\u2600\uFE0F" || icon === "\uD83C\uDF24\uFE0F") icon = "\uD83C\uDF19";
+        else if (icon === "\u26C5") icon = "\u2601\uFE0F";
+      }
+      setText("wxIcon", icon);
       setText("wxTemp", (temp != null ? temp : "--") + "\u00B0");
       var rain = pick("rain");
       setText("wxRain", rain != null ? Math.round(rain) + "%" : "--%");
@@ -1200,7 +1290,7 @@
       var wetLine = [];
       if (pick("hum") != null) wetLine.push("濕度 " + Math.round(pick("hum")) + "%");
       wetLine.push("降雨機率 " + (rain != null ? Math.round(rain) + "%" : "未知"));
-      if (pick("rainAmt") != null) wetLine.push("今日降雨量 " + pick("rainAmt") + " mm");
+      if (pick("rainAmt") != null) wetLine.push("今日預估雨量 " + pick("rainAmt") + " mm");
       parts.push(wetLine.join("｜"));
       var airLine = [];
       if (pick("pressure") != null) airLine.push("氣壓 " + Math.round(pick("pressure")) + " hPa");
@@ -1217,7 +1307,8 @@
         setText("wxAqi", "--");
       }
       var srcs = [];
-      if (cwa) srcs.push("氣象署");
+      if (obs) { var ot = new Date(obs.at); srcs.push("氣象署" + obs.name + "測站 " + pad(ot.getHours()) + ":" + pad(ot.getMinutes()) + " 實測"); }
+      if (cwa) srcs.push("氣象署預報");
       if (aq && aq.src === "環境部") srcs.push("環境部");
       if (om && (!cwa || pick("pressure") != null || pick("uv") != null || (aq && aq.src === "Open-Meteo"))) srcs.push("Open-Meteo");
       parts.push(L.name + "｜" + srcs.join("、"));
@@ -1247,23 +1338,37 @@
     loadWeather();
   });
 
-  // ---- 台股加權指數（盤���延遲報價，失敗時退回證交所 OpenAPI ���盤資料） ----
+  // ---- 台股加權指數（盤中延遲報價，失敗時退回證交所 OpenAPI 收盤資料） ----
   function fmtIdx(n) {
     return n.toLocaleString("zh-Hant-TW", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
   function fmtK(n) {
     return (n / 1000).toFixed(1) + "K";
   }
+  // 交易日判斷：國定假日表＋報價本身的資料日期（颱風假等臨時休市也能自動辨識）
+  var twDataDate = ""; // 加權指數報價所屬日期 YYYY-MM-DD
+  function nowMin() { var d = new Date(); return d.getHours() * 60 + d.getMinutes(); }
+  function twDataLagging() {
+    // 交易日 09:05 後報價仍停在舊日期 → 視為臨時休市（或資料源未更新）
+    var d = new Date();
+    return !!twDataDate && isTradingDay(d) && nowMin() >= 545 && twDataDate !== ymdLocal(d);
+  }
   function twMarketOpen() {
-    var d = new Date(), w = d.getDay();
-    if (w === 0 || w === 6) return false;
-    var m = d.getHours() * 60 + d.getMinutes();
-    return m >= 540 && m <= 810; // 09:00–13:30
+    var m = nowMin();
+    return isTradingDay(new Date()) && m >= 540 && m <= 810 && !twDataLagging(); // 09:00–13:30
   }
   function isStaleClose() {
-    // 週末與週一開盤前（09:00 前）：標籤顯示的是舊收盤資料
-    var n0 = new Date(), dow0 = n0.getDay();
-    return dow0 === 0 || dow0 === 6 || (dow0 === 1 && n0.getHours() * 60 + n0.getMinutes() < 540);
+    // 休市日（週末、國定假日、補假），或休市後第一個交易日開盤前：標籤上是舊收盤資料
+    var n0 = new Date(), y0 = new Date(n0.getFullYear(), n0.getMonth(), n0.getDate() - 1);
+    return !isTradingDay(n0) || (nowMin() < 540 && !isTradingDay(y0)) || twDataLagging();
+  }
+  function twSessionText() {
+    var n0 = new Date(), m = nowMin();
+    if (!isTradingDay(n0) || twDataLagging()) {
+      var hn = TW_HOLIDAYS[ymdLocal(n0)];
+      return "休市" + (hn ? "（" + hn + "）" : "");
+    }
+    return m < 540 ? "盤前" : m <= 810 ? "盤中" : "已收盤";
   }
   var globalNote = "";
   var twTitleBase = "";
@@ -1281,10 +1386,11 @@
     chip.title = twTitleBase + (twEtfNote ? "\n" + twEtfNote : "") + (globalNote ? "\n\n" + globalNote : "") + tail;
     chip.setAttribute("aria-label", twTitleBase);
   }
-  function renderStock(val, chg, pct, note) {
+  function renderStock(val, chg, pct, note, dataDate) {
+    twDataDate = dataDate || "";
     setText("twVal", fmtK(val));
     var el = document.getElementById("twChg");
-    // 週末與週一開盤前（09:00 前）顯示的是舊收盤，標籤上不顯示漲跌幅（懸浮資訊仍保留）
+    // 休市日與休市後首個交易日開盤前顯示的是舊收盤，標籤上不顯示漲跌幅（懸浮資訊仍保留）
     var staleClose = isStaleClose();
     if (staleClose) {
       el.textContent = "";
@@ -1307,12 +1413,12 @@
       chip.classList.add("mkt-closed");
     }
     twUpdT = new Date();
-    twTitleBase = "台股加權指數 " + fmtIdx(val) + "，漲跌 " + (chg >= 0 ? "+" : "") + chg.toFixed(2) + "（" + (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%）" + (twMarketOpen() ? "｜盤中" : "｜已收盤") + (note ? "｜" + note : "");
+    twTitleBase = "台股加權指數 " + fmtIdx(val) + "，漲跌 " + (chg >= 0 ? "+" : "") + chg.toFixed(2) + "（" + (pct >= 0 ? "+" : "") + pct.toFixed(2) + "%）" + "｜" + twSessionText() + (twDataDate ? "｜資料日 " + twDataDate.slice(5).replace("-", "/") : "") + (note ? "｜" + note : "");
     applyTwTitle();
     chip.hidden = false;
   }
   function loadStock() {
-    // 首選：富果即時行情（金鑰由 Worker 專線自動附加；未設��鑰或失敗時自動���回證交所）
+    // 首選：富果即時行情（金鑰由 Worker 專線自動附加；未設金鑰或失敗時自動退回證交所）
     fetchJson("https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/IX0001")
       .then(function (j) {
         var y = parseFloat(j && j.previousClose);
@@ -1320,7 +1426,7 @@
         if (!isFinite(z) || !isFinite(y) || y === 0) throw new Error("no data");
         var chg = isFinite(parseFloat(j.change)) ? parseFloat(j.change) : z - y;
         var pct = isFinite(parseFloat(j.changePercent)) ? parseFloat(j.changePercent) : chg / y * 100;
-        renderStock(z, chg, pct, "富果即時行情");
+        renderStock(z, chg, pct, "富果即時行情", /^\d{4}-\d{2}-\d{2}$/.test(String(j.date)) ? String(j.date) : "");
       })
       .catch(loadStockTwse);
   }
@@ -1330,7 +1436,8 @@
         var m = j.msgArray && j.msgArray[0];
         var z = parseFloat(m && m.z), y = parseFloat(m && m.y);
         if (!isFinite(z) || !isFinite(y) || y === 0) throw new Error("no data");
-        renderStock(z, z - y, (z - y) / y * 100, "盤中延遲報價" + (m.t ? " " + m.t : ""));
+        var md = String(m.d || "");
+        renderStock(z, z - y, (z - y) / y * 100, "盤中延遲報價" + (m.t ? " " + m.t : ""), /^\d{8}$/.test(md) ? md.slice(0, 4) + "-" + md.slice(4, 6) + "-" + md.slice(6) : "");
       })
       .catch(function () {
         return fetchJson("https://openapi.twse.com.tw/v1/exchangeReport/MI_INDEX")
@@ -1345,7 +1452,8 @@
             var chg = sign * Math.abs(parseFloat(String(row["漲跌點數"]).replace(/,/g, "")));
             var pct = sign * Math.abs(parseFloat(String(row["漲跌百分比"]).replace(/,/g, "")));
             if (!isFinite(val) || !isFinite(chg) || !isFinite(pct)) return;
-            renderStock(val, chg, pct, "當日收盤資料");
+            var rd = String(row["日期"] || ""); // 民國年 YYYMMDD
+            renderStock(val, chg, pct, "當日收盤資料", /^\d{7}$/.test(rd) ? (parseInt(rd.slice(0, 3), 10) + 1911) + "-" + rd.slice(3, 5) + "-" + rd.slice(5) : "");
           })
           .catch(function () { /* 保持隱藏 */ });
       });
@@ -1408,7 +1516,7 @@
       html += '<span class="' + (cls || "t-f") + '">' + (pc > 0 ? "\u25B2" : pc < 0 ? "\u25BC" : "\u2013") + '</span>';
     }
     el.innerHTML = html;
-    el.hidden = !got || isStaleClose(); // 全數無資料或舊收盤時段（週末、週一開盤前）才隱藏
+    el.hidden = !got || isStaleClose(); // 全數無資料或舊收盤時段（休市日、休市後首日開盤前）才隱藏
   }
   function fmtTwQuote(code, name, z, y) {
     var s = code + " " + name + " " + fmtNum(z);
@@ -1477,7 +1585,6 @@
     var url = FINMIND + "?" + qs;
     var routes = [
       function (u) { return u; },
-      function (u) { return "https://corsproxy.io/?url=" + encodeURIComponent(u); },
       function (u) { return "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u); }
     ];
     var i = 0;
@@ -1513,11 +1620,11 @@
     var pc = (last - prev) / prev * 100;
     return "（" + (pc >= 0 ? "+" : "") + pc.toFixed(2) + "%）";
   }
-  // VIX 分級（依使用者定義）：<13 極度平靜、13–17 平靜、17–22 正常、22–30 警戒、30–40 恐���、40–60 極度恐慌、>60 金融危機等級
+  // VIX 分級（依使用者定義）：<13 極度平靜、13–17 平靜、17–22 正常、22–30 警戒、30–40 恐慌、40–60 極度恐慌、>60 金融危機等級
   function vixNote(v) { return v >= 60 ? "金融危機等級" : v >= 40 ? "極度恐慌" : v >= 30 ? "恐慌" : v >= 22 ? "警戒" : v >= 17 ? "正常" : v >= 13 ? "平靜" : "極度平靜"; }
-  // 美股指數／VIX：FinMind 美�����日���（���料源同 Yahoo），取最近兩個收盤價計算漲跌
-  // 銅用 CPER、美元��數用 UUP 替身：×0.156 ≈ 美元/磅、×3.65 ≈ DXY（估算常數，待實價校準，漲跌%不受影響）
-  // mul：ETF 價 → 原值（指數點數或每桶油價）的換算比例，依 2026/07 實際收盤校準，漲跌%不受影響
+  // 美股指數／VIX：FinMind 美股日線（資料源同 Yahoo），取最近兩個收盤價計算漲跌
+  // 油價、銅、美元指數直接顯示 ETF 原價（BNO／USO／CPER／UUP），漲跌%即標的走勢
+  // mul（選填）：ETF 價 → 原值的換算比例；目前全部不換算，避免比例漂移造成誤差
   // fmt："k" 以千點 K 取小數一位；"1" 取小數一位；省略則用 fmtNum
   function usJob(sym, label, group, mul, fmt, note) {
     return fetchFinmind("dataset=USStockPrice&data_id=" + encodeURIComponent(sym) + fmRange(12))
@@ -1532,18 +1639,86 @@
       })
       .catch(function () { return null; });
   }
-  function loadGlobal() {
-    // 日股改追台股掛牌 00661 元大日經225（富果即時，看得到當日盤中漲跌）；韓股暫以 EWY 原值呈現
-    var jobs = [
-      fetchJson("https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/00661")
+  // ---- 亞股大盤（日經 225、KOSPI）：每 10 分鐘與台股同步更新 ----
+  // 首選 Naver 即時指數（KOSPI 即時、日經延遲約 15 分）：需在 Worker 白名單加入 polling.finance.naver.com；
+  // 未開通或失敗時，自動退回台股掛牌 ETF（富果即時）：00661 元大日經225、009829 大華韓國KOSPI50
+  var ASIA_IDX = [
+    { name: "日經", naver: "worldstock/index/.N225", etf: "00661", etfName: "日股(00661)" },
+    { name: "KOSPI", naver: "domestic/index/KOSPI", etf: "009829", etfName: "韓股(009829)" }
+  ];
+  var asiaParts = [];
+  function workerJson(u) {
+    if (!WORKER_URL) return Promise.reject(new Error("no worker"));
+    return fetch(WORKER_URL + "/?url=" + encodeURIComponent(u)).then(function (r) {
+      if (!r.ok) throw new Error("http " + r.status);
+      return r.json();
+    });
+  }
+  function numStr(v) { return parseFloat(String(v == null ? "" : v).replace(/,/g, "")); }
+  function loadAsia() {
+    var jobs = ASIA_IDX.map(function (a) {
+      return workerJson("https://polling.finance.naver.com/api/realtime/" + a.naver)
         .then(function (j) {
-          var y = parseFloat(j && j.previousClose);
-          var z = parseFloat(j && (j.closePrice != null ? j.closePrice : j.lastPrice));
-          if (!isFinite(z) || z <= 0) return null;
-          return { g: "asia", t: "日股(00661) " + z.toFixed(2) + fmtChg(z, y, false) };
+          var d = j && j.datas && j.datas[0];
+          var v = numStr(d && d.closePrice), pc = numStr(d && d.fluctuationsRatio);
+          if (!isFinite(v) || v <= 0) throw new Error("no data");
+          var code = String(d.compareToPreviousPrice && d.compareToPreviousPrice.code || "");
+          if (isFinite(pc)) pc = (code === "4" || code === "5") ? -Math.abs(pc) : (code === "1" || code === "2") ? Math.abs(pc) : pc;
+          var open = String(d.marketStatus) === "OPEN";
+          var delay = d.stockExchangeType && parseInt(d.stockExchangeType.delayTime, 10);
+          var st = open ? "盤中" + (delay > 0 ? "・延遲" + delay + "分" : "") : "收盤";
+          var shown = v >= 10000 ? (v / 1000).toFixed(1) + "K" : fmtNum(Math.round(v));
+          return a.name + " " + shown + "（" + (isFinite(pc) ? (pc >= 0 ? "+" : "") + pc.toFixed(2) + "%，" : "") + st + "）";
         })
-        .catch(function () { return null; }),
-      usJob("EWY", "韓股ETF(EWY)", "asia", null, "1"),
+        .catch(function () {
+          return fetchJson("https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/" + a.etf)
+            .then(function (j) {
+              var y = parseFloat(j && j.previousClose);
+              var z = parseFloat(j && (j.closePrice != null ? j.closePrice : j.lastPrice));
+              if (!isFinite(z) || z <= 0) return null;
+              return a.etfName + " " + z.toFixed(2) + fmtChg(z, y, false);
+            });
+        })
+        .catch(function () { return null; });
+    });
+    Promise.all(jobs).then(function (arr) {
+      asiaParts = arr.filter(Boolean);
+      buildGlobalNote();
+    });
+  }
+  // 全球行情組字：FinMind／CNN 結果（globalBy，30 分鐘一輪）＋亞股（asiaParts，10 分鐘一輪）
+  var globalBy = null;
+  function buildGlobalNote() {
+    var by = globalBy || {};
+    function g(k) { return by[k] || []; }
+    // 依性質分段：台股期現貨量能／國際行情／利匯率與風險，段落間空一行較易讀
+    var s1 = [], s2 = [], s3 = [];
+    if (g("txf").length) s1.push("台指期：" + g("txf").join("｜"));
+    if (g("mgn").length) s1.push("量能資券：" + g("mgn").join("｜"));
+    if (asiaParts.length) s2.push("亞股：" + asiaParts.join("｜"));
+    if (g("us").length) s2.push("美股：" + g("us").join("｜"));
+    if (g("cmd").length) s2.push("商品：" + g("cmd").join("｜"));
+    if (g("fx").length) s3.push("利率匯率：" + g("fx").join("｜"));
+    if (g("risk").length) s3.push("風險：" + g("risk").join("｜"));
+    var secs = [];
+    if (s1.length) secs.push(s1.join("\n"));
+    if (s2.length) secs.push(s2.join("\n"));
+    if (s3.length) secs.push(s3.join("\n"));
+    globalNote = secs.join("\n\n");
+    if (twTitleBase) applyTwTitle();
+  }
+  function loadGlobal(force) {
+    // 快取 25 分鐘：儀表板嵌在多個 Notion 頁面，每次切頁都會重新載入；
+    // 這些多為日線資料，盤中不會變，快取可避免撞到 FinMind 免金鑰每小時次數上限
+    if (!force) {
+      try {
+        var c = JSON.parse(localStorage.getItem("glob3") || "null");
+        if (c && c.by && Date.now() - c.t < 25 * 60 * 1000) {
+          globalBy = c.by; globalUpdT = new Date(c.t); buildGlobalNote(); return;
+        }
+      } catch (e) {}
+    }
+    var jobs = [
       usJob("^GSPC", "標普", "us", null, "k"),
       usJob("^DJI", "道瓊", "us", null, "k"),
       usJob("^IXIC", "納指", "us", null, "k"),
@@ -1570,7 +1745,7 @@
           if (String(r.date) < String(best.date)) continue;
           if (cd < String(best.contract_date)) { best = r; continue; }
           if (cd > String(best.contract_date)) continue;
-          // 同日同近月：夜盤（after_market）比日盤晚，優先採��
+          // 同日同近月：夜盤（after_market）比日盤晚，優先採用
           if (String(r.trading_session) === "after_market" && String(best.trading_session) !== "after_market") best = r;
         }
         if (!best) return null;
@@ -1618,7 +1793,7 @@
         return { g: "mgn", t: "成交 " + fmtNum(Math.round(last)) + " 億" + fmtChg(last, prev, false) };
       })
       .catch(function () { return null; }));
-    // 融資融券���餘額：FinMind 台股整體資券（融資原始單位＝元、融券＝張；換算億元／萬張，增減以%表示）
+    // 融資融券總餘額：FinMind 台股整體資券（融資原始單位＝元、融券＝張；換算億元／萬張，增減以%表示）
     jobs.push(fetchFinmind("dataset=TaiwanStockTotalMarginPurchaseShortSale" + fmRange(8))
       .then(function (rows) {
         var latest = {};
@@ -1688,7 +1863,7 @@
       .then(function (j) {
         var fg = j && j.fear_and_greed;
         if (!fg || fg.score == null) return null;
-        // CNN 分級（依使用者����義，直接用分數判斷）：0–24 極度恐慌、25–44 恐慌、45–55 中性、56–74 貪婪、75–100 極度貪婪
+        // CNN 分級（依使用者定義，直接用分數判斷）：0–24 極度恐慌、25–44 恐慌、45–55 中性、56–74 貪婪、75–100 極度貪婪
         var sc = Math.round(fg.score);
         var r = sc >= 75 ? "極度貪婪" : sc >= 56 ? "貪婪" : sc >= 45 ? "中性" : sc >= 25 ? "恐慌" : "極度恐慌";
         var pv = parseFloat(fg.previous_close);
@@ -1697,36 +1872,26 @@
       })
       .catch(function () { return null; }));
     Promise.all(jobs).then(function (arr) {
-      var by = { txf: [], mgn: [], asia: [], us: [], cmd: [], fx: [], risk: [] };
-      for (var i = 0; i < arr.length; i++) if (arr[i]) by[arr[i].g].push(arr[i].t);
-      // 依性質分段：台股期現貨量能／國際行情／利匯率與風險，段落間空一行較易讀
-      var s1 = [], s2 = [], s3 = [];
-      if (by.txf.length) s1.push("台指期：" + by.txf.join("｜"));
-      if (by.mgn.length) s1.push("量能資券：" + by.mgn.join("｜"));
-      if (by.asia.length) s2.push("亞股：" + by.asia.join("｜"));
-      if (by.us.length) s2.push("美股：" + by.us.join("｜"));
-      if (by.cmd.length) s2.push("商品：" + by.cmd.join("｜"));
-      if (by.fx.length) s3.push("利率匯率：" + by.fx.join("｜"));
-      if (by.risk.length) s3.push("風險：" + by.risk.join("｜"));
-      var secs = [];
-      if (s1.length) secs.push(s1.join("\n"));
-      if (s2.length) secs.push(s2.join("\n"));
-      if (s3.length) secs.push(s3.join("\n"));
-      globalNote = secs.join("\n\n");
-      if (secs.length) globalUpdT = new Date();
-      if (twTitleBase) applyTwTitle();
+      var by = { txf: [], mgn: [], us: [], cmd: [], fx: [], risk: [] }, got = 0;
+      for (var i = 0; i < arr.length; i++) if (arr[i] && by[arr[i].g]) { by[arr[i].g].push(arr[i].t); got++; }
+      if (!got) return;
+      globalBy = by;
+      globalUpdT = new Date();
+      // 至少一半項目成功才寫入快取，避免把一次失敗的結果卡住 25 分鐘
+      if (got >= arr.length / 2) { try { localStorage.setItem("glob3", JSON.stringify({ t: Date.now(), by: by })); } catch (e) {} }
+      buildGlobalNote();
     });
   }
   updateCalendarChips(); // 月相與農曆資料就緒後立即補顯示
   loadWeather();
   loadStock();
-  loadTwQuotes(); loadOtcIdx();
-  loadGlobal();
+  loadTwQuotes(); loadOtcIdx(); loadAsia();
+  loadGlobal(false);
   setInterval(function () {
-    if (!wxManualLoc) wxLocKey = wxDefaultLoc(); // 未手動切換時，依上班時段自動回到預設地��
+    if (!wxManualLoc) wxLocKey = wxDefaultLoc(); // 未手動切換時，依上班時段自動回到預設地點
     loadWeather();
   }, 30 * 60 * 1000);
-  setInterval(function () { loadStock(); loadTwQuotes(); loadOtcIdx(); }, 10 * 60 * 1000);
+  setInterval(function () { loadStock(); loadTwQuotes(); loadOtcIdx(); loadAsia(); }, 10 * 60 * 1000);
   // 點一下台股膠囊立即更新（台股＋全球行情；5 秒內重複點擊不重抓）
   (function () {
     var twChip = document.getElementById("tw"), lastTap = 0;
@@ -1734,10 +1899,10 @@
       var n2 = Date.now();
       if (n2 - lastTap < 5000) return;
       lastTap = n2;
-      loadStock(); loadTwQuotes(); loadOtcIdx(); loadGlobal();
+      loadStock(); loadTwQuotes(); loadOtcIdx(); loadAsia(); loadGlobal(true);
     });
   })();
-  setInterval(loadGlobal, 30 * 60 * 1000);
+  setInterval(function () { loadGlobal(false); }, 30 * 60 * 1000);
   // ---- 新聞輪替列（中央社／BBC 中文／自由時報 官方 RSS）：即時、免金鑰；只留 36 小時內頭條，依 國際 > 財經 > 產業 優先排序 ----
   var NEWS_FEEDS = [
     ["國際", "https://feeds.feedburner.com/rsscna/intworld", "中央社"],
@@ -1754,7 +1919,7 @@
   var NEWS_ORDER = [["國際", 8], ["財經", 6], ["產業", 5]]; // 每類上限，同類單一來源最多 3 則，避免單家洗版
   var NEWS_TAGCLS = { "國際": "nt-intl", "財經": "nt-fin", "產業": "nt-tech" };
   var NEWS_SKIP = /廣編|贊助|優惠|折扣|抽獎|開獎|團購|好康|盤點概念股|同學會|樂透|今彩|威力彩|頭獎|發票|新聞360|自由說新聞|請見影片|書摘|推薦序/;
-  var NEWS_LINKSKIP = /cn\.nytimes\.com\/(opinion|health|culture|travel|style|obits|realestate|education|dining|fashion|magazine)\//; // 路透聚合源：略過體育・查核・非英文版重複條目 // 擋掉廣宣・導購・樂透開獎類雜訊
+  var NEWS_LINKSKIP = /cn\.nytimes\.com\/(opinion|health|culture|travel|style|obits|realestate|education|dining|fashion|magazine)\//; // 紐時中文：略過評論與生活風格類
   var newsItems = [], newsIdx = 0, newsTimer = null, newsHover = false;
   function newsAgo(iso) {
     var t0 = new Date(iso).getTime();
@@ -1808,7 +1973,6 @@
     // 各家官方 RSS（不經 Google，避開代理遭擋）：即時、免金鑰；優先走 Worker 專線，不通時自動改走公用代理
     var routes = [
       function (x) { return WORKER_URL + "/?url=" + encodeURIComponent(x); },
-      function (x) { return "https://corsproxy.io/?url=" + encodeURIComponent(x); },
       function (x) { return "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(x); }
     ];
     var i = 0;
@@ -1845,7 +2009,7 @@
         var cut0 = desc.slice(0, 500), p1 = Math.max(cut0.lastIndexOf("。"), cut0.lastIndexOf("！"), cut0.lastIndexOf("？"));
         desc = p1 > 100 ? cut0.slice(0, p1 + 1) : cut0 + "…";
       }
-      if (desc && !/[一-鿿]/.test(desc)) desc = ""; // 純外文摘要（如路透聚合源）無法直接閱讀，不彈卡
+      if (desc && !/[一-鿿]/.test(desc)) desc = ""; // 純外文摘要無法直接閱讀，不彈卡
       var t0 = new Date(pub).getTime();
       if (!title || !isFinite(t0) || Date.now() - t0 > 36 * 60 * 60 * 1000) continue;
       if (NEWS_SKIP.test(title)) continue;
