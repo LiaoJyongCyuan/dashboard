@@ -33,6 +33,13 @@
     --wd-off-text: #C68C66;
     --wd-off-bg-wknd: #FAEFF2;
     --wd-off-text-wknd: #D194A3;
+    /* 休息日色（2026/10 改版，取代灰玫瑰）：週日＋國定假日＋補假＝珊瑚紅、週六＝鼠尾草綠；行程標記＝霧青 */
+    --rest-sun: #ED6B5A;
+    --rest-sun-bg: #FCEBE7;
+    --rest-sat: #91A776;
+    --rest-sat-text: #7F9A62; /* 小字用：比 #91A776 深一階，維持可讀性 */
+    --rest-sat-bg: #EEF3EA;
+    --cal-evt: #9BC1BC;
     /* 年度天數標籤：扁平內斂 */
     --doy-text: #8C8983;
     /* 分區細線 */
@@ -92,6 +99,12 @@
       --wd-off-text-wknd: rgba(238,175,193,0.8);
       --doy-text: rgba(255,255,255,0.62);
       --divider: rgba(255,255,255,0.18);
+      --rest-sun: #EF7A6A;
+      --rest-sun-bg: rgba(237,107,90,0.16);
+      --rest-sat: #9DB283;
+      --rest-sat-text: #A9BE8F;
+      --rest-sat-bg: rgba(145,167,118,0.18);
+      --cal-evt: #9BC1BC;
     }
     :root[data-theme="green"] {
       --seg-fill-a: rgba(114,188,143,0.45);
@@ -130,19 +143,21 @@
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
     display: flex;
-    flex-wrap: wrap; /* 讓新聞列可換行到儀表下方 */
     align-items: center;
     justify-content: center;
     padding: 8px 24px;
   }
+  /* 版面：左欄＝主資訊（上）＋新聞列（下，右端止於時間區塊下方）；右欄＝月曆、主題色點，跨兩列 */
   .wrap {
     width: 100%;
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto auto;
+    column-gap: 12px;
     align-items: center;
-    gap: 12px;
   }
   .main {
-    flex: 1 1 auto;
+    grid-column: 1;
+    grid-row: 1;
     min-width: 0;
   }
   /* ---- top line: date + day ring + time ---- */
@@ -170,61 +185,136 @@
     align-self: center;
     white-space: nowrap;
   }
-  .wd-chip.wknd {
-    background: var(--wd-off-bg-wknd);
-    color: var(--wd-on-wknd);
+  .wd-chip.sun {
+    background: var(--rest-sun-bg);
+    color: var(--rest-sun);
+  }
+  .wd-chip.sat {
+    background: var(--rest-sat-bg);
+    color: var(--rest-sat-text);
   }
   body.ready .wd-chip { transition: background 0.3s ease, color 0.3s ease; }
-  /* ---- 分區細線：時間與週曆之間 ---- */
+  /* ---- 分區細線：左欄與月曆之間（縱貫兩列） ---- */
   .vdiv {
-    flex: 0 0 auto;
-    align-self: center;
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: stretch;
     width: 1px;
-    height: 30px;
+    margin: 6px 0;
     border-radius: 0.5px;
     background: var(--divider);
   }
-  /* ---- 迷你雙週曆（時間與主題色點之間） ---- */
-  .weekcal {
+  /* ---- 月曆（整月六週、可切換月份；滑過日期看農曆／節日／行程，點一下開 Google 日曆） ---- */
+  .mcal {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-self: stretch;
+    display: flex;
+    gap: 7px;
+    min-height: 76px;
+  }
+  .mc-side {
     flex: 0 0 auto;
-    align-self: center;
+    width: 26px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1px 0;
+    user-select: none;
   }
-  .wc-row {
+  .mc-yr {
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 10px;
+    color: var(--text2);
+    font-variant-numeric: tabular-nums;
+  }
+  .mc-mon {
+    border: 0;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--text);
+    font: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1;
+  }
+  .mc-mon b {
+    font-size: 17px;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .mc-mon i {
+    font-style: normal;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text2);
+    margin-top: 2px;
+  }
+  .mcal.away .mc-mon b { color: var(--chip-text); } /* 瀏覽其他月份時，月份數字改主題色提示 */
+  .mc-nav { display: flex; gap: 1px; }
+  .mc-nav .news-btn { font-size: 8px; line-height: 12px; padding: 0 1px; }
+  .mc-grid {
     display: grid;
     grid-template-columns: repeat(7, 18px);
-    gap: 2px;
-    justify-items: center;
-    align-items: center;
+    grid-template-rows: auto repeat(6, minmax(0, 1fr));
+    column-gap: 2px;
+    row-gap: 1px;
+    align-items: stretch;
   }
-  .wc-head span {
+  .mc-h {
     font-size: 9px;
     font-weight: 600;
     line-height: 1;
+    padding-bottom: 2px;
+    text-align: center;
     color: var(--text2);
     user-select: none;
   }
-  .wc-head span.wknd { color: var(--wd-off-text-wknd); }
-  .wc-days span {
-    width: 18px;
-    height: 15px;
-    border-radius: 5px;
+  .mc-h.sun { color: var(--rest-sun); }
+  .mc-h.sat { color: var(--rest-sat-text); }
+  .mc-d {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
+    min-height: 10px;
+    border-radius: 4px;
+    font-size: 9.5px;
     font-weight: 600;
     line-height: 1;
     font-variant-numeric: tabular-nums;
     color: var(--text2);
+    text-decoration: none;
+    cursor: pointer;
     user-select: none;
+    transition: background 0.15s ease;
   }
-  .wc-days { row-gap: 4px; }
-  .wc-days span.wknd { color: var(--wd-off-text-wknd); }
-  .wc-days span.today { background: var(--wd-on); color: #FFFFFF; }
-  .wc-days span.today.wknd { background: var(--wd-on-wknd); }
+  .mc-d:hover { background: var(--seg-empty); }
+  .mc-d:focus-visible { outline: none; box-shadow: 0 0 0 1px var(--cal-evt); }
+  .mc-d.sat { color: var(--rest-sat-text); }
+  .mc-d.sun { color: var(--rest-sun); }
+  .mc-d.out { opacity: 0.32; }
+  .mc-d.today { background: var(--wd-on); color: #FFFFFF; opacity: 1; }
+  .mc-d.today.sat { background: var(--rest-sat); }
+  .mc-d.today.sun { background: var(--rest-sun); }
+  /* 有行程：日期下方一道霧青短線（今天實心底上改白線） */
+  .mc-d.ev::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -1px;
+    width: 8px;
+    height: 2px;
+    margin-left: -4px;
+    border-radius: 1px;
+    background: var(--cal-evt);
+  }
+  .mc-d.today.ev::after { bottom: 1px; height: 1.5px; background: rgba(255,255,255,0.9); }
   .doy-chip.s-spring { background: rgba(120,180,130,0.18); color: #55875B; }
   .doy-chip.s-summer { background: rgba(226,132,110,0.18); color: #C2604F; }
   .doy-chip.s-autumn { background: rgba(226,178,96,0.2); color: #A9702B; }
@@ -398,7 +488,9 @@
   }
   /* ---- theme dots (right edge) ---- */
   .dots {
-    flex: 0 0 auto;
+    grid-column: 4;
+    grid-row: 1 / span 2;
+    align-self: center;
     display: grid;
     grid-template-rows: repeat(3, auto);
     grid-auto-flow: column;
@@ -437,9 +529,16 @@
   .dot-teal  { --c: var(--dot-teal); }
   /* ---- 響應式排版 ---- */
   .lbrk { display: none; } /* 手機版換行器：桌面不顯示 */
-  /* 中幅（窄視窗／平板）：先收掉右側雙週曆 */
+  /* 中寬（約 761–960px）：月曆與間距稍微收緊，避免時鐘被擠到第二行 */
+  @media (max-width: 960px) {
+    body { padding: 8px 16px; }
+    .wrap { column-gap: 9px; }
+    .mcal { gap: 5px; }
+    .mc-grid { grid-template-columns: repeat(7, 16px); column-gap: 1px; }
+  }
+  /* 中幅（窄視窗／平板）：先收掉右側月曆 */
   @media (max-width: 760px) {
-    .weekcal, .vdiv { display: none; }
+    .mcal, .vdiv { display: none; }
   }
   /* 手機版：改為固定三行式排版，隱藏次要資訊
      第一行：日期＋週幾＋月相（左）、日照輪＋時鐘（右）
@@ -462,7 +561,7 @@
     .segments { gap: 2px; }
   }
   /* ---- 新聞輪替列（各家官方 RSS）：一次一則、淡入淡出輪替，可收合 ---- */
-  .news-row { position: relative; flex: 1 1 100%; display: flex; align-items: center; gap: 7px; margin: 7px 4px 0; padding-top: 6px; border-top: 1px solid rgba(0,0,0,0.07); font-size: 12px; line-height: 17px; min-height: 18px; }
+  .news-row { position: relative; grid-column: 1; grid-row: 2; min-width: 0; display: flex; align-items: center; gap: 7px; margin: 7px 0 0 4px; padding-top: 6px; border-top: 1px solid rgba(0,0,0,0.07); font-size: 12px; line-height: 17px; min-height: 18px; }
   .news-row[hidden] { display: none; }
   .news-tag { flex: none; font-size: 10px; line-height: 15px; padding: 0 7px; border-radius: 8px; background: #EFE9DF; color: #8A7A62; font-weight: 600; letter-spacing: 1px; }
   .news-tag.nt-intl { background: #EAF3FB; color: #5B8FC7; }
@@ -497,7 +596,7 @@
     .news-pop { background: #33322E; border-color: rgba(255,255,255,0.12); box-shadow: 0 8px 26px rgba(0,0,0,0.5); }
     .news-pop .np-a { color: #8FB8E8; }
   }
-  @media (max-width: 520px) { .news-src { display: none; } .news-row { margin: 4px 4px 0; padding-top: 4px; } }
+  @media (max-width: 520px) { .news-src { display: none; } .news-row { margin: 4px 0 0 4px; padding-top: 4px; } }
 </style>
 </head>
 <body>
@@ -553,12 +652,27 @@
         <button type="button" class="news-toggle" id="newsBtn" aria-label="隱藏新聞">📰</button>
       </div>
     </div>
+    <div class="news-row" id="newsRow" hidden>
+      <span class="news-tag" id="newsTag">新聞</span>
+      <span class="news-item" id="newsItem">
+        <a class="news-a" id="newsA" href="#" target="_blank" rel="noopener noreferrer">—</a>
+        <span class="news-src" id="newsSrc"></span>
+      </span>
+      <button type="button" class="news-btn news-nav" id="newsPrev" aria-label="上一則">▲</button>
+      <button type="button" class="news-btn news-nav" id="newsNext" aria-label="下一則">▼</button>
+      <div class="news-pop" id="newsPop" hidden></div>
+    </div>
     <div class="vdiv" aria-hidden="true"></div>
-    <div class="weekcal" id="weekcal" role="img" aria-label="雙週日曆">
-      <div class="wc-row wc-head" aria-hidden="true">
-        <span class="wknd">日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span class="wknd">六</span>
+    <div class="mcal" id="mcal" role="group" aria-label="月曆">
+      <div class="mc-side">
+        <span class="mc-yr" id="mcYr">—</span>
+        <button type="button" class="mc-mon" id="mcMon" aria-label="月份"><b id="mcMonNum">—</b><i>月</i></button>
+        <span class="mc-nav">
+          <button type="button" class="news-btn mc-btn" id="mcPrev" aria-label="上個月" title="上個月">▲</button>
+          <button type="button" class="news-btn mc-btn" id="mcNext" aria-label="下個月" title="下個月">▼</button>
+        </span>
       </div>
-      <div class="wc-row wc-days" id="wcdays"></div>
+      <div class="mc-grid" id="mcGrid"></div>
     </div>
     <div class="dots" role="group" aria-label="主題顏色">
       <button type="button" class="dot dot-blue" data-theme="blue" aria-label="淡藍主題"></button>
@@ -569,17 +683,6 @@
       <button type="button" class="dot dot-teal" data-theme="teal" aria-label="淡青主題"></button>
     </div>
   </div>
-
-<div class="news-row" id="newsRow" hidden>
-  <span class="news-tag" id="newsTag">新聞</span>
-  <span class="news-item" id="newsItem">
-    <a class="news-a" id="newsA" href="#" target="_blank" rel="noopener noreferrer">—</a>
-    <span class="news-src" id="newsSrc"></span>
-  </span>
-  <button type="button" class="news-btn news-nav" id="newsPrev" aria-label="上一則">▲</button>
-  <button type="button" class="news-btn news-nav" id="newsNext" aria-label="下一則">▼</button>
-  <div class="news-pop" id="newsPop" hidden></div>
-</div>
 <script>
 (function () {
   "use strict";
@@ -590,6 +693,24 @@
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
   function setText(id, v) { document.getElementById(id).textContent = v; }
   function ymdLocal(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  // 網址 # 參數：主題色可直接寫（#green），其餘用 key=value，以 & 串接
+  // 例：…/dashboard/#green&k=行事曆存取碼&gu=1　（k＝Worker 的 CAL_KEY；gu＝點日期時開啟的 Google 帳戶）
+  // 存取碼只放在 Notion 嵌入網址裡，不寫進公開的 index.html
+  function parseHash() {
+    var out = { theme: "" };
+    var h = (location.hash || "").replace(/^#/, "");
+    var parts = h ? h.split("&") : [];
+    for (var i = 0; i < parts.length; i++) {
+      var part = parts[i], eq = part.indexOf("=");
+      var v;
+      try { v = decodeURIComponent(eq < 0 ? part : part.slice(eq + 1)); } catch (e) { v = eq < 0 ? part : part.slice(eq + 1); }
+      if (eq < 0) { if (v) out.theme = v; continue; }
+      var k = part.slice(0, eq);
+      if (k === "t" || k === "theme") out.theme = v; else out[k] = v;
+    }
+    return out;
+  }
+  var HASHP = parseHash();
 
   // ---- 國定假日（行政院人事行政總處辦公日曆表；含補假）----
   // 用途：台股休市判斷、上班地點預設、雙週曆標色。每年 6 月人事總處公告隔年日曆後補上新一年
@@ -769,8 +890,6 @@
     setText("sunTitle", "日出 " + fmtHM(sunRise) + "｜日落 " + fmtHM(sunSet) + "｜" + spanTxt + "｜" + nextTxt);
   }
   var wdChip = document.getElementById("wdchip");
-  var wcDays = document.getElementById("wcdays");
-  var weekcal = document.getElementById("weekcal");
   var lastDateKey = "";
   var fills = [];
   var styles = getComputedStyle(document.documentElement);
@@ -815,28 +934,19 @@
     setText("ss", pad(now.getSeconds()));
     setText("date", now.getFullYear() + " 年 " + (now.getMonth() + 1) + " 月 " + now.getDate() + " 日");
     var day = now.getDay();
+    var todayHol = TW_HOLIDAYS[ymdLocal(now)];
     wdChip.textContent = WEEKDAYS[day];
-    wdChip.classList.toggle("wknd", day === 0 || day === 6);
-    wdChip.setAttribute("aria-label", "今天" + WEEKDAYS[day]);
+    // 休息日配色：週日與國定假日／補假＝珊瑚紅、週六＝鼠尾草綠（與月曆一致）
+    wdChip.classList.toggle("sun", day === 0 || !!todayHol);
+    wdChip.classList.toggle("sat", day === 6 && !todayHol);
+    wdChip.title = todayHol || "";
+    wdChip.setAttribute("aria-label", "今天" + WEEKDAYS[day] + (todayHol ? "，" + todayHol : ""));
 
-    // 迷你週曆：換日才重建
+    // 換日：通知月曆更新「今天」標記（跨月時自動翻到新月份）
     var dateKey = now.getFullYear() + "-" + now.getMonth() + "-" + now.getDate();
     if (dateKey !== lastDateKey) {
       lastDateKey = dateKey;
-      wcDays.innerHTML = "";
-      var ws = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day);
-      for (var d = 0; d < 14; d++) {
-        var cell = new Date(ws.getFullYear(), ws.getMonth(), ws.getDate() + d);
-        var el = document.createElement("span");
-        el.textContent = cell.getDate();
-        var col = d % 7;
-        if (col === 0 || col === 6) el.classList.add("wknd");
-        var hn = TW_HOLIDAYS[ymdLocal(cell)];
-        if (hn) { el.classList.add("wknd"); el.title = hn; } // 國定假日與補假也標成假日色
-        if (d === day) el.classList.add("today");
-        wcDays.appendChild(el);
-      }
-      weekcal.setAttribute("aria-label", "雙週日曆，今天 " + (now.getMonth() + 1) + " 月 " + now.getDate() + " 日" + WEEKDAYS[day]);
+      calOnNewDay();
     }
 
     var dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
@@ -916,7 +1026,7 @@
   }
 
   // 初始主題：網址 hash > 上次選擇 > 淡藍
-  var initTheme = (location.hash || "").replace("#", "");
+  var initTheme = HASHP.theme;
   if (THEMES.indexOf(initTheme) < 0) {
     try { initTheme = localStorage.getItem("dash-theme") || "blue"; } catch (e) { initTheme = "blue"; }
   }
@@ -1061,15 +1171,16 @@
   }
 
   // ---- 即時天氣（氣象署測站實測＋鄉鎮預報為主，Open-Meteo 補充，每 30 分鐘更新） ----
-  // 兩個常用地點：點天氣膠囊即可切換；週一至五 8-17 時預設南屯（上班），其餘時間預設大里
+  // 兩個常用地點：點天氣膠囊即可切換；週一至五 8-17 時預設西屯（上班，2026/10 起由南屯改西屯），其餘時間預設大里
   var WX_LOCS = {
-    // obs：氣象署自動氣象站代碼（大里 C0F9N0、南屯 C0F9U0），提供實測氣溫／濕度／風
-    dali:   { name: "大里", cwa: "大里區", obs: "C0F9N0", lat: 24.0994, lon: 120.6781, aq: "大里" },
-    nantun: { name: "南屯", cwa: "南屯區", obs: "C0F9U0", lat: 24.1383, lon: 120.6431, aq: "西屯" }
+    // obs：氣象署自動氣象站代碼（大里 C0F9N0、西屯 C0F9T0），提供實測氣溫／濕度／風
+    // 舊上班地點南屯：{ name: "南屯", cwa: "南屯區", obs: "C0F9U0", lat: 24.1383, lon: 120.6431, aq: "西屯" }
+    dali:  { name: "大里", cwa: "大里區", obs: "C0F9N0", lat: 24.0994, lon: 120.6781, aq: "大里" },
+    xitun: { name: "西屯", cwa: "西屯區", obs: "C0F9T0", lat: 24.1795, lon: 120.6413, aq: "西屯" }
   };
   function wxDefaultLoc() {
     var d = new Date(), h = d.getHours();
-    return (isWorkday(d) && h >= 8 && h < 17) ? "nantun" : "dali"; // 國定假日與補假視同週末
+    return (isWorkday(d) && h >= 8 && h < 17) ? "xitun" : "dali"; // 國定假日與補假視同週末
   }
   var wxLocKey = wxDefaultLoc();
   var wxManualLoc = false;
@@ -1077,7 +1188,7 @@
   // 留空時改用 Open-Meteo 衛星模型估計值
   // 金鑰已改存於 Cloudflare Worker（機密 MOENV_KEY），由專線自動附加；此處留空即可
   var MOENV_API_KEY = "";
-  // 空品測站隨地點自動選擇（大里→大里站、南屯→西屯站）
+  // 空品測站隨地點自動選擇（大里→大里站、西屯→西屯站）
   // 自架 Cloudflare Worker 專線（穩定轉發，金鑰藏在 Worker 裡）
   var WORKER_URL = "https://dash-relay.tzc5w4gsk2.workers.dev";
   var WX_ICONS = {
@@ -1175,7 +1286,7 @@
     var L = WX_LOCS[wxLocKey];
     var wxUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + L.lat + "&longitude=" + L.lon +
       "&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,surface_pressure,uv_index,wind_speed_10m,wind_direction_10m&hourly=precipitation_probability&daily=precipitation_sum&forecast_days=1&timezone=Asia%2FTaipei";
-    // 空品：優先環境部官方測站（大里→大里站、南屯→西屯站），失敗時退回 Open-Meteo 估計
+    // 空品：優先環境部官方測站（大里→大里站、西屯→西屯站），失敗時退回 Open-Meteo 估計
     var aqPromise = ((MOENV_API_KEY || WORKER_URL)
       ? fetchJson("https://data.moenv.gov.tw/api/v2/aqx_p_432?language=zh&limit=250" + (MOENV_API_KEY ? "&api_key=" + MOENV_API_KEY : ""))
           .then(function (j) {
@@ -1321,14 +1432,14 @@
       chip.hidden = false;
     }).catch(function () { /* 連線失敗時保持隱藏，不影響儀表板 */ });
   }
-  // 點一下天氣膠囊切換大里／南屯（手動選擇後，本次開啟期間不再自動改回預設）
-  // 點地點名稱→切換大里／南屯；點其餘天氣資訊→重新整理目前地點（5 秒防連點）
+  // 點一下天氣膠囊切換大里／西屯（手動選擇後，本次開啟期間不再自動改回預設）
+  // 點地點名稱→切換大里／西屯；點其餘天氣資訊→重新整理目前地點（5 秒防連點）
   var wxRefLast = 0;
   document.getElementById("wx").addEventListener("click", function (ev) {
     var locEl = document.getElementById("wxLoc");
     if (locEl && (ev.target === locEl || locEl.contains(ev.target))) {
       wxManualLoc = true;
-      wxLocKey = wxLocKey === "dali" ? "nantun" : "dali";
+      wxLocKey = wxLocKey === "dali" ? "xitun" : "dali";
       loadWeather();
       return;
     }
@@ -1492,6 +1603,7 @@
     ["2330", "台積電"]
   ];
   var twEtfNote = "", otcPart = "", twParts = [];
+  var tw2330Px = NaN; // 台積電現價：台股懸浮資訊與 ADR 折溢價共用
   // 標籤右端小三角：左→右 0050／櫃買／0052／0055／0056；紅漲綠跌，深淺＝幅度（四階）
   // 分級門檻依標的波動性質：大盤／中型／金融型 0.5／1.5／3%，電子型波動較大 0.75／2／4%
   // （指數型 ETF 單日 ±3～4% 已屬罕見大行情，5% 門檻幾乎永遠點不到最深色）
@@ -1540,6 +1652,7 @@
     twEtfNote = lines.join("\n");
     if (twTitleBase) applyTwTitle();
     renderEtfTris();
+    if (globalBy) buildGlobalNote(); // 台積電現價更新 → 重算 ADR 折溢價
   }
   function loadTwQuotes() {
     var jobs = TW_QUOTES.map(function (it) {
@@ -1549,6 +1662,7 @@
           var z = parseFloat(j && (j.closePrice != null ? j.closePrice : j.lastPrice));
           if (!isFinite(z) || z <= 0) throw new Error("no data");
           twTriPcts[it[0]] = isFinite(y) && y > 0 ? (z - y) / y * 100 : null;
+          if (it[0] === "2330") tw2330Px = z;
           return fmtTwQuote(it[0], it[1], z, y);
         })
         .catch(function () { return null; });
@@ -1572,6 +1686,7 @@
             if (!isFinite(z) || z <= 0) { z = y; y = NaN; }
             twTriPcts[TW_QUOTES[n][0]] = isFinite(y) && y > 0 && isFinite(z) ? (z - y) / y * 100 : null;
             if (isFinite(z) && z > 0) parts[n] = fmtTwQuote(TW_QUOTES[n][0], TW_QUOTES[n][1], z, y);
+            if (TW_QUOTES[n][0] === "2330" && isFinite(z) && z > 0) tw2330Px = z;
           }
           applyTwQuotes(parts);
         })
@@ -1696,7 +1811,16 @@
     if (g("txf").length) s1.push("台指期：" + g("txf").join("｜"));
     if (g("mgn").length) s1.push("量能資券：" + g("mgn").join("｜"));
     if (asiaParts.length) s2.push("亞股：" + asiaParts.join("｜"));
-    if (g("us").length) s2.push("美股：" + g("us").join("｜"));
+    var us = g("us").slice();
+    // 台積電 ADR（TSM，1 單位＝5 股普通股）：附漲跌與折溢價＝TSM × 美元兌台幣 ÷（2330 現價 × 5）− 1
+    var nm = by.num || {};
+    if (nm.tsm > 0) {
+      var adrIn = [];
+      if (nm.tsmPrev > 0) { var adrPc = (nm.tsm - nm.tsmPrev) / nm.tsmPrev * 100; adrIn.push((adrPc >= 0 ? "+" : "") + adrPc.toFixed(2) + "%"); }
+      if (nm.usd > 0 && tw2330Px > 0) { var prem = (nm.tsm * nm.usd / (tw2330Px * 5) - 1) * 100; adrIn.push((prem >= 0 ? "溢價 " : "折價 ") + Math.abs(prem).toFixed(1) + "%"); }
+      us.push("台積電ADR " + nm.tsm.toFixed(1) + (adrIn.length ? "（" + adrIn.join("，") + "）" : ""));
+    }
+    if (us.length) s2.push("美股：" + us.join("｜"));
     if (g("cmd").length) s2.push("商品：" + g("cmd").join("｜"));
     if (g("fx").length) s3.push("利率匯率：" + g("fx").join("｜"));
     if (g("risk").length) s3.push("風險：" + g("risk").join("｜"));
@@ -1712,7 +1836,7 @@
     // 這些多為日線資料，盤中不會變，快取可避免撞到 FinMind 免金鑰每小時次數上限
     if (!force) {
       try {
-        var c = JSON.parse(localStorage.getItem("glob3") || "null");
+        var c = JSON.parse(localStorage.getItem("glob4") || "null");
         if (c && c.by && Date.now() - c.t < 25 * 60 * 1000) {
           globalBy = c.by; globalUpdT = new Date(c.t); buildGlobalNote(); return;
         }
@@ -1723,6 +1847,14 @@
       usJob("^DJI", "道瓊", "us", null, "k"),
       usJob("^IXIC", "納指", "us", null, "k"),
       usJob("^SOX", "費半", "us", null, "k"),
+      // 台積電 ADR：只存數值，文字在 buildGlobalNote 組（才能跟著 2330 現價即時重算折溢價）
+      fetchFinmind("dataset=USStockPrice&data_id=TSM" + fmRange(12))
+        .then(function (rows) {
+          var last = parseFloat(rows[rows.length - 1].Close);
+          var prev = rows.length > 1 ? parseFloat(rows[rows.length - 2].Close) : NaN;
+          return isFinite(last) && last > 0 ? { g: "num", n: { tsm: last, tsmPrev: prev } } : null;
+        })
+        .catch(function () { return null; }),
       usJob("BNO", "布蘭特ETF(BNO)", "cmd", null, "1"),
       usJob("USO", "西德州ETF(USO)", "cmd", null, "1"),
       usJob("CPER", "銅ETF(CPER)", "cmd", null, "1"),
@@ -1855,7 +1987,7 @@
         var prev = vals.length > 1 ? vals[vals.length - 2] : NaN;
         var pc2 = isFinite(prev) && prev !== 0 ? (last - prev) / prev * 100 : NaN;
         var dir = isFinite(pc2) ? "（台幣" + (pc2 > 0 ? "貶" : pc2 < 0 ? "升" : "持平") + (pc2 ? " " + Math.abs(pc2).toFixed(2) + "%" : "") + "）" : "";
-        return { g: "fx", t: "美元兌台幣 " + last.toFixed(2) + dir };
+        return { g: "fx", t: "美元兌台幣 " + last.toFixed(2) + dir, n: { usd: last } };
       })
       .catch(function () { return null; }));
     // CNN 恐懼與貪婪指數（走 Worker 專線；非官方端點，抓不到時自動略過）
@@ -1872,16 +2004,254 @@
       })
       .catch(function () { return null; }));
     Promise.all(jobs).then(function (arr) {
-      var by = { txf: [], mgn: [], us: [], cmd: [], fx: [], risk: [] }, got = 0;
-      for (var i = 0; i < arr.length; i++) if (arr[i] && by[arr[i].g]) { by[arr[i].g].push(arr[i].t); got++; }
+      var by = { txf: [], mgn: [], us: [], cmd: [], fx: [], risk: [], num: {} }, got = 0;
+      for (var i = 0; i < arr.length; i++) {
+        var it = arr[i];
+        if (!it) continue;
+        if (it.n) for (var nk in it.n) if (isFinite(it.n[nk])) by.num[nk] = it.n[nk];
+        if (it.g === "num") { got++; continue; }
+        if (by[it.g]) { by[it.g].push(it.t); got++; }
+      }
       if (!got) return;
       globalBy = by;
       globalUpdT = new Date();
       // 至少一半項目成功才寫入快取，避免把一次失敗的結果卡住 25 分鐘
-      if (got >= arr.length / 2) { try { localStorage.setItem("glob3", JSON.stringify({ t: Date.now(), by: by })); } catch (e) {} }
+      if (got >= arr.length / 2) { try { localStorage.setItem("glob4", JSON.stringify({ t: Date.now(), by: by })); } catch (e) {} }
       buildGlobalNote();
     });
   }
+  // ---- 月曆：整月六週、可切換月份；滑過日期看農曆／節氣／國定假日／Google 行程，點一下在 Google 日曆開啟該日 ----
+  // 行程來源：Worker /cal 路由（彙整各帳戶的 Apps Script；網址與金鑰都存在 Worker Secrets）
+  // 存取碼 k 只放在 Notion 嵌入網址的 # 後面；沒有存取碼時月曆照常運作，只是不顯示行程
+  var CAL_KEY = "";
+  try {
+    if (HASHP.k != null) { // 網址帶 #k= 時以網址為準（k= 空值＝清除本機記住的存取碼）
+      if (HASHP.k) localStorage.setItem("dash-cal-key", HASHP.k); else localStorage.removeItem("dash-cal-key");
+    }
+    CAL_KEY = HASHP.k != null ? HASHP.k : (localStorage.getItem("dash-cal-key") || "");
+  } catch (e) { CAL_KEY = HASHP.k || ""; }
+  // 點日期開哪個 Google 帳戶：數字＝瀏覽器登入順序（0 起算），也可直接填 email（#gu=xxx@gmail.com）
+  var GCAL_USER = HASHP.gu || "0";
+  var TW_HOL_MAX_YEAR = (function () {
+    var mx = 0;
+    for (var k in TW_HOLIDAYS) mx = Math.max(mx, parseInt(k.slice(0, 4), 10));
+    return mx;
+  })();
+  var CAL_HEAD = ["日", "一", "二", "三", "四", "五", "六"];
+  var mcalEl = document.getElementById("mcal");
+  var mcGrid = document.getElementById("mcGrid");
+  var calView = null, calFollow = true;           // calFollow：目前是否停在「本月」
+  var calEv = {}, calEvState = "off", calEvKey = "", calEvFailed = [], calEvMulti = false;
+  var calLunarMemo = {}, calAwayT = null, calRefLast = 0, calInited = false;
+
+  function gcalDayUrl(d) {
+    var path = "r/day/" + d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate();
+    return GCAL_USER.indexOf("@") > 0
+      ? "https://calendar.google.com/calendar/" + path + "?authuser=" + encodeURIComponent(GCAL_USER)
+      : "https://calendar.google.com/calendar/u/" + encodeURIComponent(GCAL_USER) + "/" + path;
+  }
+  function calGridStart(y, m) { var f = new Date(y, m, 1); return new Date(y, m, 1 - f.getDay()); }
+  function addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+  function parseYmd(t) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(t || ""));
+    return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+  }
+  function calLunar(d) {
+    var k = ymdLocal(d);
+    if (!(k in calLunarMemo)) calLunarMemo[k] = lunarText(d);
+    return calLunarMemo[k];
+  }
+  // 把 Worker 回傳的事件攤到每一天：全天事件（結束日不含）、跨日事件逐日列出
+  function buildCalIndex(events) {
+    var idx = {}, cals = {};
+    function put(k, sort, text) { (idx[k] = idx[k] || []).push({ sort: sort, text: text }); }
+    for (var i = 0; i < events.length; i++) {
+      var ev = events[i];
+      if (!ev || !ev.s) continue;
+      var title = String(ev.t || "（無標題）");
+      var tag = ev.c ? "〔" + ev.c + "〕" : "";
+      cals[ev.c || ""] = 1;
+      if (ev.a) {
+        var s0 = parseYmd(ev.s), e0 = parseYmd(ev.e);
+        if (!s0) continue;
+        if (!e0 || e0 <= s0) e0 = addDays(s0, 1);
+        for (var d = s0, n = 0; d < e0 && n < 62; d = addDays(d, 1), n++) put(ymdLocal(d), "", ["全天", title, tag]);
+        continue;
+      }
+      var sd = String(ev.s).slice(0, 10), ed = String(ev.e || ev.s).slice(0, 10);
+      var st = String(ev.s).slice(11, 16), et = String(ev.e || "").slice(11, 16);
+      var sD = parseYmd(sd), eD = parseYmd(ed) || sD;
+      if (!sD) continue;
+      if (et === "00:00" && eD > sD) { eD = addDays(eD, -1); et = "24:00"; } // 結束在午夜＝當天結束
+      if (ymdLocal(eD) === sd) {
+        put(sd, st, [st + (et && et !== st ? "–" + et : ""), title, tag]);
+        continue;
+      }
+      for (var d2 = sD, n2 = 0; d2 <= eD && n2 < 62; d2 = addDays(d2, 1), n2++) {
+        var k2 = ymdLocal(d2);
+        if (k2 === sd) put(k2, st, [st + " 起", title, tag]);
+        else if (k2 === ymdLocal(eD) && et !== "24:00") put(k2, "", ["至 " + et, title, tag]);
+        else put(k2, "", ["全天", title, tag]);
+      }
+    }
+    for (var key in idx) idx[key].sort(function (a, b) { return a.sort < b.sort ? -1 : a.sort > b.sort ? 1 : 0; });
+    calEvMulti = Object.keys(cals).length > 1; // 只有一個日曆時不標日曆名
+    return idx;
+  }
+  function calDayTitle(d, hol, evs) {
+    var lun = calLunar(d), term = solarTermOf(d);
+    var lines = [(d.getMonth() + 1) + "/" + d.getDate() + "（" + WEEKDAYS[d.getDay()] + "）" + (lun ? "｜農曆" + lun : "")];
+    var tags = [];
+    if (hol) tags.push(hol);
+    if (term) tags.push("節氣 " + term);
+    if (tags.length) lines.push(tags.join("｜"));
+    if (CAL_KEY) {
+      lines.push("");
+      if (evs && evs.length) {
+        for (var i = 0; i < evs.length && i < 10; i++) {
+          var t = evs[i].text;
+          lines.push("・" + t[0] + "　" + t[1] + (calEvMulti ? " " + t[2] : ""));
+        }
+        if (evs.length > 10) lines.push("…還有 " + (evs.length - 10) + " 筆");
+      } else {
+        lines.push(calEvState === "loading" ? "行程載入中…" : calEvState === "err" ? "行程暫時無法取得" : "沒有行程");
+      }
+    }
+    lines.push("", "點一下：在 Google 日曆開啟這一天");
+    return lines.join("\n");
+  }
+  function renderCal() {
+    if (!calInited) return;
+    var now = new Date(), y = calView.y, m = calView.m;
+    calFollow = y === now.getFullYear() && m === now.getMonth();
+    mcalEl.classList.toggle("away", !calFollow);
+    setText("mcYr", y);
+    setText("mcMonNum", m + 1);
+    var frag = document.createDocumentFragment();
+    for (var h = 0; h < 7; h++) {
+      var he = document.createElement("span");
+      he.className = "mc-h" + (h === 0 ? " sun" : h === 6 ? " sat" : "");
+      he.textContent = CAL_HEAD[h];
+      he.setAttribute("aria-hidden", "true");
+      frag.appendChild(he);
+    }
+    var g0 = calGridStart(y, m), todayK = ymdLocal(now), hols = [], evDays = 0;
+    for (var i = 0; i < 42; i++) {
+      var d = addDays(g0, i), k = ymdLocal(d), w = d.getDay(), hol = TW_HOLIDAYS[k], inMon = d.getMonth() === m;
+      var evs = calEv[k];
+      var a = document.createElement("a");
+      a.className = "mc-d" + (inMon ? "" : " out") + (w === 0 || hol ? " sun" : w === 6 ? " sat" : "") +
+        (k === todayK ? " today" : "") + (evs && evs.length ? " ev" : "");
+      a.textContent = d.getDate();
+      a.href = gcalDayUrl(d);
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.title = calDayTitle(d, hol, evs);
+      a.setAttribute("aria-label", (d.getMonth() + 1) + "月" + d.getDate() + "日" + WEEKDAYS[w] + (hol ? "，" + hol : "") + (evs && evs.length ? "，" + evs.length + " 筆行程" : ""));
+      frag.appendChild(a);
+      if (inMon && hol) hols.push((m + 1) + "/" + d.getDate() + " " + hol);
+      if (inMon && evs && evs.length) evDays++;
+    }
+    mcGrid.innerHTML = "";
+    mcGrid.appendChild(frag);
+    // 月份標籤的懸浮資訊：本月假日、行程摘要與操作說明
+    var info = [y + " 年 " + (m + 1) + " 月" + (calFollow ? "（本月）" : "")];
+    if (y > TW_HOL_MAX_YEAR) info.push("※ " + y + " 年國定假日表尚未建立（人事總處每年 6 月公告後補上）");
+    else info.push(hols.length ? "國定假日：" + hols.join("、") : "本月沒有國定假日");
+    if (CAL_KEY) {
+      if (calEvState === "ok") info.push("有行程的日子：" + evDays + " 天" + (calEvFailed.length ? "（未取得：" + calEvFailed.join("、") + "）" : ""));
+      else if (calEvState === "loading") info.push("行程載入中…");
+      else if (calEvState === "err") info.push("行程暫時無法取得");
+    }
+    info.push("");
+    if (!calFollow) info.push("點一下：回到本月");
+    else if (CAL_KEY) info.push("點一下：重新整理行程");
+    info.push("▲▼：切換月份" + (calFollow ? "" : "（滑鼠離開 1 分鐘後自動回到本月）"));
+    var mon = document.getElementById("mcMon");
+    mon.title = info.join("\n");
+    mon.setAttribute("aria-label", y + " 年 " + (m + 1) + " 月");
+    mcalEl.setAttribute("aria-label", "月曆，" + y + " 年 " + (m + 1) + " 月");
+  }
+  function applyCalEvents(events, failed) {
+    calEv = buildCalIndex(events || []);
+    calEvFailed = failed || [];
+    calEvState = "ok";
+    renderCal();
+  }
+  function loadCalEvents(force) {
+    if (!CAL_KEY || !WORKER_URL) { calEvState = "off"; return; }
+    var g0 = calGridStart(calView.y, calView.m), g1 = addDays(g0, 42);
+    var s0 = ymdLocal(g0), s1 = ymdLocal(g1), key = s0 + "_" + s1;
+    calEvKey = key;
+    var store = null;
+    try { store = JSON.parse(localStorage.getItem("calev1") || "null"); } catch (e) {}
+    if (!store || typeof store !== "object") store = {};
+    // 本機快取 10 分鐘：儀表板每次切頁都會重載，避免一直打 Apps Script
+    if (!force && store[key] && Date.now() - store[key].t < 10 * 60 * 1000) { applyCalEvents(store[key].ev, store[key].f); return; }
+    if (store[key]) applyCalEvents(store[key].ev, store[key].f); // 先顯示舊資料，背景更新
+    else { calEvState = "loading"; renderCal(); }
+    fetch(WORKER_URL + "/cal?start=" + s0 + "&end=" + s1 + (force ? "&fresh=1" : ""), { headers: { "X-Cal-Key": CAL_KEY } })
+      .then(function (r) {
+        if (!r.ok) throw new Error("http " + r.status);
+        return r.json();
+      })
+      .then(function (j) {
+        if (!j || Object.prototype.toString.call(j.events) !== "[object Array]") throw new Error("bad data");
+        store[key] = { t: Date.now(), ev: j.events, f: j.failed || [] };
+        var keys = Object.keys(store).sort(function (a, b) { return store[b].t - store[a].t; });
+        for (var i = 4; i < keys.length; i++) delete store[keys[i]]; // 只留最近 4 個月份
+        try { localStorage.setItem("calev1", JSON.stringify(store)); } catch (e) {}
+        if (calEvKey === key) applyCalEvents(j.events, j.failed);
+      })
+      .catch(function () {
+        if (calEvKey !== key || store[key]) return; // 有舊資料就繼續顯示舊的
+        calEvState = "err";
+        renderCal();
+      });
+  }
+  function calGo(delta) {
+    var now = new Date();
+    var d = delta === 0 ? new Date(now.getFullYear(), now.getMonth(), 1) : new Date(calView.y, calView.m + delta, 1);
+    calView = { y: d.getFullYear(), m: d.getMonth() };
+    calEv = {}; // 換月先清掉舊索引，等新資料進來
+    renderCal();
+    loadCalEvents(false);
+  }
+  function calOnNewDay() {
+    if (!calInited) return;
+    var now = new Date();
+    calLunarMemo = {};
+    if (calFollow) {
+      var moved = calView.y !== now.getFullYear() || calView.m !== now.getMonth();
+      calView = { y: now.getFullYear(), m: now.getMonth() };
+      if (moved) { calEv = {}; loadCalEvents(false); }
+    }
+    renderCal();
+  }
+  (function initCal() {
+    var now = new Date();
+    calView = { y: now.getFullYear(), m: now.getMonth() };
+    calInited = true;
+    calEvState = CAL_KEY ? "loading" : "off";
+    renderCal();
+    loadCalEvents(false);
+    document.getElementById("mcPrev").addEventListener("click", function () { calGo(-1); });
+    document.getElementById("mcNext").addEventListener("click", function () { calGo(1); });
+    document.getElementById("mcMon").addEventListener("click", function () {
+      if (!calFollow) { calGo(0); return; }
+      var t = Date.now();
+      if (t - calRefLast < 5000) return; // 已在本月：重新整理行程（5 秒防連點）
+      calRefLast = t;
+      loadCalEvents(true);
+    });
+    // 翻到其他月份後，滑鼠離開月曆 60 秒自動回到本月
+    mcalEl.addEventListener("mouseleave", function () {
+      if (calAwayT) clearTimeout(calAwayT);
+      calAwayT = setTimeout(function () { if (!calFollow) calGo(0); }, 60000);
+    });
+    mcalEl.addEventListener("mouseenter", function () { if (calAwayT) { clearTimeout(calAwayT); calAwayT = null; } });
+    setInterval(function () { loadCalEvents(false); }, 15 * 60 * 1000);
+  })();
   updateCalendarChips(); // 月相與農曆資料就緒後立即補顯示
   loadWeather();
   loadStock();
