@@ -550,6 +550,7 @@
      圓窗（.sg-body，縮成 68%）：古銅金外框 → 分片玻璃（深淺交錯）→ 內圈鉛條 → 中心花窗（四季＝四瓣花、日照＝太陽／夜間新月）
      圈外：點狀光環軌道＋寶石指針（沿軌道繞行）
      座標 0–40、0° 在正上方順時針；玻璃片由 JS 依節氣、日出日落產生 ---- */
+  .main { --dock-ring: 48px; --dock-gap: 12px; --dock-w: calc(var(--dock-ring) * 2 + var(--dock-gap) + 20px); }
   .sgring { display: block; width: 26px; height: 26px; overflow: visible; margin: -1px 0; }
   .sg-pane { stroke: var(--sg-lead); stroke-width: 1.15; stroke-linejoin: round; }
   .sg-lead-o { fill: none; stroke: var(--sg-frame); stroke-width: 2.1; } /* 外框：慕夏光環的古銅金 */
@@ -687,10 +688,22 @@
   /* 依「主欄實際寬度」自動調整（不看視窗寬度，所以 Notion 頁面寬窄、有沒有行程欄都適用）：
      單行模式：寬度不夠時依序收起 0050 四小三角 → 台股漲跌點數 → ^TWII 字樣 → 天氣地點，保證時鐘不被擠到下一行
      兩行模式（主欄 ≤ 615px）：第一行日期＋週幾＋月相；第二行天氣＋台股（左）、圓環＋時鐘（右），再窄就依序收起次要資訊 */
-  .main { container-type: inline-size; }
-  @container (min-width: 616px) and (max-width: 745px) { #etfTris { display: none !important; } }
-  @container (min-width: 616px) and (max-width: 700px) { #twChg .tw-pts { display: none; } }
-  @container (min-width: 616px) and (max-width: 668px) { #tw .wx-lab { display: none; } }
+  .main { container-type: inline-size; position: relative; }
+  @container (min-width: 616px) and (max-width: 659px) { #etfTris { display: none !important; } }
+  @container (min-width: 616px) and (max-width: 659px) { #twChg .tw-pts { display: none; } }
+  /* 圓環展示區（主欄 ≥ 660px）：時鐘列與今年進度列往左收 128px，空出來的位置放大圓環（左＝日照輪緊鄰時鐘、右＝四季輪緊鄰月曆）
+     新聞列與上方細線不受影響；圓環改為絕對定位、上下置中於兩列之間 */
+  @container (min-width: 660px) {
+    .line, .bar-row { margin-right: var(--dock-w); }
+    .time-group .sgring { position: absolute; top: 50%; width: var(--dock-ring); height: var(--dock-ring); margin: calc(var(--dock-ring) / -2) 0 0; }
+    #sunring { right: calc(var(--dock-ring) + var(--dock-gap) + 2px); }
+    #seasonring { right: 2px; }
+  }
+  @container (min-width: 660px) and (max-width: 805px) { #etfTris { display: none !important; } }
+  @container (min-width: 660px) and (max-width: 760px) { #twChg .tw-pts { display: none; } }
+  @container (min-width: 660px) and (max-width: 728px) { #tw .wx-lab { display: none; } }
+  @container (min-width: 660px) and (max-width: 698px) { #wx > .wx-item:first-child { display: none; } }
+  @container (min-width: 616px) and (max-width: 659px) { #tw .wx-lab { display: none; } }
   @container (min-width: 616px) and (max-width: 638px) { #wx > .wx-item:first-child { display: none; } }
   @container (max-width: 615px) {
     .lbrk { display: block; order: 1; flex-basis: 100%; height: 0; }
