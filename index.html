@@ -36,10 +36,11 @@
     /* 休息日色（2026/10 改版，取代灰玫瑰）：週日＋國定假日＋補假＝珊瑚紅、週六＝鼠尾草綠；行程標記＝霧青 */
     --rest-sun: #ED6B5A;
     --rest-sun-bg: #FCEBE7;
-    --rest-sat: #91A776;
-    --rest-sat-text: #7F9A62; /* 小字用：比 #91A776 深一階，維持可讀性 */
-    --rest-sat-bg: #EEF3EA;
-    --cal-evt: #9BC1BC;
+    --ev-rgb: 236, 178, 72;   /* 行程底色（琥珀，與農曆膠囊同色系），透明度依筆數疊加 */
+    --cal-out: #ABA8A2;       /* 月曆：其他月份的日期 */
+    --nd-dot: #D3D0CA;        /* 切換圓點 */
+    --nd-arrow: #7D7A75;      /* 切換圓點滑過時的箭頭 */
+    --ag-ad-text: #9A6A1E;    /* 行程欄「全天」標籤字色 */
     /* 年度天數標籤：扁平內斂 */
     --doy-text: #8C8983;
     /* 分區細線 */
@@ -101,10 +102,11 @@
       --divider: rgba(255,255,255,0.18);
       --rest-sun: #EF7A6A;
       --rest-sun-bg: rgba(237,107,90,0.16);
-      --rest-sat: #9DB283;
-      --rest-sat-text: #A9BE8F;
-      --rest-sat-bg: rgba(145,167,118,0.18);
-      --cal-evt: #9BC1BC;
+      --ev-rgb: 230, 176, 80;
+      --cal-out: rgba(255,255,255,0.34);
+      --nd-dot: rgba(255,255,255,0.26);
+      --nd-arrow: rgba(255,255,255,0.78);
+      --ag-ad-text: #EBC27A;
     }
     :root[data-theme="green"] {
       --seg-fill-a: rgba(114,188,143,0.45);
@@ -151,7 +153,7 @@
   .wrap {
     width: 100%;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto auto;
+    grid-template-columns: minmax(0, 1fr) auto auto auto auto;
     column-gap: 12px;
     align-items: center;
   }
@@ -190,8 +192,8 @@
     color: var(--rest-sun);
   }
   .wd-chip.sat {
-    background: var(--rest-sat-bg);
-    color: var(--rest-sat-text);
+    background: var(--rest-sun-bg);
+    color: var(--rest-sun);
   }
   body.ready .wd-chip { transition: background 0.3s ease, color 0.3s ease; }
   /* ---- 分區細線：左欄與月曆之間（縱貫兩列） ---- */
@@ -250,14 +252,34 @@
   }
   .mc-mon i {
     font-style: normal;
-    font-size: 9px;
+    font-size: 11.5px;
     font-weight: 600;
     color: var(--text2);
-    margin-top: 2px;
+    margin-top: 1px;
   }
   .mcal.away .mc-mon b { color: var(--chip-text); } /* 瀏覽其他月份時，月份數字改主題色提示 */
-  .mc-nav { display: flex; gap: 1px; }
-  .mc-nav .news-btn { font-size: 8px; line-height: 12px; padding: 0 1px; }
+  /* 切換鈕：兩顆同尺寸灰點（左＝上一個、右＝下一個），滑過時灰點收起、露出方向箭頭 */
+  .navdots { display: inline-flex; align-items: center; gap: 1px; flex: none; }
+  .nd { position: relative; flex: none; width: 13px; height: 13px; padding: 0; border: 0; background: none; cursor: pointer; }
+  .nd::before {
+    content: ""; position: absolute; left: 50%; top: 50%;
+    width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%;
+    background: var(--nd-dot);
+    transition: transform 0.18s ease, opacity 0.18s ease;
+  }
+  .nd::after {
+    content: ""; position: absolute; left: 50%; top: 50%;
+    width: 4px; height: 4px;
+    border-top: 1.5px solid var(--nd-arrow); border-right: 1.5px solid var(--nd-arrow);
+    opacity: 0; transition: opacity 0.18s ease;
+  }
+  .nd.prev::after { transform: translate(-30%, -50%) rotate(-135deg); }
+  .nd.next::after { transform: translate(-75%, -50%) rotate(45deg); }
+  .nd:hover::before, .nd:focus-visible::before { transform: scale(0.2); opacity: 0; }
+  .nd:hover::after, .nd:focus-visible::after { opacity: 1; }
+  .nd:active::after { border-color: var(--text); }
+  .nd:focus-visible { outline: none; }
+  .mc-nav { gap: 0; }
   .mc-grid {
     display: grid;
     grid-template-columns: repeat(7, 18px);
@@ -275,8 +297,7 @@
     color: var(--text2);
     user-select: none;
   }
-  .mc-h.sun { color: var(--rest-sun); }
-  .mc-h.sat { color: var(--rest-sat-text); }
+  .mc-h.rest { color: var(--rest-sun); }
   .mc-d {
     position: relative;
     display: flex;
@@ -295,26 +316,40 @@
     transition: background 0.15s ease;
   }
   .mc-d:hover { background: var(--seg-empty); }
-  .mc-d:focus-visible { outline: none; box-shadow: 0 0 0 1px var(--cal-evt); }
-  .mc-d.sat { color: var(--rest-sat-text); }
-  .mc-d.sun { color: var(--rest-sun); }
-  .mc-d.out { opacity: 0.32; }
-  .mc-d.today { background: var(--wd-on); color: #FFFFFF; opacity: 1; }
-  .mc-d.today.sat { background: var(--rest-sat); }
-  .mc-d.today.sun { background: var(--rest-sun); }
-  /* 有行程：日期下方一道霧青短線（今天實心底上改白線） */
-  .mc-d.ev::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    bottom: -1px;
-    width: 8px;
-    height: 2px;
-    margin-left: -4px;
-    border-radius: 1px;
-    background: var(--cal-evt);
+  .mc-d:focus-visible { outline: none; box-shadow: 0 0 0 1px var(--text2); }
+  .mc-d.rest { color: var(--rest-sun); }              /* 週六日、國定假日：統一珊瑚橘 */
+  .mc-d.out, .mc-d.out.rest { color: var(--cal-out); } /* 其他月份：一律灰，不分平日假日 */
+  /* 有行程：琥珀透明底，筆數越多疊得越深（--ea 由程式依筆數設定） */
+  .mc-d.ev { background: rgba(var(--ev-rgb), var(--ea, 0.2)); }
+  .mc-d.ev:hover { background: rgba(var(--ev-rgb), calc(var(--ea, 0.2) + 0.12)); }
+  .mc-d.today, .mc-d.today.ev { background: var(--wd-on); color: #FFFFFF; }
+  .mc-d.today.rest, .mc-d.today.rest.ev { background: var(--rest-sun); }
+  /* ---- 今天／明天行程欄（月曆右側） ---- */
+  .agenda {
+    grid-column: 4;
+    grid-row: 1 / span 2;
+    align-self: center;
+    width: 168px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-auto-rows: 15px;
+    column-gap: 8px;
+    font-size: 11px;
+    line-height: 15px;
   }
-  .mc-d.today.ev::after { bottom: 1px; height: 1.5px; background: rgba(255,255,255,0.9); }
+  .agenda[hidden] { display: none; }
+  .wrap:has(.agenda[hidden]) { grid-template-columns: minmax(0, 1fr) auto auto auto; }
+  .wrap:has(.agenda[hidden]) .dots { grid-column: 4; }
+  .ag-lab { grid-column: 1; font-size: 10.5px; font-weight: 600; color: var(--text2); white-space: nowrap; }
+  .ag-lab.td { color: var(--chip-text); }
+  .ag-it, .ag-none, .ag-more { grid-column: 2; min-width: 0; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .ag-tm { flex: none; font-size: 10px; color: var(--text2); font-variant-numeric: tabular-nums; }
+  .ag-tm.ad { font-size: 9px; line-height: 13px; padding: 0 4px; border-radius: 3px; background: rgba(var(--ev-rgb), 0.3); color: var(--ag-ad-text); }
+  .ag-ti { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+  .ag-it.past { opacity: 0.38; }
+  .ag-it.now .ag-tm { color: var(--wd-on); font-weight: 650; }
+  .ag-none, .ag-more { color: var(--text2); opacity: 0.75; font-size: 10.5px; }
+  .agenda .gap { margin-top: 4px; } /* 今天與明天之間留一點呼吸 */
   .doy-chip.s-spring { background: rgba(120,180,130,0.18); color: #55875B; }
   .doy-chip.s-summer { background: rgba(226,132,110,0.18); color: #C2604F; }
   .doy-chip.s-autumn { background: rgba(226,178,96,0.2); color: #A9702B; }
@@ -488,7 +523,7 @@
   }
   /* ---- theme dots (right edge) ---- */
   .dots {
-    grid-column: 4;
+    grid-column: 5;
     grid-row: 1 / span 2;
     align-self: center;
     display: grid;
@@ -529,6 +564,15 @@
   .dot-teal  { --c: var(--dot-teal); }
   /* ---- 響應式排版 ---- */
   .lbrk { display: none; } /* 手機版換行器：桌面不顯示 */
+  /* 行程欄：寬度不夠時先縮窄（標題自動截斷），再不夠就收起（滑過月曆日期仍看得到行程） */
+  @media (max-width: 1119px) {
+    .agenda { width: 122px; column-gap: 6px; }
+  }
+  @media (max-width: 1059px) {
+    .agenda { display: none; }
+    .wrap { grid-template-columns: minmax(0, 1fr) auto auto auto; } /* 收起後不留空欄位與間距 */
+    .dots { grid-column: 4; }
+  }
   /* 中寬（約 761–960px）：月曆與間距稍微收緊，避免時鐘被擠到第二行 */
   @media (max-width: 960px) {
     body { padding: 8px 16px; }
@@ -575,7 +619,6 @@
   .news-src { flex: none; color: var(--text2); opacity: .75; font-size: 10.5px; }
   .news-btn { flex: none; border: 0; background: none; cursor: pointer; padding: 0 2px; color: var(--text2); font-size: 10px; line-height: 16px; opacity: .35; }
   .news-btn:hover { opacity: 1; }
-  .news-nav { font-size: 11px; padding: 0 1px; }
   .news-row.off { display: none; }
   .news-toggle { border: 0; background: none; cursor: pointer; padding: 0 2px; font-size: 12px; line-height: 15px; align-self: center; opacity: .9; transition: opacity .25s ease, filter .25s ease; }
   .news-toggle.off { opacity: .3; filter: grayscale(1); }
@@ -658,8 +701,10 @@
         <a class="news-a" id="newsA" href="#" target="_blank" rel="noopener noreferrer">—</a>
         <span class="news-src" id="newsSrc"></span>
       </span>
-      <button type="button" class="news-btn news-nav" id="newsPrev" aria-label="上一則">▲</button>
-      <button type="button" class="news-btn news-nav" id="newsNext" aria-label="下一則">▼</button>
+      <span class="navdots news-navs">
+        <button type="button" class="nd prev" id="newsPrev" aria-label="上一則" title="上一則"></button>
+        <button type="button" class="nd next" id="newsNext" aria-label="下一則" title="下一則"></button>
+      </span>
       <div class="news-pop" id="newsPop" hidden></div>
     </div>
     <div class="vdiv" aria-hidden="true"></div>
@@ -667,13 +712,14 @@
       <div class="mc-side">
         <span class="mc-yr" id="mcYr">—</span>
         <button type="button" class="mc-mon" id="mcMon" aria-label="月份"><b id="mcMonNum">—</b><i>月</i></button>
-        <span class="mc-nav">
-          <button type="button" class="news-btn mc-btn" id="mcPrev" aria-label="上個月" title="上個月">▲</button>
-          <button type="button" class="news-btn mc-btn" id="mcNext" aria-label="下個月" title="下個月">▼</button>
+        <span class="navdots mc-nav">
+          <button type="button" class="nd prev" id="mcPrev" aria-label="上個月" title="上個月"></button>
+          <button type="button" class="nd next" id="mcNext" aria-label="下個月" title="下個月"></button>
         </span>
       </div>
       <div class="mc-grid" id="mcGrid"></div>
     </div>
+    <div class="agenda" id="agenda" hidden aria-label="今天與明天的行程"></div>
     <div class="dots" role="group" aria-label="主題顏色">
       <button type="button" class="dot dot-blue" data-theme="blue" aria-label="淡藍主題"></button>
       <button type="button" class="dot dot-green" data-theme="green" aria-label="淡綠主題"></button>
@@ -2020,9 +2066,10 @@
       buildGlobalNote();
     });
   }
-  // ---- 月曆：整月六週、可切換月份；滑過日期看農曆／節氣／國定假日／Google 行程，點一下在 Google 日曆開啟該日 ----
+  // ---- 月曆：整月六週、可切換月份；滑過日期看農曆／節氣／國定假日／Google 行程，點一下在 Google 日曆開啟該月 ----
   // 行程來源：Worker /cal 路由（彙整各帳戶的 Apps Script；網址與金鑰都存在 Worker Secrets）
   // 存取碼 k 只放在 Notion 嵌入網址的 # 後面；沒有存取碼時月曆照常運作，只是不顯示行程
+  // 右側「今天／明天」行程欄：固定讀本月資料，翻到其他月份也不受影響
   var CAL_KEY = "";
   try {
     if (HASHP.k != null) { // 網址帶 #k= 時以網址為準（k= 空值＝清除本機記住的存取碼）
@@ -2038,33 +2085,42 @@
     return mx;
   })();
   var CAL_HEAD = ["日", "一", "二", "三", "四", "五", "六"];
+  var EV_ALPHA = [0, 0.2, 0.36, 0.49, 0.59, 0.67]; // 行程底色：每多一筆疊一層 20% 透明琥珀（1-(0.8)^n），5 筆封頂
+  var AG_LINES = 5;                                  // 今天／明天欄最多幾行
   var mcalEl = document.getElementById("mcal");
   var mcGrid = document.getElementById("mcGrid");
+  var agEl = document.getElementById("agenda");
   var calView = null, calFollow = true;           // calFollow：目前是否停在「本月」
   var calEv = {}, calEvState = "off", calEvKey = "", calEvFailed = [], calEvMulti = false;
+  var calHome = null, calHomeState = "off";       // 本月資料（給今天／明天欄用）
+  var calInflight = {};
   var calLunarMemo = {}, calAwayT = null, calRefLast = 0, calInited = false;
 
-  function gcalDayUrl(d) {
-    var path = "r/day/" + d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate();
+  function gcalUrl(view, d) {
+    var path = "r/" + view + "/" + d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate();
     return GCAL_USER.indexOf("@") > 0
       ? "https://calendar.google.com/calendar/" + path + "?authuser=" + encodeURIComponent(GCAL_USER)
       : "https://calendar.google.com/calendar/u/" + encodeURIComponent(GCAL_USER) + "/" + path;
   }
   function calGridStart(y, m) { var f = new Date(y, m, 1); return new Date(y, m, 1 - f.getDay()); }
   function addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+  function calRangeKey(y, m) { var g0 = calGridStart(y, m); return ymdLocal(g0) + "_" + ymdLocal(addDays(g0, 42)); }
+  function calHomeKey() { var n = new Date(); return calRangeKey(n.getFullYear(), n.getMonth()); }
   function parseYmd(t) {
     var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(t || ""));
     return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
   }
+  function hm2min(t) { var m = /^(\d{2}):(\d{2})/.exec(t || ""); return m ? +m[1] * 60 + +m[2] : 0; }
   function calLunar(d) {
     var k = ymdLocal(d);
     if (!(k in calLunarMemo)) calLunarMemo[k] = lunarText(d);
     return calLunarMemo[k];
   }
   // 把 Worker 回傳的事件攤到每一天：全天事件（結束日不含）、跨日事件逐日列出
+  // 每筆：text＝[時間標籤, 標題, 〔日曆名〕]；ad＝整天；sm/em＝當天起訖分鐘（判斷已結束／進行中）
   function buildCalIndex(events) {
     var idx = {}, cals = {};
-    function put(k, sort, text) { (idx[k] = idx[k] || []).push({ sort: sort, text: text }); }
+    function put(k, sort, text, ad, sm, em) { (idx[k] = idx[k] || []).push({ sort: sort, text: text, ad: ad, sm: sm, em: em }); }
     for (var i = 0; i < events.length; i++) {
       var ev = events[i];
       if (!ev || !ev.s) continue;
@@ -2075,7 +2131,7 @@
         var s0 = parseYmd(ev.s), e0 = parseYmd(ev.e);
         if (!s0) continue;
         if (!e0 || e0 <= s0) e0 = addDays(s0, 1);
-        for (var d = s0, n = 0; d < e0 && n < 62; d = addDays(d, 1), n++) put(ymdLocal(d), "", ["全天", title, tag]);
+        for (var d = s0, n = 0; d < e0 && n < 62; d = addDays(d, 1), n++) put(ymdLocal(d), "", ["全天", title, tag], true, 0, 1440);
         continue;
       }
       var sd = String(ev.s).slice(0, 10), ed = String(ev.e || ev.s).slice(0, 10);
@@ -2084,20 +2140,20 @@
       if (!sD) continue;
       if (et === "00:00" && eD > sD) { eD = addDays(eD, -1); et = "24:00"; } // 結束在午夜＝當天結束
       if (ymdLocal(eD) === sd) {
-        put(sd, st, [st + (et && et !== st ? "–" + et : ""), title, tag]);
+        put(sd, st, [st + (et && et !== st ? "–" + et : ""), title, tag], false, hm2min(st), et ? hm2min(et) : hm2min(st) + 1);
         continue;
       }
       for (var d2 = sD, n2 = 0; d2 <= eD && n2 < 62; d2 = addDays(d2, 1), n2++) {
         var k2 = ymdLocal(d2);
-        if (k2 === sd) put(k2, st, [st + " 起", title, tag]);
-        else if (k2 === ymdLocal(eD) && et !== "24:00") put(k2, "", ["至 " + et, title, tag]);
-        else put(k2, "", ["全天", title, tag]);
+        if (k2 === sd) put(k2, st, [st + " 起", title, tag], false, hm2min(st), 1440);
+        else if (k2 === ymdLocal(eD) && et !== "24:00") put(k2, "", ["至 " + et, title, tag], false, 0, hm2min(et));
+        else put(k2, "", ["全天", title, tag], true, 0, 1440);
       }
     }
     for (var key in idx) idx[key].sort(function (a, b) { return a.sort < b.sort ? -1 : a.sort > b.sort ? 1 : 0; });
-    calEvMulti = Object.keys(cals).length > 1; // 只有一個日曆時不標日曆名
-    return idx;
+    return { map: idx, multi: Object.keys(cals).length > 1 }; // 只有一個日曆時不標日曆名
   }
+  function evLine(e, multi) { return "・" + e.text[0] + "　" + e.text[1] + (multi ? " " + e.text[2] : ""); }
   function calDayTitle(d, hol, evs) {
     var lun = calLunar(d), term = solarTermOf(d);
     var lines = [(d.getMonth() + 1) + "/" + d.getDate() + "（" + WEEKDAYS[d.getDay()] + "）" + (lun ? "｜農曆" + lun : "")];
@@ -2108,16 +2164,13 @@
     if (CAL_KEY) {
       lines.push("");
       if (evs && evs.length) {
-        for (var i = 0; i < evs.length && i < 10; i++) {
-          var t = evs[i].text;
-          lines.push("・" + t[0] + "　" + t[1] + (calEvMulti ? " " + t[2] : ""));
-        }
+        for (var i = 0; i < evs.length && i < 10; i++) lines.push(evLine(evs[i], calEvMulti));
         if (evs.length > 10) lines.push("…還有 " + (evs.length - 10) + " 筆");
       } else {
         lines.push(calEvState === "loading" ? "行程載入中…" : calEvState === "err" ? "行程暫時無法取得" : "沒有行程");
       }
     }
-    lines.push("", "點一下：在 Google 日曆開啟這一天");
+    lines.push("", "點一下：在 Google 日曆開啟 " + (d.getMonth() + 1) + " 月");
     return lines.join("\n");
   }
   function renderCal() {
@@ -2130,7 +2183,7 @@
     var frag = document.createDocumentFragment();
     for (var h = 0; h < 7; h++) {
       var he = document.createElement("span");
-      he.className = "mc-h" + (h === 0 ? " sun" : h === 6 ? " sat" : "");
+      he.className = "mc-h" + (h === 0 || h === 6 ? " rest" : "");
       he.textContent = CAL_HEAD[h];
       he.setAttribute("aria-hidden", "true");
       frag.appendChild(he);
@@ -2138,12 +2191,13 @@
     var g0 = calGridStart(y, m), todayK = ymdLocal(now), hols = [], evDays = 0;
     for (var i = 0; i < 42; i++) {
       var d = addDays(g0, i), k = ymdLocal(d), w = d.getDay(), hol = TW_HOLIDAYS[k], inMon = d.getMonth() === m;
-      var evs = calEv[k];
+      var evs = calEv[k], n = evs ? Math.min(evs.length, 5) : 0;
       var a = document.createElement("a");
-      a.className = "mc-d" + (inMon ? "" : " out") + (w === 0 || hol ? " sun" : w === 6 ? " sat" : "") +
-        (k === todayK ? " today" : "") + (evs && evs.length ? " ev" : "");
+      a.className = "mc-d" + (inMon ? "" : " out") + (w === 0 || w === 6 || hol ? " rest" : "") +
+        (k === todayK ? " today" : "") + (n ? " ev" : "");
+      if (n) a.style.setProperty("--ea", (EV_ALPHA[n] * (inMon ? 1 : 0.6)).toFixed(3));
       a.textContent = d.getDate();
-      a.href = gcalDayUrl(d);
+      a.href = gcalUrl("month", d);
       a.target = "_blank";
       a.rel = "noopener noreferrer";
       a.title = calDayTitle(d, hol, evs);
@@ -2159,61 +2213,137 @@
     if (y > TW_HOL_MAX_YEAR) info.push("※ " + y + " 年國定假日表尚未建立（人事總處每年 6 月公告後補上）");
     else info.push(hols.length ? "國定假日：" + hols.join("、") : "本月沒有國定假日");
     if (CAL_KEY) {
-      if (calEvState === "ok") info.push("有行程的日子：" + evDays + " 天" + (calEvFailed.length ? "（未取得：" + calEvFailed.join("、") + "）" : ""));
+      if (calEvState === "ok") info.push("有行程的日子：" + evDays + " 天（底色越深＝行程越多）" + (calEvFailed.length ? "（未取得：" + calEvFailed.join("、") + "）" : ""));
       else if (calEvState === "loading") info.push("行程載入中…");
       else if (calEvState === "err") info.push("行程暫時無法取得");
     }
     info.push("");
     if (!calFollow) info.push("點一下：回到本月");
     else if (CAL_KEY) info.push("點一下：重新整理行程");
-    info.push("▲▼：切換月份" + (calFollow ? "" : "（滑鼠離開 1 分鐘後自動回到本月）"));
+    info.push("下方兩點：左＝上個月、右＝下個月" + (calFollow ? "" : "（滑鼠離開 1 分鐘後自動回到本月）"));
     var mon = document.getElementById("mcMon");
     mon.title = info.join("\n");
     mon.setAttribute("aria-label", y + " 年 " + (m + 1) + " 月");
     mcalEl.setAttribute("aria-label", "月曆，" + y + " 年 " + (m + 1) + " 月");
   }
-  function applyCalEvents(events, failed) {
-    calEv = buildCalIndex(events || []);
-    calEvFailed = failed || [];
-    calEvState = "ok";
-    renderCal();
+  // ---- 今天／明天行程欄 ----
+  function agEl_(tag, cls, text) { var e = document.createElement(tag); e.className = cls; if (text != null) e.textContent = text; return e; }
+  function renderAgenda() {
+    if (!agEl) return;
+    if (!CAL_KEY) { agEl.hidden = true; return; }
+    agEl.hidden = false;
+    var now = new Date(), nowMin = now.getHours() * 60 + now.getMinutes();
+    var tK = ymdLocal(now), mK = ymdLocal(addDays(now, 1));
+    var map = calHome ? calHome.map : {}, multi = calHome ? calHome.multi : false;
+    var days = [
+      { lab: "今天", cls: "td", list: (map[tK] || []).slice(), today: true },
+      { lab: "明天", cls: "tm", list: (map[mK] || []).slice(), today: false }
+    ];
+    var frag = document.createDocumentFragment(), tip = [];
+    if (!calHome) {
+      frag.appendChild(agEl_("span", "ag-lab td", "今天"));
+      frag.appendChild(agEl_("span", "ag-none", calHomeState === "err" ? "行程暫時無法取得" : "行程載入中…"));
+      agEl.innerHTML = ""; agEl.appendChild(frag); agEl.title = ""; return;
+    }
+    // 行數分配：明天至少 1 行（最多先留 2 行），其餘給今天；今天放不下時優先省略已結束的
+    var mNeed = Math.min(Math.max(days[1].list.length, 1), 2);
+    var tCap = Math.max(1, AG_LINES - mNeed);
+    var tUsed = Math.min(Math.max(days[0].list.length, 1), tCap);
+    var caps = [tUsed, AG_LINES - tUsed];
+    days.forEach(function (day, di) {
+      var list = day.list, cap = caps[di];
+      tip.push(day.lab + "（" + (addDays(now, di).getMonth() + 1) + "/" + addDays(now, di).getDate() + "）");
+      if (!list.length) tip.push("・沒有行程");
+      list.forEach(function (e) { tip.push(evLine(e, multi)); });
+      if (di === 0) tip.push("");
+      var show = list, moreLine = false;
+      if (list.length > cap) {
+        if (day.today) { // 放不下時，先省略已結束的（滑過行程欄仍可看到完整清單）
+          var live = list.filter(function (e) { return e.ad || e.em > nowMin; });
+          if (live.length) show = live;
+        }
+        var base = show; // 「＋N 項」只算還沒結束、被省略的
+        if (show.length > cap) { show = show.slice(0, cap - 1); moreLine = true; }
+      }
+      var more = moreLine ? base.length - show.length : 0;
+      var rows = Math.max(show.length + (moreLine ? 1 : 0), 1);
+      var lab = agEl_("span", "ag-lab " + day.cls + (di ? " gap" : ""), day.lab);
+      lab.style.gridRow = "span " + rows;
+      frag.appendChild(lab);
+      if (!list.length) frag.appendChild(agEl_("span", "ag-none" + (di ? " gap" : ""), "沒有行程"));
+      show.forEach(function (e, j) {
+        var past = day.today && !e.ad && e.em <= nowMin;
+        var live = day.today && !e.ad && e.sm <= nowMin && nowMin < e.em;
+        var row = agEl_("span", "ag-it" + (past ? " past" : "") + (live ? " now" : "") + (di && !j ? " gap" : ""));
+        var tm = e.ad ? "全天" : e.text[0].replace(/–.*$/, "");
+        row.appendChild(agEl_("span", "ag-tm" + (e.ad ? " ad" : ""), tm));
+        row.appendChild(agEl_("span", "ag-ti", e.text[1]));
+        frag.appendChild(row);
+      });
+      if (moreLine) frag.appendChild(agEl_("span", "ag-more" + (di && !show.length ? " gap" : ""), "＋" + more + " 項"));
+    });
+    agEl.innerHTML = "";
+    agEl.appendChild(frag);
+    agEl.title = tip.join("\n");
   }
-  function loadCalEvents(force) {
-    if (!CAL_KEY || !WORKER_URL) { calEvState = "off"; return; }
-    var g0 = calGridStart(calView.y, calView.m), g1 = addDays(g0, 42);
-    var s0 = ymdLocal(g0), s1 = ymdLocal(g1), key = s0 + "_" + s1;
-    calEvKey = key;
+  // ---- 行程資料：localStorage 快取 10 分鐘＋背景更新；同一區間同時只發一個請求 ----
+  function applyCalEvents(key, events, failed) {
+    var r = buildCalIndex(events || []);
+    if (key === calEvKey) {
+      calEv = r.map; calEvMulti = r.multi; calEvFailed = failed || []; calEvState = "ok";
+      renderCal();
+    }
+    if (key === calHomeKey()) { r.key = key; calHome = r; calHomeState = "ok"; renderAgenda(); }
+  }
+  function calLoad(y, m, force) {
+    if (!CAL_KEY || !WORKER_URL) return;
+    var key = calRangeKey(y, m), parts = key.split("_");
     var store = null;
     try { store = JSON.parse(localStorage.getItem("calev1") || "null"); } catch (e) {}
     if (!store || typeof store !== "object") store = {};
     // 本機快取 10 分鐘：儀表板每次切頁都會重載，避免一直打 Apps Script
-    if (!force && store[key] && Date.now() - store[key].t < 10 * 60 * 1000) { applyCalEvents(store[key].ev, store[key].f); return; }
-    if (store[key]) applyCalEvents(store[key].ev, store[key].f); // 先顯示舊資料，背景更新
-    else { calEvState = "loading"; renderCal(); }
-    fetch(WORKER_URL + "/cal?start=" + s0 + "&end=" + s1 + (force ? "&fresh=1" : ""), { headers: { "X-Cal-Key": CAL_KEY } })
+    if (!force && store[key] && Date.now() - store[key].t < 10 * 60 * 1000) { applyCalEvents(key, store[key].ev, store[key].f); return; }
+    if (store[key]) applyCalEvents(key, store[key].ev, store[key].f); // 先顯示舊資料，背景更新
+    if (calInflight[key] && !force) return;
+    calInflight[key] = 1;
+    fetch(WORKER_URL + "/cal?start=" + parts[0] + "&end=" + parts[1] + (force ? "&fresh=1" : ""), { headers: { "X-Cal-Key": CAL_KEY } })
       .then(function (r) {
         if (!r.ok) throw new Error("http " + r.status);
         return r.json();
       })
       .then(function (j) {
+        delete calInflight[key];
         if (!j || Object.prototype.toString.call(j.events) !== "[object Array]") throw new Error("bad data");
-        store[key] = { t: Date.now(), ev: j.events, f: j.failed || [] };
-        var keys = Object.keys(store).sort(function (a, b) { return store[b].t - store[a].t; });
-        for (var i = 4; i < keys.length; i++) delete store[keys[i]]; // 只留最近 4 個月份
-        try { localStorage.setItem("calev1", JSON.stringify(store)); } catch (e) {}
-        if (calEvKey === key) applyCalEvents(j.events, j.failed);
+        var st2 = null;
+        try { st2 = JSON.parse(localStorage.getItem("calev1") || "null"); } catch (e) {}
+        if (!st2 || typeof st2 !== "object") st2 = {};
+        st2[key] = { t: Date.now(), ev: j.events, f: j.failed || [] };
+        var keys = Object.keys(st2).sort(function (a, b) { return st2[b].t - st2[a].t; });
+        for (var i = 4; i < keys.length; i++) delete st2[keys[i]]; // 只留最近 4 個月份
+        try { localStorage.setItem("calev1", JSON.stringify(st2)); } catch (e) {}
+        applyCalEvents(key, j.events, j.failed);
       })
       .catch(function () {
-        if (calEvKey !== key || store[key]) return; // 有舊資料就繼續顯示舊的
-        calEvState = "err";
-        renderCal();
+        delete calInflight[key];
+        if (store[key]) return; // 有舊資料就繼續顯示舊的
+        if (key === calEvKey && calEvState !== "ok") { calEvState = "err"; renderCal(); }
+        if (key === calHomeKey() && !calHome) { calHomeState = "err"; renderAgenda(); }
       });
+  }
+  function loadCalEvents(force) {
+    if (!CAL_KEY || !WORKER_URL) { calEvState = "off"; return; }
+    calEvKey = calRangeKey(calView.y, calView.m);
+    if (calEvState !== "ok" || !Object.keys(calEv).length) { calEvState = "loading"; }
+    calLoad(calView.y, calView.m, force);
+    if (calEvState === "loading") renderCal();
+    var n = new Date();
+    if (calRangeKey(n.getFullYear(), n.getMonth()) !== calEvKey) calLoad(n.getFullYear(), n.getMonth(), false); // 今天／明天欄
   }
   function calGo(delta) {
     var now = new Date();
     var d = delta === 0 ? new Date(now.getFullYear(), now.getMonth(), 1) : new Date(calView.y, calView.m + delta, 1);
     calView = { y: d.getFullYear(), m: d.getMonth() };
-    calEv = {}; // 換月先清掉舊索引，等新資料進來
+    calEv = {}; calEvState = "loading"; // 換月先清掉舊索引，等新資料進來
     renderCal();
     loadCalEvents(false);
   }
@@ -2224,16 +2354,21 @@
     if (calFollow) {
       var moved = calView.y !== now.getFullYear() || calView.m !== now.getMonth();
       calView = { y: now.getFullYear(), m: now.getMonth() };
-      if (moved) { calEv = {}; loadCalEvents(false); }
+      if (moved) { calEv = {}; calHome = null; calEvState = "loading"; loadCalEvents(false); }
     }
+    if (calHome && calHome.key !== calHomeKey()) calHome = null; // 跨月：本月資料換新
+    if (!calHome) { var n2 = new Date(); calLoad(n2.getFullYear(), n2.getMonth(), false); }
     renderCal();
+    renderAgenda();
   }
   (function initCal() {
     var now = new Date();
     calView = { y: now.getFullYear(), m: now.getMonth() };
     calInited = true;
     calEvState = CAL_KEY ? "loading" : "off";
+    calHomeState = CAL_KEY ? "loading" : "off";
     renderCal();
+    renderAgenda();
     loadCalEvents(false);
     document.getElementById("mcPrev").addEventListener("click", function () { calGo(-1); });
     document.getElementById("mcNext").addEventListener("click", function () { calGo(1); });
@@ -2251,6 +2386,7 @@
     });
     mcalEl.addEventListener("mouseenter", function () { if (calAwayT) { clearTimeout(calAwayT); calAwayT = null; } });
     setInterval(function () { loadCalEvents(false); }, 15 * 60 * 1000);
+    setInterval(renderAgenda, 60 * 1000); // 每分鐘更新「已結束／進行中」狀態
   })();
   updateCalendarChips(); // 月相與農曆資料就緒後立即補顯示
   loadWeather();
