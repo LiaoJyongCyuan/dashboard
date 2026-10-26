@@ -10,18 +10,23 @@
     --text2: #7D7A75;
     --seg-empty: #F0EFED;
     --dot-ring: rgba(0,0,0,0.18);
-    --sea-sp: #7FBE8B; --sea-su: #E5A898; --sea-au: #E0BE8A; --sea-wi: #82A8DB; --sea-hand: #C2552A;
+    --sea-sp: #7FBE8B; --sea-su: #E5A898; --sea-au: #E0BE8A; --sea-wi: #82A8DB;
     --sun-day: #EBB670;
     --sun-night: #96A8C9;
     --mkt-closed: #EDEDEB;
-    --sun-hand: #D5754A; /* 白天指針：比主題橘再沉穩一點 */
-    --sun-hand-night: #57649E; /* 夜間指針：靛藍再淡一階，仍暗於夜弧 #96A8C9 */
+    --ring-hand: #D5754A; /* 日照輪、四季輪的圓點指針（同一色，比主題橘再沉穩一點） */
     --dot-blue: #A9CDEC;
     --dot-green: #A8D3B8;
     --dot-amber: #E9CF95;
     --dot-lav: #C9B8E4;
     --dot-rose: #E9BCC8;
     --dot-teal: #A8D3D1;
+    --dot-indigo: #B3BBE6;
+    --dot-peach: #F2C4A8;
+    --dot-olive: #C9CC9C;
+    --dot-mauve: #D4B5CF;
+    --dot-slate: #B7C3CF;
+    --dot-sand: #D3C7B4;
     --seg-fill-a: #BFD9F2;
     --seg-fill-b: #8FBBE8;
     --chip-bg: #EAF3FB;
@@ -41,6 +46,7 @@
     --nd-dot: #D3D0CA;        /* 切換圓點 */
     --nd-arrow: #7D7A75;      /* 切換圓點滑過時的箭頭 */
     --ag-ad-text: #9A6A1E;    /* 行程欄「全天」標籤字色 */
+    --ag-today: #4A8FE7;      /* 行程欄「今天」：固定藍，不隨主題變色 */
     /* 年度天數標籤：扁平內斂 */
     --doy-text: #8C8983;
     /* 分區細線 */
@@ -76,18 +82,53 @@
     --chip-bg: #E9F5F4;
     --chip-text: #4E9C99;
   }
+  :root[data-theme="indigo"] {
+    --seg-fill-a: #D3D8F2;
+    --seg-fill-b: #9AA5E0;
+    --chip-bg: #EEF0FA;
+    --chip-text: #5F6BB8;
+  }
+  :root[data-theme="peach"] {
+    --seg-fill-a: #F6DCCB;
+    --seg-fill-b: #EDB08C;
+    --chip-bg: #FCF1EA;
+    --chip-text: #BF7A52;
+  }
+  :root[data-theme="olive"] {
+    --seg-fill-a: #E0E2C4;
+    --seg-fill-b: #BFC388;
+    --chip-bg: #F4F5EA;
+    --chip-text: #7F8445;
+  }
+  :root[data-theme="mauve"] {
+    --seg-fill-a: #E8D5E5;
+    --seg-fill-b: #C998C1;
+    --chip-bg: #F7EFF5;
+    --chip-text: #9A6390;
+  }
+  :root[data-theme="slate"] {
+    --seg-fill-a: #D5DDE5;
+    --seg-fill-b: #A3B3C3;
+    --chip-bg: #EEF2F5;
+    --chip-text: #607487;
+  }
+  :root[data-theme="sand"] {
+    --seg-fill-a: #E3DED5;
+    --seg-fill-b: #C4B8A6;
+    --chip-bg: #F4F1EC;
+    --chip-text: #857A68;
+  }
   @media (prefers-color-scheme: dark) {
     :root {
       --text: #FFFFFF;
       --text2: rgba(255,255,255,0.65);
       --seg-empty: rgba(255,255,255,0.13);
       --dot-ring: rgba(255,255,255,0.35);
-      --sea-sp: #6C9A77; --sea-su: #906860; --sea-au: #867150; --sea-wi: #5D80A8; --sea-hand: #F0925C;
+      --sea-sp: #6C9A77; --sea-su: #906860; --sea-au: #867150; --sea-wi: #5D80A8;
       --sun-day: rgba(236,175,110,0.78);
       --sun-night: rgba(135,158,205,0.7);
       --mkt-closed: rgba(170,170,170,0.2);
-      --sun-hand: #D9814F; /* 白天指針（深色模式）：稍降亮度 */
-      --sun-hand-night: #8194DF; /* 夜間指針（深色模式）：靛藍再淡一階 */
+      --ring-hand: #DE8556; /* 圓點指針（深色模式） */
       --seg-fill-a: rgba(94,159,232,0.45);
       --seg-fill-b: rgba(94,159,232,0.85);
       --chip-bg: rgba(94,159,232,0.14);
@@ -107,6 +148,7 @@
       --nd-dot: rgba(255,255,255,0.26);
       --nd-arrow: rgba(255,255,255,0.78);
       --ag-ad-text: #EBC27A;
+      --ag-today: #74AEF4;
     }
     :root[data-theme="green"] {
       --seg-fill-a: rgba(114,188,143,0.45);
@@ -138,6 +180,42 @@
       --chip-bg: rgba(130,198,195,0.14);
       --chip-text: #9AD0CD;
     }
+    :root[data-theme="indigo"] {
+      --seg-fill-a: rgba(154,165,224,0.45);
+      --seg-fill-b: rgba(154,165,224,0.85);
+      --chip-bg: rgba(154,165,224,0.14);
+      --chip-text: #B3BCEB;
+    }
+    :root[data-theme="peach"] {
+      --seg-fill-a: rgba(237,176,140,0.45);
+      --seg-fill-b: rgba(237,176,140,0.85);
+      --chip-bg: rgba(237,176,140,0.14);
+      --chip-text: #F0BE9F;
+    }
+    :root[data-theme="olive"] {
+      --seg-fill-a: rgba(191,195,136,0.45);
+      --seg-fill-b: rgba(191,195,136,0.85);
+      --chip-bg: rgba(191,195,136,0.14);
+      --chip-text: #CDD199;
+    }
+    :root[data-theme="mauve"] {
+      --seg-fill-a: rgba(201,152,193,0.45);
+      --seg-fill-b: rgba(201,152,193,0.85);
+      --chip-bg: rgba(201,152,193,0.14);
+      --chip-text: #D9B2D2;
+    }
+    :root[data-theme="slate"] {
+      --seg-fill-a: rgba(163,179,195,0.45);
+      --seg-fill-b: rgba(163,179,195,0.85);
+      --chip-bg: rgba(163,179,195,0.14);
+      --chip-text: #B5C3D1;
+    }
+    :root[data-theme="sand"] {
+      --seg-fill-a: rgba(196,184,166,0.45);
+      --seg-fill-b: rgba(196,184,166,0.85);
+      --chip-bg: rgba(196,184,166,0.14);
+      --chip-text: #D3C7B5;
+    }
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; background: transparent; }
@@ -153,7 +231,7 @@
   .wrap {
     width: 100%;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto auto auto;
+    grid-template-columns: minmax(0, 1fr) auto auto auto auto auto; /* 主資訊｜分隔線｜月份｜月曆格｜行程｜主題色 */
     column-gap: 12px;
     align-items: center;
   }
@@ -207,22 +285,17 @@
     background: var(--divider);
   }
   /* ---- 月曆（整月六週、可切換月份；滑過日期看農曆／節日／行程，點一下開 Google 日曆） ---- */
-  .mcal {
-    grid-column: 3;
-    grid-row: 1 / span 2;
-    align-self: stretch;
-    display: flex;
-    gap: 7px;
-    min-height: 76px;
-  }
+  .mcal { display: contents; } /* 子元素直接排進外層格線：月份＋年（第 1 列）、切換灰點（第 2 列，與新聞列同高）、月曆格（跨兩列） */
   .mc-side {
-    flex: 0 0 auto;
+    grid-column: 3;
+    grid-row: 1;
+    align-self: stretch;
     width: 26px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    padding: 1px 0;
+    padding: 1px 0 0;
     user-select: none;
   }
   .mc-yr {
@@ -257,7 +330,6 @@
     color: var(--text2);
     margin-top: 1px;
   }
-  .mcal.away .mc-mon b { color: var(--chip-text); } /* 瀏覽其他月份時，月份數字改主題色提示 */
   /* 切換鈕：兩顆同尺寸灰點（左＝上一個、右＝下一個），滑過時灰點收起、露出方向箭頭 */
   .navdots { display: inline-flex; align-items: center; gap: 1px; flex: none; }
   .nd { position: relative; flex: none; width: 13px; height: 13px; padding: 0; border: 0; background: none; cursor: pointer; }
@@ -275,12 +347,28 @@
   }
   .nd.prev::after { transform: translate(-30%, -50%) rotate(-135deg); }
   .nd.next::after { transform: translate(-75%, -50%) rotate(45deg); }
+  .nd.down::after { transform: translate(-50%, -75%) rotate(135deg); }
   .nd:hover::before, .nd:focus-visible::before { transform: scale(0.2); opacity: 0; }
   .nd:hover::after, .nd:focus-visible::after { opacity: 1; }
   .nd:active::after { border-color: var(--text); }
   .nd:focus-visible { outline: none; }
-  .mc-nav { gap: 0; }
+  /* 月份切換灰點：放在第 2 列，盒模型與新聞列相同（上距 7、細線 1、內距 6），圓點中心自然同高 */
+  .mc-nav {
+    grid-column: 3;
+    grid-row: 2;
+    align-self: stretch;
+    justify-self: center;
+    gap: 0;
+    margin-top: 7px;
+    padding-top: 6px;
+    border-top: 1px solid transparent;
+  }
   .mc-grid {
+    grid-column: 4;
+    grid-row: 1 / span 2;
+    align-self: stretch;
+    min-height: 76px;
+    margin-left: -5px; /* 與月份欄只隔 7px */
     display: grid;
     grid-template-columns: repeat(7, 18px);
     grid-template-rows: auto repeat(6, minmax(0, 1fr));
@@ -326,29 +414,30 @@
   .mc-d.today.rest, .mc-d.today.rest.ev { background: var(--rest-sun); }
   /* ---- 今天／明天行程欄（月曆右側） ---- */
   .agenda {
-    grid-column: 4;
+    grid-column: 5;
     grid-row: 1 / span 2;
-    align-self: center;
+    align-self: start;
     width: 168px;
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-auto-rows: 15px;
-    column-gap: 8px;
+    display: flex;
+    flex-direction: column;
     font-size: 11px;
     line-height: 15px;
   }
   .agenda[hidden] { display: none; }
-  .wrap:has(.agenda[hidden]) { grid-template-columns: minmax(0, 1fr) auto auto auto; }
-  .wrap:has(.agenda[hidden]) .dots { grid-column: 4; }
-  .ag-lab { grid-column: 1; font-size: 10.5px; font-weight: 600; color: var(--text2); white-space: nowrap; }
-  .ag-lab.td { color: var(--chip-text); }
-  .ag-it, .ag-none, .ag-more { grid-column: 2; min-width: 0; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .wrap:has(.agenda[hidden]) { grid-template-columns: minmax(0, 1fr) auto auto auto auto; } /* 沒有行程欄時不留空欄位 */
+  .wrap:has(.agenda[hidden]) .dots { grid-column: 5; }
+  .ag-hd, .ag-it { height: 15px; min-width: 0; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .ag-hd { justify-content: space-between; }
+  .ag-lab { font-size: 11px; font-weight: 650; color: var(--text); }
+  .ag-lab.td { color: var(--ag-today); }
+  .ag-cnt { font-size: 9.5px; color: var(--text2); opacity: 0.85; }
   .ag-tm { flex: none; font-size: 10px; color: var(--text2); font-variant-numeric: tabular-nums; }
   .ag-tm.ad { font-size: 9px; line-height: 13px; padding: 0 4px; border-radius: 3px; background: rgba(var(--ev-rgb), 0.3); color: var(--ag-ad-text); }
   .ag-ti { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+  .ag-pill { flex: none; font-size: 9.5px; line-height: 13px; padding: 0 6px; border-radius: 4px; background: rgba(var(--ev-rgb), 0.3); color: var(--ag-ad-text); }
+  .ag-plus { flex: none; margin-left: auto; font-size: 9px; line-height: 12px; padding: 0 4px; border-radius: 6px; background: var(--seg-empty); color: var(--text2); }
   .ag-it.past { opacity: 0.38; }
   .ag-it.now .ag-tm { color: var(--wd-on); font-weight: 650; }
-  .ag-none, .ag-more { color: var(--text2); opacity: 0.75; font-size: 10.5px; }
   .agenda .gap { margin-top: 4px; } /* 今天與明天之間留一點呼吸 */
   .doy-chip.s-spring { background: rgba(120,180,130,0.18); color: #55875B; }
   .doy-chip.s-summer { background: rgba(226,132,110,0.18); color: #C2604F; }
@@ -459,14 +548,12 @@
   #sunring { transform: none; }
   #sunDayArc { fill: none; stroke: var(--sun-day); stroke-width: 5.8; }
   #sunNightArc { fill: none; stroke: var(--sun-night); stroke-width: 5.8; }
-  #sunHand { fill: var(--sun-hand); }
-  #sunring.night #sunHand { fill: var(--sun-hand-night); }
+  #sunHand, #seasonHand { fill: var(--ring-hand); } /* 日照輪與四季輪的圓點指針同色 */
   /* 四季輪：一年一圈，四色＝天文四季 */
   .sea-spring { fill: none; stroke: var(--sea-sp); stroke-width: 5.8; }
   .sea-summer { fill: none; stroke: var(--sea-su); stroke-width: 5.8; }
   .sea-autumn { fill: none; stroke: var(--sea-au); stroke-width: 5.8; }
   .sea-winter { fill: none; stroke: var(--sea-wi); stroke-width: 5.8; }
-  #seasonHand { fill: var(--sea-hand); }
   .time {
     font-size: 21px;
     font-weight: 650;
@@ -522,15 +609,24 @@
     white-space: nowrap;
   }
   /* ---- theme dots (right edge) ---- */
+  /* 主題色：單直行，一次顯示一組 3 色；最下方灰點切換下一組（共 4 組 12 色） */
   .dots {
-    grid-column: 5;
+    grid-column: 6;
     grid-row: 1 / span 2;
     align-self: center;
-    display: grid;
-    grid-template-rows: repeat(3, auto);
-    grid-auto-flow: column;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 3px;
   }
+  .dpage { display: none; flex-direction: column; gap: 3px; }
+  .dpage.on { display: flex; }
+  .dpage.on .dot::before { animation: dotIn 0.26s ease backwards; }
+  .dpage.on .dot:nth-child(2)::before { animation-delay: 0.04s; }
+  .dpage.on .dot:nth-child(3)::before { animation-delay: 0.08s; }
+  @keyframes dotIn { from { transform: scale(0.3); opacity: 0; } }
+  .dots .nd { width: 11px; height: 11px; }
+  .dots .nd::before { width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; }
   .dot {
     width: 11px;
     height: 11px;
@@ -562,27 +658,34 @@
   .dot-lav   { --c: var(--dot-lav); }
   .dot-rose  { --c: var(--dot-rose); }
   .dot-teal  { --c: var(--dot-teal); }
+  .dot-indigo { --c: var(--dot-indigo); }
+  .dot-peach { --c: var(--dot-peach); }
+  .dot-olive { --c: var(--dot-olive); }
+  .dot-mauve { --c: var(--dot-mauve); }
+  .dot-slate { --c: var(--dot-slate); }
+  .dot-sand { --c: var(--dot-sand); }
   /* ---- 響應式排版 ---- */
   .lbrk { display: none; } /* 手機版換行器：桌面不顯示 */
   /* 行程欄：寬度不夠時先縮窄（標題自動截斷），再不夠就收起（滑過月曆日期仍看得到行程） */
   @media (max-width: 1119px) {
-    .agenda { width: 122px; column-gap: 6px; }
+    .agenda { width: 122px; }
   }
   @media (max-width: 1059px) {
     .agenda { display: none; }
-    .wrap { grid-template-columns: minmax(0, 1fr) auto auto auto; } /* 收起後不留空欄位與間距 */
-    .dots { grid-column: 4; }
+    .wrap { grid-template-columns: minmax(0, 1fr) auto auto auto auto; } /* 收起後不留空欄位與間距 */
+    .dots { grid-column: 5; }
   }
   /* 中寬（約 761–960px）：月曆與間距稍微收緊，避免時鐘被擠到第二行 */
   @media (max-width: 960px) {
     body { padding: 8px 16px; }
     .wrap { column-gap: 9px; }
-    .mcal { gap: 5px; }
-    .mc-grid { grid-template-columns: repeat(7, 16px); column-gap: 1px; }
+    .mc-grid { grid-template-columns: repeat(7, 16px); column-gap: 1px; margin-left: -4px; }
   }
   /* 中幅（窄視窗／平板）：先收掉右側月曆 */
   @media (max-width: 760px) {
     .mcal, .vdiv { display: none; }
+    .wrap, .wrap:has(.agenda[hidden]) { grid-template-columns: minmax(0, 1fr) auto; }
+    .wrap .dots, .wrap:has(.agenda[hidden]) .dots { grid-column: 2; }
   }
   /* 手機版：改為固定三行式排版，隱藏次要資訊
      第一行：日期＋週幾＋月相（左）、日照輪＋時鐘（右）
@@ -597,7 +700,7 @@
     .wx-chip { order: 4; }
     .time { font-size: 19px; }
     .time .sec { display: none; }
-    #weekring, #dayring, #seasonring { display: none; }
+    #seasonring { display: none; }
     .dots { display: none; }
     .doy-chip { display: none; }
     .wx-chip .wx-lab { display: none; }
@@ -662,16 +765,6 @@
         </span>
         <span class="lbrk" aria-hidden="true"></span>
         <span class="time-group">
-          <svg class="dayring" id="weekring" viewBox="0 0 20 20" width="19" height="19" role="img" aria-label="本週進度">
-            <title id="weekTitle">本週進度</title>
-            <circle class="ring-base" cx="10" cy="10" r="9"></circle>
-            <circle class="ring-fill week" id="weekFill" cx="10" cy="10" r="4.5"></circle>
-          </svg>
-          <svg class="dayring" id="dayring" viewBox="0 0 20 20" width="19" height="19" role="img" aria-label="今日進度">
-            <title id="ringTitle">今日進度</title>
-            <circle class="ring-base" cx="10" cy="10" r="9"></circle>
-            <circle class="ring-fill" id="ringFill" cx="10" cy="10" r="4.5"></circle>
-          </svg>
           <svg class="dayring" id="seasonring" viewBox="0 0 20 20" width="19" height="19" role="img" aria-label="四季輪">
             <title id="seasonTitle">四季輪</title>
             <g id="seasonArcs"></g>
@@ -712,21 +805,36 @@
       <div class="mc-side">
         <span class="mc-yr" id="mcYr">—</span>
         <button type="button" class="mc-mon" id="mcMon" aria-label="月份"><b id="mcMonNum">—</b><i>月</i></button>
-        <span class="navdots mc-nav">
-          <button type="button" class="nd prev" id="mcPrev" aria-label="上個月" title="上個月"></button>
-          <button type="button" class="nd next" id="mcNext" aria-label="下個月" title="下個月"></button>
-        </span>
       </div>
+      <span class="navdots mc-nav">
+        <button type="button" class="nd prev" id="mcPrev" aria-label="上個月" title="上個月"></button>
+        <button type="button" class="nd next" id="mcNext" aria-label="下個月" title="下個月"></button>
+      </span>
       <div class="mc-grid" id="mcGrid"></div>
     </div>
     <div class="agenda" id="agenda" hidden aria-label="今天與明天的行程"></div>
     <div class="dots" role="group" aria-label="主題顏色">
-      <button type="button" class="dot dot-blue" data-theme="blue" aria-label="淡藍主題"></button>
-      <button type="button" class="dot dot-green" data-theme="green" aria-label="淡綠主題"></button>
-      <button type="button" class="dot dot-amber" data-theme="amber" aria-label="淡黃主題"></button>
-      <button type="button" class="dot dot-lav" data-theme="lav" aria-label="淡紫主題"></button>
-      <button type="button" class="dot dot-rose" data-theme="rose" aria-label="淡粉主題"></button>
-      <button type="button" class="dot dot-teal" data-theme="teal" aria-label="淡青主題"></button>
+      <div class="dpage" data-page="0">
+        <button type="button" class="dot dot-blue" data-theme="blue" aria-label="淡藍主題" title="淡藍"></button>
+        <button type="button" class="dot dot-green" data-theme="green" aria-label="淡綠主題" title="淡綠"></button>
+        <button type="button" class="dot dot-amber" data-theme="amber" aria-label="淡黃主題" title="淡黃"></button>
+      </div>
+      <div class="dpage" data-page="1">
+        <button type="button" class="dot dot-lav" data-theme="lav" aria-label="淡紫主題" title="淡紫"></button>
+        <button type="button" class="dot dot-rose" data-theme="rose" aria-label="淡粉主題" title="淡粉"></button>
+        <button type="button" class="dot dot-teal" data-theme="teal" aria-label="淡青主題" title="淡青"></button>
+      </div>
+      <div class="dpage" data-page="2">
+        <button type="button" class="dot dot-indigo" data-theme="indigo" aria-label="靛藍主題" title="靛藍"></button>
+        <button type="button" class="dot dot-peach" data-theme="peach" aria-label="杏桃主題" title="杏桃"></button>
+        <button type="button" class="dot dot-olive" data-theme="olive" aria-label="橄欖主題" title="橄欖"></button>
+      </div>
+      <div class="dpage" data-page="3">
+        <button type="button" class="dot dot-mauve" data-theme="mauve" aria-label="藕紫主題" title="藕紫"></button>
+        <button type="button" class="dot dot-slate" data-theme="slate" aria-label="石板主題" title="石板"></button>
+        <button type="button" class="dot dot-sand" data-theme="sand" aria-label="砂岩主題" title="砂岩"></button>
+      </div>
+      <button type="button" class="nd down dsw" id="themeNext" aria-label="下一組顏色" title="下一組顏色"></button>
     </div>
   </div>
 <script>
@@ -734,7 +842,7 @@
   "use strict";
   var WEEKDAYS = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
   var SEG_COUNT = 12; /* 12 個月，上色處即當月進度 */
-  var THEMES = ["blue", "green", "amber", "lav", "rose", "teal"];
+  var THEMES = ["blue", "green", "amber", "lav", "rose", "teal", "indigo", "peach", "olive", "mauve", "slate", "sand"];
   var RING_C = 2 * Math.PI * 4.5;
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
   function setText(id, v) { document.getElementById(id).textContent = v; }
@@ -825,8 +933,6 @@
   function taipeiDayNo(t) { return Math.floor((t.getTime() + 8 * 3600000) / 864e5); } // 以台灣時間切日
 
   var segContainer = document.getElementById("segments");
-  var ringFill = document.getElementById("ringFill");
-  var weekFill = document.getElementById("weekFill");
 
   // ---- 日照時鐘：台中日出日落（NOAA 簡化公式，本地計算免 API） ----
   var SUN_LAT = 24.135, SUN_LON = 120.68, SUN_R = 6.4;
@@ -999,20 +1105,6 @@
     setText("yearline", "第 " + dayOfYear + " 天");
     updateCalendarChips();
 
-    // 今日進度：12 小時一輪。0-12 時由缺到滿；12-24 時由滿到缺（皆順時針推進）
-    var midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    var hrs = (now - midnight) / 3600000;
-    var ringRatio = hrs < 12 ? hrs / 12 : (24 - hrs) / 12;
-    ringFill.style.strokeDasharray = (ringRatio * RING_C).toFixed(2) + " " + RING_C.toFixed(2);
-    // 下午段用負 dashoffset 讓弧的起點順時針前進、終點固定在頂部，消去時同樣順時針
-    ringFill.style.strokeDashoffset = hrs < 12 ? "0" : (-(1 - ringRatio) * RING_C).toFixed(2);
-    setText("ringTitle", "今日進度 " + (hrs / 24 * 100).toFixed(0) + "%");
-
-    // 本週進度（週日起、週六止）
-    var weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day);
-    var weekRatio = (now - weekStart) / 604800000;
-    weekFill.style.strokeDasharray = (weekRatio * RING_C).toFixed(2) + " " + RING_C.toFixed(2);
-    setText("weekTitle", "本週進度 " + (weekRatio * 100).toFixed(1) + "%");
     updateSunRing(now);
     updateSeasonRing(now);
 
@@ -1042,9 +1134,18 @@
 
   // ---- 主題切換 ----
   var dots = document.querySelectorAll(".dot");
+  var dpages = document.querySelectorAll(".dpage"), dpageNow = -1;
+  function showDotPage(n) {
+    dpageNow = (n + dpages.length) % dpages.length;
+    for (var i = 0; i < dpages.length; i++) dpages[i].classList.toggle("on", i === dpageNow);
+    var sw = document.getElementById("themeNext");
+    if (sw) sw.title = "下一組顏色（目前第 " + (dpageNow + 1) + "／" + dpages.length + " 組）";
+  }
+  document.getElementById("themeNext").addEventListener("click", function () { showDotPage(dpageNow + 1); });
   function applyTheme(t, save) {
     if (THEMES.indexOf(t) < 0) t = "blue";
     document.documentElement.setAttribute("data-theme", t);
+    if (dpageNow < 0) showDotPage(Math.floor(THEMES.indexOf(t) / 3)); // 初次載入：顯示目前主題所在的那一組
     for (var i = 0; i < dots.length; i++) {
       var on = dots[i].getAttribute("data-theme") === t;
       dots[i].classList.toggle("active", on);
@@ -2086,7 +2187,6 @@
   })();
   var CAL_HEAD = ["日", "一", "二", "三", "四", "五", "六"];
   var EV_ALPHA = [0, 0.2, 0.36, 0.49, 0.59, 0.67]; // 行程底色：每多一筆疊一層 20% 透明琥珀（1-(0.8)^n），5 筆封頂
-  var AG_LINES = 5;                                  // 今天／明天欄最多幾行
   var mcalEl = document.getElementById("mcal");
   var mcGrid = document.getElementById("mcGrid");
   var agEl = document.getElementById("agenda");
@@ -2226,64 +2326,91 @@
     mon.setAttribute("aria-label", y + " 年 " + (m + 1) + " 月");
     mcalEl.setAttribute("aria-label", "月曆，" + y + " 年 " + (m + 1) + " 月");
   }
-  // ---- 今天／明天行程欄 ----
+  // ---- 今天／明天行程欄（置頂、上下排列：今天標題→今天行程→明天標題→明天行程） ----
+  // 共 5 行：兩行標題＋3 行行程。行程太多時：全天行程合併成一顆「N 項全天行程」，最後一列右側加「+N」，滑過看完整清單
+  var AG_EV_LINES = 3;
   function agEl_(tag, cls, text) { var e = document.createElement(tag); e.className = cls; if (text != null) e.textContent = text; return e; }
+  function agLayout(items, L) {
+    if (L <= 0 || !items.length) return [];
+    if (items.length <= L) return items.map(function (e) { return { e: e }; });
+    var ad = items.filter(function (e) { return e.ad; }), tm = items.filter(function (e) { return !e.ad; });
+    if (L === 1) {
+      if (!tm.length) return [{ ad: ad }];
+      return [{ e: tm[0], plus: items.filter(function (x) { return x !== tm[0]; }) }];
+    }
+    var rows = [];
+    if (ad.length >= 2) rows.push({ ad: ad }); else if (ad.length === 1) rows.push({ e: ad[0] });
+    var shown = tm.slice(0, L - rows.length);
+    shown.forEach(function (e) { rows.push({ e: e }); });
+    var hid = tm.slice(shown.length);
+    if (hid.length) rows[rows.length - 1].plus = hid;
+    return rows;
+  }
+  function agRow(spec, multi, nowMin, isToday) {
+    var row = agEl_("div", "ag-it"), tip = [];
+    if (spec.ad) {
+      row.appendChild(agEl_("span", "ag-pill", spec.ad.length + " 項全天行程"));
+      spec.ad.forEach(function (e) { tip.push(evLine(e, multi)); });
+    } else {
+      var e = spec.e;
+      if (isToday && !e.ad && e.em <= nowMin) row.classList.add("past");
+      if (isToday && !e.ad && e.sm <= nowMin && nowMin < e.em) row.classList.add("now");
+      row.appendChild(agEl_("span", "ag-tm" + (e.ad ? " ad" : ""), e.ad ? "全天" : e.text[0].replace(/–.*$/, "")));
+      row.appendChild(agEl_("span", "ag-ti", e.text[1]));
+      tip.push(evLine(e, multi));
+    }
+    if (spec.plus) {
+      row.appendChild(agEl_("span", "ag-plus", "+" + spec.plus.length));
+      tip.push("另有：");
+      spec.plus.forEach(function (x) { tip.push(evLine(x, multi)); });
+    }
+    row.title = tip.join("\n");
+    return row;
+  }
   function renderAgenda() {
     if (!agEl) return;
     if (!CAL_KEY) { agEl.hidden = true; return; }
     agEl.hidden = false;
+    if (calHome && calHome.key !== calHomeKey()) calHome = null;
     var now = new Date(), nowMin = now.getHours() * 60 + now.getMinutes();
-    var tK = ymdLocal(now), mK = ymdLocal(addDays(now, 1));
-    var map = calHome ? calHome.map : {}, multi = calHome ? calHome.multi : false;
-    var days = [
-      { lab: "今天", cls: "td", list: (map[tK] || []).slice(), today: true },
-      { lab: "明天", cls: "tm", list: (map[mK] || []).slice(), today: false }
-    ];
-    var frag = document.createDocumentFragment(), tip = [];
+    var tK = ymdLocal(now), tmr = addDays(now, 1), mK = ymdLocal(tmr);
+    var frag = document.createDocumentFragment();
+    function head(lab, cls, cnt, gap) {
+      var h = agEl_("div", "ag-hd" + (gap ? " gap" : ""));
+      h.appendChild(agEl_("span", "ag-lab " + cls, lab));
+      if (cnt) h.appendChild(agEl_("span", "ag-cnt", cnt));
+      return h;
+    }
     if (!calHome) {
-      frag.appendChild(agEl_("span", "ag-lab td", "今天"));
-      frag.appendChild(agEl_("span", "ag-none", calHomeState === "err" ? "行程暫時無法取得" : "行程載入中…"));
+      frag.appendChild(head("今天", "td", calHomeState === "err" ? "行程暫時無法取得" : "載入中…"));
       agEl.innerHTML = ""; agEl.appendChild(frag); agEl.title = ""; return;
     }
-    // 行數分配：明天至少 1 行（最多先留 2 行），其餘給今天；今天放不下時優先省略已結束的
-    var mNeed = Math.min(Math.max(days[1].list.length, 1), 2);
-    var tCap = Math.max(1, AG_LINES - mNeed);
-    var tUsed = Math.min(Math.max(days[0].list.length, 1), tCap);
-    var caps = [tUsed, AG_LINES - tUsed];
-    days.forEach(function (day, di) {
-      var list = day.list, cap = caps[di];
-      tip.push(day.lab + "（" + (addDays(now, di).getMonth() + 1) + "/" + addDays(now, di).getDate() + "）");
-      if (!list.length) tip.push("・沒有行程");
-      list.forEach(function (e) { tip.push(evLine(e, multi)); });
-      if (di === 0) tip.push("");
-      var show = list, moreLine = false;
-      if (list.length > cap) {
-        if (day.today) { // 放不下時，先省略已結束的（滑過行程欄仍可看到完整清單）
-          var live = list.filter(function (e) { return e.ad || e.em > nowMin; });
-          if (live.length) show = live;
-        }
-        var base = show; // 「＋N 項」只算還沒結束、被省略的
-        if (show.length > cap) { show = show.slice(0, cap - 1); moreLine = true; }
-      }
-      var more = moreLine ? base.length - show.length : 0;
-      var rows = Math.max(show.length + (moreLine ? 1 : 0), 1);
-      var lab = agEl_("span", "ag-lab " + day.cls + (di ? " gap" : ""), day.lab);
-      lab.style.gridRow = "span " + rows;
-      frag.appendChild(lab);
-      if (!list.length) frag.appendChild(agEl_("span", "ag-none" + (di ? " gap" : ""), "沒有行程"));
-      show.forEach(function (e, j) {
-        var past = day.today && !e.ad && e.em <= nowMin;
-        var live = day.today && !e.ad && e.sm <= nowMin && nowMin < e.em;
-        var row = agEl_("span", "ag-it" + (past ? " past" : "") + (live ? " now" : "") + (di && !j ? " gap" : ""));
-        var tm = e.ad ? "全天" : e.text[0].replace(/–.*$/, "");
-        row.appendChild(agEl_("span", "ag-tm" + (e.ad ? " ad" : ""), tm));
-        row.appendChild(agEl_("span", "ag-ti", e.text[1]));
-        frag.appendChild(row);
-      });
-      if (moreLine) frag.appendChild(agEl_("span", "ag-more" + (di && !show.length ? " gap" : ""), "＋" + more + " 項"));
-    });
+    var map = calHome.map, multi = calHome.multi;
+    var tList = map[tK] || [], mList = map[mK] || [];
+    var ended = tList.filter(function (e) { return !e.ad && e.em <= nowMin; });
+    var live = tList.filter(function (e) { return e.ad || e.em > nowMin; });
+    // 行數分配：明天至少留 1 行（有行程時），其餘給今天；今天用不完再給明天
+    var t = Math.min(live.length, Math.max(AG_EV_LINES - Math.min(mList.length, 1), AG_EV_LINES - mList.length));
+    var m = Math.min(mList.length, AG_EV_LINES - t);
+    var spare = AG_EV_LINES - t - m, tItems = live;
+    if (spare > 0 && ended.length) { // 還有空位：把最近結束的放回來（變淡顯示）
+      var back = ended.slice(-spare);
+      tItems = tList.filter(function (e) { return live.indexOf(e) >= 0 || back.indexOf(e) >= 0; });
+      t += back.length;
+    }
+    var tCnt = !tList.length ? "沒有行程" : !live.length ? "今天的行程都結束了" : ended.length ? "還有 " + live.length + " 項" : tList.length + " 項";
+    frag.appendChild(head("今天", "td", tCnt, false));
+    agLayout(tItems, t).forEach(function (r) { frag.appendChild(agRow(r, multi, nowMin, true)); });
+    frag.appendChild(head("明天", "tm", mList.length ? mList.length + " 項" : "沒有行程", true));
+    agLayout(mList, m).forEach(function (r) { frag.appendChild(agRow(r, multi, nowMin, false)); });
     agEl.innerHTML = "";
     agEl.appendChild(frag);
+    var tip = ["今天（" + (now.getMonth() + 1) + "/" + now.getDate() + "）"];
+    if (!tList.length) tip.push("・沒有行程");
+    tList.forEach(function (e) { tip.push(evLine(e, multi)); });
+    tip.push("", "明天（" + (tmr.getMonth() + 1) + "/" + tmr.getDate() + "）");
+    if (!mList.length) tip.push("・沒有行程");
+    mList.forEach(function (e) { tip.push(evLine(e, multi)); });
     agEl.title = tip.join("\n");
   }
   // ---- 行程資料：localStorage 快取 10 分鐘＋背景更新；同一區間同時只發一個請求 ----
