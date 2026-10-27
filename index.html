@@ -17,8 +17,10 @@
     --sg-su1: #EA846B; --sg-su2: #D8624E; --sg-su3: #F3A685;
     --sg-au1: #E8AF4C; --sg-au2: #CF8B2C; --sg-au3: #F2CA76;
     --sg-wi1: #5E93D6; --sg-wi2: #3F73BE; --sg-wi3: #88B1E7;
-    --sg-dy1: #F2B33F; --sg-dy2: #F8D068; --sg-dy3: #E5962B; --sg-dawn: #EC7A58; --sg-dusk: #9A7BD1;
-    --sg-nt1: #6C85C6; --sg-nt2: #4C5FA8; --sg-nt3: #8597D1;
+    /* 日照輪色階（依太陽高度）：午夜 nt-deep → 夜的邊緣 nt-edge → 深暮紫 tw（−12°）→ 晨昏玫瑰 dawn（0°）→ dy3（12°）→ dy1（28°）→ dy2（50°）→ dy4（78°） */
+    --sg-dy1: #F2B33F; --sg-dy2: #F8D068; --sg-dy3: #E5962B; --sg-dy4: #FBE39C; --sg-dawn: #EC7A58;
+    --sg-nt-edge: #5A5EB2; --sg-nt-deep: #352E78;
+    --sg-tw: #7C6BC2; --sg-moonlit: #C6CEEE; --sg-moon-dark: #2B356A; /* 深暮紫、月光玻璃、月相暗面 */
     --sg-track: rgba(110,90,70,0.58);
     --mkt-closed: #EDEDEB;
     --ring-hand: #E25C2E; /* 日照輪、四季輪的寶石指針（同一色，飽和朱橘，繞在圈外） */
@@ -137,8 +139,9 @@
       --sg-su1: #C56D5A; --sg-su2: #AE5646; --sg-su3: #D68B6E;
       --sg-au1: #C99A42; --sg-au2: #AF7E2B; --sg-au3: #D9B05E;
       --sg-wi1: #4F82C6; --sg-wi2: #3C68AC; --sg-wi3: #6E96D2;
-      --sg-dy1: #D5A043; --sg-dy2: #E2B657; --sg-dy3: #BE832D; --sg-dawn: #C9694C; --sg-dusk: #7D66BA;
-      --sg-nt1: #4E66AA; --sg-nt2: #3A4A8E; --sg-nt3: #6176B6;
+      --sg-dy1: #D5A043; --sg-dy2: #E2B657; --sg-dy3: #BE832D; --sg-dy4: #EBCB7A; --sg-dawn: #C9694C;
+      --sg-nt-edge: #44478F; --sg-nt-deep: #24205A;
+      --sg-tw: #61579F; --sg-moonlit: #93A1D6; --sg-moon-dark: #1C234F;
       --sg-track: rgba(235,215,185,0.5);
       --mkt-closed: rgba(170,170,170,0.2);
       --ring-hand: #F07A45; /* 寶石指針（深色模式） */
@@ -568,9 +571,10 @@
   .sg-ray { fill: var(--sg-sun); stroke: var(--sg-lead); stroke-width: 0.8; stroke-linejoin: round; }
   #sunring.night .sg-ray { display: none; }
   #sunCore { fill: var(--sg-sun); }
-  #sunring.night #sunCore { fill: var(--sg-moon); }
-  #sunShade { display: none; fill: var(--sg-med-night); }
-  #sunring.night #sunShade { display: inline; }
+  #moonLit, #moonRim { display: none; }
+  #sunring.night #sunCore { fill: var(--sg-moon-dark); }
+  #sunring.night #moonLit { display: inline; fill: var(--sg-moon); }
+  #sunring.night #moonRim { display: inline; fill: none; stroke: var(--sg-lead); stroke-width: 1; } /* 中心月相：亮面＝實際月相，暗面淡淡看得到 */
   #sunHand, #seasonHand { fill: var(--ring-hand); stroke: var(--sg-lead); stroke-width: 0.8; } /* 寶石指針：兩個輪同色 */
   .sg-glint { fill: #fff; opacity: 0.8; pointer-events: none; }
   .time {
@@ -849,7 +853,8 @@
             <circle class="sg-med" cx="20" cy="20" r="9.6"></circle>
             <g id="sunRays"></g>
             <circle id="sunCore" class="sg-core" cx="20" cy="20" r="4"></circle>
-            <circle id="sunShade" cx="21.7" cy="18.6" r="3.3"></circle>
+            <path id="moonLit" d=""></path>
+            <circle id="moonRim" cx="20" cy="20" r="4"></circle>
             <circle class="sg-lead-i" cx="20" cy="20" r="9.6"></circle>
             <circle class="sg-lead-o" cx="20" cy="20" r="18.4"></circle>
             <circle cx="20" cy="20" r="19.1" fill="url(#sgGlossN)" pointer-events="none"></circle>
@@ -1016,31 +1021,52 @@
 
   var segContainer = document.getElementById("segments");
 
-  // ---- 日照時鐘：台中日出日落（NOAA 簡化公式，本地計算免 API） ----
+  // ---- 日照時鐘：太陽位置（NOAA 通用公式，本地計算免 API） ----
+  // 每天依赤緯與均時差算出太陽正午，再反推太陽到達各仰角的時刻；玻璃片依「太陽仰角分帶」切割，大小隨季節自然變化
   var SUN_LAT = 24.135, SUN_LON = 120.68;
-  var sunKey = "", sunRise = 5.5, sunSet = 18.5, sunGold = null;
-  function computeSunTimes(d, zen) { // zen：天頂角，預設 90.833°（日出日落）；84° ＝ 太陽仰角 6°
+  var sunKey = "", sunRise = 5.5, sunSet = 18.5, sunInfo = null;
+  var MOON_NAMES_RING = ["新月", "眉月", "上弦月", "盈凸月", "滿月", "虧凸月", "下弦月", "殘月"];
+  function solarDay(d) { // 回傳 { noon: 太陽正午（台灣時間，小時）, dec: 赤緯（度） }
+    var yr = d.getFullYear(), rad = Math.PI / 180;
+    var doy = Math.round((new Date(yr, d.getMonth(), d.getDate()) - new Date(yr, 0, 1)) / 864e5);
+    var nDays = new Date(yr, 1, 29).getMonth() === 1 ? 366 : 365;
+    var g = 2 * Math.PI / nDays * (doy - 1 / 3); // 取台灣中午（UTC 04:00）
+    var eqt = 229.18 * (0.000075 + 0.001868 * Math.cos(g) - 0.032077 * Math.sin(g) - 0.014615 * Math.cos(2 * g) - 0.040849 * Math.sin(2 * g));
+    var dec = 0.006918 - 0.399912 * Math.cos(g) + 0.070257 * Math.sin(g) - 0.006758 * Math.cos(2 * g) + 0.000907 * Math.sin(2 * g)
+      - 0.002697 * Math.cos(3 * g) + 0.00148 * Math.sin(3 * g);
+    return { noon: (720 - 4 * SUN_LON - eqt) / 60 + 8, dec: dec / rad };
+  }
+  // 太陽仰角 h（度）時距離正午幾小時；null＝這天到不了這個仰角，12＝整天都在這個仰角之上
+  function sunHourAngle(h, dec) {
     var rad = Math.PI / 180;
-    var N = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
-    var lngHour = SUN_LON / 15;
-    function calc(rising) {
-      var t = N + ((rising ? 6 : 18) - lngHour) / 24;
-      var M = 0.9856 * t - 3.289;
-      var L = M + 1.916 * Math.sin(M * rad) + 0.02 * Math.sin(2 * M * rad) + 282.634;
-      L = (L % 360 + 360) % 360;
-      var RA = Math.atan(0.91764 * Math.tan(L * rad)) / rad;
-      RA = (RA % 360 + 360) % 360;
-      RA = (RA + Math.floor(L / 90) * 90 - Math.floor(RA / 90) * 90) / 15;
-      var sinDec = 0.39782 * Math.sin(L * rad);
-      var cosDec = Math.cos(Math.asin(sinDec));
-      var cosH = (Math.cos((zen || 90.833) * rad) - sinDec * Math.sin(SUN_LAT * rad)) / (cosDec * Math.cos(SUN_LAT * rad));
-      if (cosH > 1) return rising ? 6 : 18;
-      if (cosH < -1) return rising ? 0 : 24;
-      var H = (rising ? 360 - Math.acos(cosH) / rad : Math.acos(cosH) / rad) / 15;
-      var T = H + RA - 0.06571 * t - 6.622;
-      return ((T - lngHour + 8) % 24 + 24) % 24; // 台灣 UTC+8
-    }
-    return [calc(true), calc(false)];
+    var c = (Math.sin(h * rad) - Math.sin(SUN_LAT * rad) * Math.sin(dec * rad)) / (Math.cos(SUN_LAT * rad) * Math.cos(dec * rad));
+    if (c > 1) return null;
+    if (c < -1) return 12;
+    return Math.acos(c) / rad / 15;
+  }
+  // ---- 月亮位置（簡化星曆，月出月落誤差約數分鐘）：給日照輪的夜間月光與中心月相用 ----
+  function moonEcliptic(t) { // t＝J2000 起算天數；回傳黃經、黃緯、與太陽的角距（度）
+    var rad = Math.PI / 180;
+    function rev(x) { x = x % 360; return x < 0 ? x + 360 : x; }
+    function s(x) { return Math.sin(x * rad); }
+    var Ms = rev(357.5291 + 0.98560028 * t);
+    var sunLon = rev(280.459 + 0.98564736 * t) + 1.915 * s(Ms) + 0.02 * s(2 * Ms);
+    var Lm = rev(218.316 + 13.176396 * t), Mm = rev(134.963 + 13.064993 * t);
+    var D = rev(297.850 + 12.190749 * t), F = rev(93.272 + 13.229350 * t);
+    var lon = Lm + 6.289 * s(Mm) - 1.274 * s(Mm - 2 * D) + 0.658 * s(2 * D) - 0.214 * s(2 * Mm) - 0.186 * s(Ms)
+      - 0.059 * s(2 * Mm - 2 * D) - 0.057 * s(Mm - 2 * D + Ms) + 0.053 * s(Mm + 2 * D) + 0.046 * s(2 * D - Ms)
+      + 0.041 * s(Mm - Ms) - 0.035 * s(D) - 0.031 * s(Mm + Ms);
+    var lat = 5.128 * s(F) + 0.281 * s(Mm + F) + 0.278 * s(Mm - F) + 0.173 * s(2 * D - F)
+      + 0.055 * s(2 * D - Mm + F) + 0.046 * s(2 * D - Mm - F) + 0.033 * s(2 * D + F) + 0.017 * s(2 * Mm + F);
+    return { lon: rev(lon), lat: lat, elong: rev(lon - sunLon) };
+  }
+  function moonAltAt(date) { // 月球地心仰角（度）；> 0.125° 視為已升起（已含視差、大氣折射、月面半徑）
+    var rad = Math.PI / 180, t = (date.getTime() - 946728000000) / 864e5;
+    var m = moonEcliptic(t), eps = (23.4393 - 0.0000004 * t) * rad, L = m.lon * rad, B = m.lat * rad;
+    var dec = Math.asin(Math.sin(B) * Math.cos(eps) + Math.cos(B) * Math.sin(eps) * Math.sin(L));
+    var ra = Math.atan2(Math.sin(L) * Math.cos(eps) - Math.tan(B) * Math.sin(eps), Math.cos(L)) / rad;
+    var ha = (280.46061837 + 360.98564736629 * t + SUN_LON - ra) * rad;
+    return Math.asin(Math.sin(SUN_LAT * rad) * Math.sin(dec) + Math.cos(SUN_LAT * rad) * Math.cos(dec) * Math.cos(ha)) / rad;
   }
   // ---- 彩繪玻璃圓環共用：座標 0–40、圓心 (20,20)，角度 0° 在正上方、順時針 ----
   var SG_RI = 9.6, SG_RO = 18.4, SG_ORBIT = 17.3; // 玻璃帶內外半徑（縮放前）、圈外軌道半徑
@@ -1051,7 +1077,8 @@
   // 一片玻璃（環形扇區，a1→a2 順時針），鉛條由描邊畫出
   function sgPane(a1, a2, tone) {
     var lg = a2 - a1 > 180 ? 1 : 0;
-    return '<path class="sg-pane" style="fill:var(' + tone + ')" d="M' + sgPt(a1, SG_RO) + " A" + SG_RO + " " + SG_RO + " 0 " + lg + " 1 " + sgPt(a2, SG_RO) +
+    var fill = tone.indexOf("--") === 0 ? "var(" + tone + ")" : tone; // CSS 變數名、或直接給 url(#漸層)／color-mix
+    return '<path class="sg-pane" style="fill:' + fill + '" d="M' + sgPt(a1, SG_RO) + " A" + SG_RO + " " + SG_RO + " 0 " + lg + " 1 " + sgPt(a2, SG_RO) +
       " L" + sgPt(a2, SG_RI) + " A" + SG_RI + " " + SG_RI + " 0 " + lg + " 0 " + sgPt(a1, SG_RI) + ' Z"></path>';
   }
   // 寶石指針：沿圈外軌道繞行，高光固定在左上（光源方向不隨指針轉）
@@ -1111,41 +1138,168 @@
       }
     }
   }
+  // 日照輪玻璃片：依太陽仰角分帶切片（相對太陽正午左右對稱，大小隨季節變化）
+  //   分帶：夜（< −18°）｜深暮光（−18° ～ −6°，天文＋航海曙暮光）｜晨昏（−6° ～ 6°，民用曙暮光＋金色時刻）｜低照（6 ～ 30°）｜中照（30 ～ 60°）｜高照（≥ 60°）
+  //   寬的帶再等分成約 2 小時（錶盤 30°，和四季輪一片同大）的小片；每片一個純色，依該片中間時刻的太陽高度從色階取色，
+  //   片與片之間一階一階變化（彩繪玻璃的漸層）：午夜最深紫 → 夜藍紫 → 深暮紫 → 晨昏玫瑰 → 琥珀 → 金 → 正午最亮
+  //   正午那片的亮度＝當天太陽最高仰角：台中冬至約 42°（金）、春秋分約 65°、夏至約 89°（淡金）；夜色則一律在太陽午夜最深
+  //   錶盤用時鐘時間（12:00 在正上方）；太陽正午不在 12:00（經度差＋均時差，11:41 ～ 12:12），所以整圈會隨季節微微歪一邊，這是真的
+  var SUN_BANDS = [-18, -6, 6, 30, 60];
+  var SUN_RAMP = [[-18, "--sg-nt-edge"], [-12, "--sg-tw"], [0, "--sg-dawn"], [12, "--sg-dy3"], [28, "--sg-dy1"], [50, "--sg-dy2"], [78, "--sg-dy4"]];
+  var NIGHT_RAMP = [[0, "--sg-nt-edge"], [1, "--sg-nt-deep"]]; // 0＝夜的邊緣（−18°）、1＝太陽午夜
+  var SUN_PANE_H = 2, SUN_MIN_H = 40 / 60; // 每片目標約 2 小時；不到 40 分鐘的細片併掉
+  var sunPaneKey = "";
+  function sunDayInfo(d) {
+    var sd = solarDay(d), H = [];
+    for (var i = 0; i < SUN_BANDS.length; i++) H.push(sunHourAngle(SUN_BANDS[i], sd.dec));
+    // 最上層那片太窄（不到 40 分鐘）就併進下一層，避免正午出現一條細縫
+    for (var j = H.length - 1; j >= 0; j--) { if (H[j] === null) continue; if (H[j] * 2 < SUN_MIN_H) H[j] = null; break; }
+    return { noon: sd.noon, dec: sd.dec, H: H, hr: sunHourAngle(-0.833, sd.dec), maxAlt: 90 - Math.abs(SUN_LAT - sd.dec) };
+  }
+  function sunAltAtX(x, dec) { // 距太陽正午 x 小時的太陽仰角（度，不含大氣折射）
+    var r = Math.PI / 180;
+    return Math.asin(Math.sin(SUN_LAT * r) * Math.sin(dec * r) + Math.cos(SUN_LAT * r) * Math.cos(dec * r) * Math.cos(15 * x * r)) / r;
+  }
+  function sgRamp(stops, v) { // 色階取色 → [CSS 顏色, 最接近的色票]（不支援 color-mix 的舊瀏覽器退回最接近的色票）
+    var n = stops.length;
+    if (v <= stops[0][0]) return ["var(" + stops[0][1] + ")", stops[0][1]];
+    for (var i = 1; i < n; i++) {
+      if (v > stops[i][0]) continue;
+      var a = stops[i - 1], b = stops[i], p = Math.round((v - a[0]) / (b[0] - a[0]) * 100);
+      if (p <= 3) return ["var(" + a[1] + ")", a[1]];
+      if (p >= 97) return ["var(" + b[1] + ")", b[1]];
+      return ["color-mix(in oklab, var(" + b[1] + ") " + p + "%, var(" + a[1] + "))", p < 50 ? a[1] : b[1]];
+    }
+    return ["var(" + stops[n - 1][1] + ")", stops[n - 1][1]];
+  }
+  function sunPaneAt(info, a1, a2, fill) { // a1、a2：距太陽正午小時數 → 錶盤角度（時鐘 12:00 在正上方）
+    return sgPane((info.noon - 12 + a1) * 15, (info.noon - 12 + a2) * 15, fill);
+  }
+  function sunPanesEven(info, x1, x2, toneAt) { // 一段等分成約 2 小時的小片，每片依中間時刻取色
+    var k = Math.max(1, Math.round((x2 - x1) / SUN_PANE_H)), h = "";
+    for (var i = 0; i < k; i++) {
+      var u1 = x1 + (x2 - x1) * i / k, u2 = x1 + (x2 - x1) * (i + 1) / k, c = toneAt((u1 + u2) / 2);
+      h += sunPaneAt(info, u1, u2, c[0].indexOf("var(") === 0 ? c[0] : "var(" + c[1] + ");fill:" + c[0]);
+    }
+    return h;
+  }
+  function buildSunPanes(now, info) {
+    var H = info.H, n = H.length, ph = "";
+    // 白天與曙暮光：依分帶邊界由早到晚排列（x＝距正午小時數）；跨正午那一帶整段等分，所以對太陽正午左右對稱、正午那片最亮
+    var bounds = [], bandOf = [];
+    var top = -1;
+    for (var i = 0; i < n; i++) if (H[i] !== null && H[i] < 12) top = i;
+    for (var a = 0; a <= top; a++) bounds.push(-H[a]);
+    for (var b = top; b >= 0; b--) bounds.push(H[b]);
+    for (var k = 0; k < bounds.length - 1; k++) bandOf.push(k <= top ? k + 1 : 2 * top + 1 - k);
+    var H0 = top >= 0 ? H[0] : 12; // 夜的邊界（太陽仰角 −18°）
+    var dayTone = function (xm) { return sgRamp(SUN_RAMP, sunAltAtX(xm, info.dec)); };
+    for (var p = 0; p < bounds.length - 1; p++) ph += sunPanesEven(info, bounds[p], bounds[p + 1], dayTone);
+    if (H0 >= 12) { document.getElementById("sunPanes").innerHTML = ph; return { moon: null }; }
+    // 夜：傍晚到清晨連續座標 [H0, 24 − H0]（x > 12 是過了太陽午夜）；先在月出月落切開，每段再等分
+    // 夜晚對應的實際日期：還在清晨的夜裡＝昨晚到今晨；天文曙光開始後＝今晚到明晨（指針接下來會走到的那一夜）
+    var tNow = now.getHours() + now.getMinutes() / 60, eve = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (tNow < info.noon - H0 ? 1 : 0));
+    function realTime(x) { // x（距正午小時）→ 實際時刻
+      return new Date(eve.getFullYear(), eve.getMonth(), eve.getDate() + (x < 0 ? 1 : 0), 0, 0, 0, Math.round((info.noon + x) * 3600000));
+    }
+    var nA = H0, nB = 24 - H0;
+    // 月亮在天上的時段（每 5 分鐘取樣、線性內插到分鐘）
+    var STEP = 1 / 12, prevAlt = null, prevX = null, cuts = [], spans = [], cur = null;
+    for (var x = nA; x <= nB + 1e-9; x += STEP) {
+      var alt = moonAltAt(realTime(x > 12 ? x - 24 : x)) - 0.125;
+      if (prevAlt === null) { if (alt > 0) cur = [nA, null]; }
+      else if ((alt > 0) !== (prevAlt > 0)) {
+        var xc = prevX + STEP * prevAlt / (prevAlt - alt);
+        cuts.push(xc);
+        if (alt > 0) cur = [xc, null]; else if (cur) { cur[1] = xc; spans.push(cur); cur = null; }
+      }
+      prevAlt = alt; prevX = x;
+    }
+    if (cur) { cur[1] = nB; spans.push(cur); }
+    var el = moonEcliptic((realTime(0 + 12).getTime() - 946728000000) / 864e5).elong; // 取午夜的月相
+    var illum = (1 - Math.cos(el * Math.PI / 180)) / 2;
+    // 月出月落離夜的頭尾不到 40 分鐘就不切（交給提示文字的精確時刻），避免細片
+    cuts = cuts.filter(function (c) { return c - nA >= SUN_MIN_H && nB - c >= SUN_MIN_H; });
+    var pts = [nA].concat(cuts, [nB]);
+    function moonUp(x) { for (var i = 0; i < spans.length; i++) if (x > spans[i][0] && x < spans[i][1]) return true; return false; }
+    // 夜色：越接近太陽午夜越深；月亮在天上時提亮成月光玻璃（越接近滿月越亮）
+    //   月光固定比例混色會把深淺壓平（滿月時只剩一半的差距），所以月光比例也隨夜深遞減：夜的邊緣全量、太陽午夜剩一半
+    var mixPct = 15 + 40 * illum;
+    function nightTone(lit) {
+      return function (xm) {
+        var d = 1 - Math.abs(xm - 12) / (12 - nA), c = sgRamp(NIGHT_RAMP, d);
+        return lit ? ["color-mix(in srgb, var(--sg-moonlit) " + Math.round(mixPct * (1 - 0.5 * d)) + "%, " + c[0] + ")", c[1]] : c;
+      };
+    }
+    for (var s = 0; s < pts.length - 1; s++)
+      ph += sunPanesEven(info, pts[s], pts[s + 1], nightTone(moonUp((pts[s] + pts[s + 1]) / 2) && illum > 0.03));
+    document.getElementById("sunPanes").innerHTML = ph;
+    var vis = spans.map(function (sp) { return [realTime(sp[0] > 12 ? sp[0] - 24 : sp[0]), realTime(sp[1] > 12 ? sp[1] - 24 : sp[1]), sp[0] <= nA + 1e-6, sp[1] >= nB - 1e-6]; });
+    return { moon: { elong: el, illum: illum, spans: vis, night: [realTime(nA), realTime(-H0)] } };
+  }
+  // 中心月相（夜間）：亮面依實際月相（右亮＝漸盈、左亮＝漸虧）
+  function moonLitPath(elong) {
+    var r = 4, cx = 20, cy = 20, e = elong * Math.PI / 180, rx = Math.abs(Math.cos(e)) * r;
+    var wax = elong < 180, cres = Math.cos(e) > 0; // 眉月／殘月：亮面小於一半
+    var top = cx + " " + (cy - r), bot = cx + " " + (cy + r);
+    var limb = "A" + r + " " + r + " 0 0 " + (wax ? 1 : 0) + " " + bot;
+    var term = "A" + rx.toFixed(2) + " " + r + " 0 0 " + ((wax ? cres : !cres) ? 0 : 1) + " " + top;
+    return "M" + top + " " + limb + " " + term + " Z";
+  }
+  var sunMoon = null;
+  function fmtClock(d) { return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+  function fmtSec(sec) {
+    var a = Math.abs(Math.round(sec));
+    return a < 60 ? a + " 秒" : Math.floor(a / 60) + " 分 " + (a % 60) + " 秒";
+  }
   function updateSunRing(now) {
     var key = now.getFullYear() + "-" + now.getMonth() + "-" + now.getDate();
     if (key !== sunKey) {
       sunKey = key;
-      var st = computeSunTimes(now);
-      sunRise = st[0]; sunSet = st[1];
-      var gh = computeSunTimes(now, 84); // 太陽仰角 6°：早上金色時刻結束／傍晚開始
-      sunGold = [gh[0], gh[1]];
-      // 玻璃片：白天、夜間各等分 6 片，左右對稱於太陽正午（台中約 11:40 前後，所以圖案會略往左偏）
-      // 白天：頭尾兩片晨昏橘、中間兩片最亮；夜間：頭尾兩片暮光紫、中間兩片（午夜）最深
-      var dayLen = sunSet - sunRise, ngtLen = 24 - dayLen, ph = "";
-      var dayTone = ["--sg-dawn", "--sg-dy3", "--sg-dy2", "--sg-dy2", "--sg-dy1", "--sg-dawn"];
-      var ngtTone = ["--sg-dusk", "--sg-nt1", "--sg-nt2", "--sg-nt2", "--sg-nt3", "--sg-dusk"];
-      for (var pk = 0; pk < 6; pk++) {
-        var d1 = sunRise + dayLen * pk / 6, d2 = sunRise + dayLen * (pk + 1) / 6;
-        var n1 = sunSet + ngtLen * pk / 6, n2 = sunSet + ngtLen * (pk + 1) / 6;
-        ph += sgPane(((d1 - 12) / 24) * 360, ((d2 - 12) / 24) * 360, dayTone[pk]);
-        ph += sgPane(((n1 - 12) / 24) * 360, ((n2 - 12) / 24) * 360, ngtTone[pk]);
-      }
-      document.getElementById("sunPanes").innerHTML = ph;
-      if (!document.getElementById("sunRays").firstChild) { // 中心太陽的 8 道光芒（夜間隱藏，改顯示新月）
+      sunInfo = sunDayInfo(now);
+      var hr = sunInfo.hr === null ? 0 : sunInfo.hr;
+      sunRise = sunInfo.noon - hr; sunSet = sunInfo.noon + hr;
+      var yInfo = sunDayInfo(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1));
+      sunInfo.dayDelta = (hr - (yInfo.hr === null ? 0 : yInfo.hr)) * 2 * 3600; // 日光比昨天長幾秒
+      if (!document.getElementById("sunRays").firstChild) { // 中心太陽的 8 道光芒（夜間隱藏，改顯示月相）
         var rays = "";
         for (var ri = 0; ri < 8; ri++) rays += '<path class="sg-ray" d="M18.7 15.6 L20 10.9 L21.3 15.6 Z" transform="rotate(' + (ri * 45 + 22.5) + ' 20 20)"></path>';
         document.getElementById("sunRays").innerHTML = rays;
       }
     }
     var tNow = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
+    var H0n = sunInfo.H[0] === null ? 12 : sunInfo.H[0];
+    var pKey = key + (tNow < sunInfo.noon - H0n ? "a" : "p"); // 夜間月光在天文曙光開始時換成下一夜
+    if (pKey !== sunPaneKey) {
+      sunPaneKey = pKey;
+      sunMoon = buildSunPanes(now, sunInfo).moon;
+      var ml = document.getElementById("moonLit");
+      if (ml && sunMoon) ml.setAttribute("d", moonLitPath(sunMoon.elong));
+    }
     sgHand("sunHand", "sunGlint", ((tNow - 12) / 24) * 360);
     var isDay = tNow >= sunRise && tNow < sunSet;
     document.getElementById("sunring").classList.toggle("night", !isDay);
-    var nextTxt = isDay ? "距日落 " + fmtDur(sunSet - tNow) : "距日出 " + fmtDur(((sunRise - tNow) % 24 + 24) % 24);
-    // 白天標日光時長、夜間標夜間時長
-    var spanTxt = isDay ? "日光 " + fmtDur(sunSet - sunRise) : "夜間 " + fmtDur(24 - (sunSet - sunRise));
-    var goldTxt = sunGold ? "｜金色時刻 " + fmtHM(sunRise) + "–" + fmtHM(sunGold[0]) + "、" + fmtHM(sunGold[1]) + "–" + fmtHM(sunSet) : "";
-    setText("sunTitle", "日出 " + fmtHM(sunRise) + "｜日落 " + fmtHM(sunSet) + "｜" + spanTxt + "｜" + nextTxt + goldTxt);
+    var H = sunInfo.H, noon = sunInfo.noon;
+    var lines = [];
+    var dd = sunInfo.dayDelta, ddTxt = Math.abs(dd) < 1 ? "和昨天差不多" : "比昨天" + (dd > 0 ? "長 " : "短 ") + fmtSec(dd);
+    lines.push("日出 " + fmtHM(sunRise) + "｜日落 " + fmtHM(sunSet) + "｜日光 " + fmtDur(sunSet - sunRise) + "（" + ddTxt + "）");
+    lines.push("太陽正午 " + fmtHM(noon) + "，仰角 " + Math.round(sunInfo.maxAlt) + "°｜" +
+      (isDay ? "距日落 " + fmtDur(sunSet - tNow) : "距日出 " + fmtDur(((sunRise - tNow) % 24 + 24) % 24)));
+    if (H[0] !== null && H[2] !== null) {
+      lines.push("曙光 " + fmtHM(noon - H[0]) + "–" + fmtHM(sunRise) + "｜金色時刻 " + fmtHM(sunRise) + "–" + fmtHM(noon - H[2]) +
+        "、" + fmtHM(noon + H[2]) + "–" + fmtHM(sunSet) + "｜暮光 " + fmtHM(sunSet) + "–" + fmtHM(noon + H[0]));
+    }
+    if (sunMoon) {
+      var mm = sunMoon, pct = Math.round(mm.illum * 100), mName = MOON_NAMES_RING[Math.floor(mm.elong / 45 + 0.5) % 8];
+      var when = tNow >= noon - H0n && tNow < noon + H0n ? "今晚" : "今夜", vt;
+      if (!mm.spans.length) vt = "夜裡月亮不在天上";
+      else if (mm.spans.length === 1 && mm.spans[0][2] && mm.spans[0][3]) vt = "整夜都看得到月亮";
+      else vt = mm.spans.map(function (sp) {
+        return (sp[2] ? "入夜" : fmtClock(sp[0]) + " 月出") + "～" + (sp[3] ? "天亮" : fmtClock(sp[1]) + " 月落");
+      }).join("、");
+      lines.push(when + "：" + mName + "（亮面 " + pct + "%），" + vt);
+    }
+    setText("sunTitle", lines.join("\n"));
   }
   var wdChip = document.getElementById("wdchip");
   var lastDateKey = "";
