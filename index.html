@@ -22,6 +22,11 @@
     --sg-nt-edge: #5A5EB2; --sg-nt-deep: #352E78;
     --sg-tw: #7C6BC2; --sg-moonlit: #C6CEEE; --sg-moon-dark: #2B356A; /* 深暮紫、月光玻璃、月相暗面 */
     --sg-track: rgba(110,90,70,0.58);
+    --sg-earth: #3E92D4; --sg-earth-night: #1F3766; --sg-moon-shade: #A29C90; /* 天象儀：地球白天／夜半邊、月亮背光面 */
+    /* 四季輪中心花木（慕夏柔和色）：粉紅四階、鮭橘、白瓣、葉綠兩階、枝幹；光環圓盤四季淡色 */
+    --se-pk0: #FCE6EC; --se-pk1: #F4BFCF; --se-pk2: #E58FA6; --se-pk3: #B9507A; --se-sal: #EE9A7C; --se-wh: #FFFDF7;
+    --se-lf1: #8DBB72; --se-lf2: #5E9A58; --se-br: #6B4A36;
+    --se-h-sp: #E3F0D6; --se-h-su: #FBE2DC; --se-h-au: #F8E5BC; --se-h-wi: #DDE8F6;
     --mkt-closed: #EDEDEB;
     --ring-hand: #E25C2E; /* 日照輪、四季輪的寶石指針（同一色，飽和朱橘，繞在圈外） */
     --dot-blue: #A9CDEC;
@@ -143,6 +148,10 @@
       --sg-nt-edge: #44478F; --sg-nt-deep: #24205A;
       --sg-tw: #61579F; --sg-moonlit: #93A1D6; --sg-moon-dark: #1C234F;
       --sg-track: rgba(235,215,185,0.5);
+      --sg-earth: #3C83C4; --sg-earth-night: #18294F; --sg-moon-shade: #77736A;
+      --se-pk0: #E9CBD3; --se-pk1: #DAA2B3; --se-pk2: #C77890; --se-pk3: #A2486D; --se-sal: #CF8468; --se-wh: #EEE8DA;
+      --se-lf1: #75A061; --se-lf2: #4F8449; --se-br: #2A1D15;
+      --se-h-sp: #4A5A3E; --se-h-su: #5E4440; --se-h-au: #5F5030; --se-h-wi: #3E4A60;
       --mkt-closed: rgba(170,170,170,0.2);
       --ring-hand: #F07A45; /* 寶石指針（深色模式） */
       --seg-fill-a: rgba(94,159,232,0.45);
@@ -550,17 +559,48 @@
     align-self: center;
   }
   /* ---- 四季輪＋日照輪：慕夏彩繪玻璃風
-     圓窗（.sg-body，縮成 68%）：古銅金外框 → 分片玻璃（深淺交錯）→ 內圈鉛條 → 中心花窗（四季＝四瓣花、日照＝太陽／夜間新月）
+     圓窗（.sg-body，縮成 68%）：古銅金外框 → 分片玻璃（深淺交錯）→ 內圈鉛條 → 中心花窗（四季＝台灣花木：春蝴蝶蘭、夏荷花、秋台灣欒樹、冬梅花，襯慕夏光環圓盤；日照＝太陽／夜間新月）
      圈外：點狀光環軌道＋寶石指針（沿軌道繞行）
      座標 0–40、0° 在正上方順時針；玻璃片由 JS 依節氣、日出日落產生 ---- */
-  .main { --dock-ring: 48px; --dock-gap: 12px; --dock-w: calc(var(--dock-ring) * 2 + var(--dock-gap) + 20px); }
+  .wrap { --dock-ring: 60px; --dock-gap: 12px; --dock-n: 2; --dock-dy: 16px; } /* 圓環展示區：大小、間距、幾個環、垂直位移（置中於時鐘列～新聞列） */
   .sgring { display: block; width: 26px; height: 26px; overflow: visible; margin: -1px 0; }
   .sg-pane { stroke: var(--sg-lead); stroke-width: 1.15; stroke-linejoin: round; }
   .sg-lead-o { fill: none; stroke: var(--sg-frame); stroke-width: 2.1; } /* 外框：慕夏光環的古銅金 */
   .sg-lead-i { fill: none; stroke: var(--sg-lead); stroke-width: 1.45; }
   .sg-med { fill: var(--sg-med); }
-  .sg-petal { fill: var(--sg-petal, var(--sg-au3)); stroke: var(--sg-lead); stroke-width: 1; stroke-linejoin: round; }
-  .sg-leaf { fill: var(--sg-gold); stroke: var(--sg-lead); stroke-width: 0.8; stroke-linejoin: round; }
+  .se-emb { display: none; }
+  #seasonOrn[data-s="sp"] .se-sp, #seasonOrn[data-s="su"] .se-su, #seasonOrn[data-s="au"] .se-au, #seasonOrn[data-s="wi"] .se-wi { display: inline; }
+  .se-halo { fill: var(--se-h-au); stroke: var(--sg-frame); stroke-width: 0.5; } /* 慕夏的光環圓盤：花木壓在圓盤邊上 */
+  #seasonOrn[data-s="sp"] .se-halo { fill: var(--se-h-sp); }
+  #seasonOrn[data-s="su"] .se-halo { fill: var(--se-h-su); }
+  #seasonOrn[data-s="wi"] .se-halo { fill: var(--se-h-wi); }
+  .se-emb path, .se-emb circle { stroke: var(--sg-lead); stroke-width: 0.5; stroke-linejoin: round; }
+  .se-emb .ln { fill: none; stroke-width: 0.3; stroke-linecap: round; stroke-opacity: 0.7; }
+  .se-emb .ln.pk { stroke: var(--se-pk3); stroke-opacity: 0.55; }
+  .se-emb .ln.tdr { stroke: var(--se-pk3); stroke-width: 0.35; stroke-opacity: 1; }
+  .se-emb .ln.ped { stroke: var(--se-br); stroke-width: 0.4; stroke-opacity: 1; }
+  .se-emb .ln.sta { stroke: var(--sg-gold); stroke-width: 0.28; stroke-opacity: 1; }
+  .se-emb .st { fill: none; stroke: var(--se-lf2); stroke-width: 0.75; stroke-linecap: round; }
+  .se-emb .st.au { stroke: var(--se-br); stroke-width: 0.8; }
+  .se-emb .br { fill: none; stroke: var(--se-br); stroke-width: 1.35; stroke-linecap: round; }
+  .se-emb .br2 { stroke-width: 0.8; }
+  .se-emb .an, .se-emb .fl { stroke-width: 0.25; }
+  .se-emb .cap { stroke-width: 0.3; }
+  /* 天象儀：圓窗中心在日地之間；太陽貼著上方外框露出透鏡形一段，天空玻璃離太陽越遠越暗；地球、月亮都是朝太陽（上方）那半邊亮 */
+  .orr-pane { stroke: var(--sg-lead); stroke-width: 1.15; stroke-linejoin: round; } /* 太陽：和其他環同粗的鉛條 */
+  .orr-sky { stroke: var(--sg-lead); stroke-width: 0.8; stroke-linejoin: round; } /* 天空：細一點的鉛條，主角留給日地月 */
+  .orr-sun { stroke: var(--sg-lead); stroke-width: 1.05; }   /* 日面外緣：粗鉛條 */
+  .orr-sun2 { stroke: var(--sg-lead); stroke-width: 0.45; }  /* 日面內圈：細描線 */
+  .orr-fine { fill: none; stroke: var(--sg-dy3); stroke-width: 0.4; stroke-linecap: round; } /* 細光芒線 */
+  .orr-bead { fill: var(--sg-dy4); stroke: none; } /* 光圈上的金珠 */
+  .orr-morbit { fill: none; stroke: var(--sg-moonlit); stroke-width: 0.6; stroke-linecap: round; stroke-dasharray: 0 1.3; opacity: 0.8; } /* 月亮軌道：點狀，呼應外圈軌道 */
+  .orr-ocean { fill: var(--sg-earth); }
+  .orr-land { fill: var(--se-lf1); stroke: var(--sg-lead); stroke-width: 0.25; }
+  .orr-night { fill: var(--sg-earth-night); opacity: 0.78; }  /* 背對太陽的半邊 */
+  .orr-mshade { fill: var(--sg-moon-shade); }
+  .orr-mlit { fill: var(--sg-moon); }
+  .orr-rim { fill: none; stroke: var(--sg-lead); stroke-width: 0.6; } /* 地球外框（整組放大 1.38 倍，實際約 0.8） */
+  .orr-mrim { stroke-width: 0.55; }
   .sg-core { fill: var(--sg-gold); stroke: var(--sg-lead); stroke-width: 1; }
   .sg-track { fill: none; stroke: var(--sg-track); stroke-width: 1.25; stroke-linecap: round; stroke-dasharray: 0 2.7; } /* 圈外點狀軌道 */
   .sg-gloss .g0 { stop-color: #fff; stop-opacity: var(--sg-gloss0); }
@@ -695,18 +735,23 @@
   .main { container-type: inline-size; position: relative; }
   @container (min-width: 616px) and (max-width: 659px) { #etfTris { display: none !important; } }
   @container (min-width: 616px) and (max-width: 659px) { #twChg .tw-pts { display: none; } }
-  /* 圓環展示區（主欄 ≥ 660px）：時鐘列與今年進度列往左收 128px，空出來的位置放大圓環（左＝日照輪緊鄰時鐘、右＝四季輪緊鄰月曆）
-     新聞列與上方細線不受影響；圓環改為絕對定位、上下置中於兩列之間 */
+  /* 圓環展示區（主欄 ≥ 660px）：時鐘列、今年進度列、新聞列（含上方細線）右側一起收窄，空出整個右側高度放大圓環
+     順序：時鐘 → 日照輪（一天）→ 四季輪（一年）→ 天象儀（主欄 ≥ 902px 才顯示）→ 月曆；圓環絕對定位、上下置中於時鐘列～新聞列 */
+  #orrery { display: none; }
   @container (min-width: 660px) {
-    .line, .bar-row { margin-right: var(--dock-w); }
-    .time-group .sgring { position: absolute; top: 50%; width: var(--dock-ring); height: var(--dock-ring); margin: calc(var(--dock-ring) / -2) 0 0; }
-    #sunring { right: calc(var(--dock-ring) + var(--dock-gap) + 2px); }
-    #seasonring { right: 2px; }
+    .line, .bar-row, .news-in { margin-right: calc(var(--dock-ring) * var(--dock-n) + var(--dock-gap) * (var(--dock-n) - 1) + 20px); }
+    .time-group .sgring { position: absolute; top: calc(50% + var(--dock-dy)); width: var(--dock-ring); height: var(--dock-ring); margin: calc(var(--dock-ring) / -2) 0 0; }
+    #sunring { right: calc((var(--dock-ring) + var(--dock-gap)) * (var(--dock-n) - 1) + 2px); }
+    #seasonring { right: calc((var(--dock-ring) + var(--dock-gap)) * (var(--dock-n) - 2) + 2px); }
   }
-  @container (min-width: 660px) and (max-width: 805px) { #etfTris { display: none !important; } }
-  @container (min-width: 660px) and (max-width: 760px) { #twChg .tw-pts { display: none; } }
-  @container (min-width: 660px) and (max-width: 728px) { #tw .wx-lab { display: none; } }
-  @container (min-width: 660px) and (max-width: 698px) { #wx > .wx-item:first-child { display: none; } }
+  @container (min-width: 902px) {
+    .line, .bar-row, .news-in, .time-group { --dock-n: 3; }
+    .time-group #orrery { display: block; right: 2px; }
+  }
+  @container (min-width: 660px) and (max-width: 829px) { #etfTris { display: none !important; } }
+  @container (min-width: 660px) and (max-width: 784px) { #twChg .tw-pts { display: none; } }
+  @container (min-width: 660px) and (max-width: 752px) { #tw .wx-lab { display: none; } }
+  @container (min-width: 660px) and (max-width: 722px) { #wx > .wx-item:first-child { display: none; } }
   @container (min-width: 616px) and (max-width: 659px) { #tw .wx-lab { display: none; } }
   @container (min-width: 616px) and (max-width: 638px) { #wx > .wx-item:first-child { display: none; } }
   @container (max-width: 615px) {
@@ -734,6 +779,9 @@
     .mc-grid { grid-template-columns: repeat(7, 16px); column-gap: 1px; margin-left: -4px; }
   }
   /* 中幅（窄視窗／平板）：先收掉右側月曆 */
+  @media (max-width: 840px) { /* 月曆收起後，新聞列關閉時下方沒有東西撐高，展示區圓環改成置中於時鐘列～今年進度列 */
+    .wrap:has(> .news-row.off), .wrap:has(> .news-row[hidden]) { --dock-dy: 0px; }
+  }
   @media (max-width: 840px) { /* 840 以下主欄會窄到要換兩行，先收月曆，保持單行＋月曆或兩行無月曆兩種乾淨組合 */
     .mcal, .vdiv { display: none; }
     .wrap, .wrap:has(.agenda[hidden]) { grid-template-columns: minmax(0, 1fr) auto; }
@@ -763,7 +811,8 @@
     .news-row, .news-toggle { display: none !important; }
   }
   /* ---- 新聞輪替列（各家官方 RSS）：一次一則、淡入淡出輪替，可收合 ---- */
-  .news-row { position: relative; grid-column: 1; grid-row: 2; min-width: 0; display: flex; align-items: center; gap: 7px; margin: 7px 0 0 4px; padding-top: 6px; border-top: 1px solid rgba(0,0,0,0.07); font-size: 12px; line-height: 17px; min-height: 18px; }
+  .news-row { position: relative; grid-column: 1; grid-row: 2; min-width: 0; margin-top: 7px; container-type: inline-size; } /* 寬度＝主欄，給圓環展示區判斷要不要收窄 */
+  .news-in { display: flex; align-items: center; gap: 7px; margin-left: 4px; padding-top: 6px; border-top: 1px solid rgba(0,0,0,0.07); font-size: 12px; line-height: 17px; min-height: 18px; }
   .news-row[hidden] { display: none; }
   .news-tag { flex: none; font-size: 10px; line-height: 15px; padding: 0 7px; border-radius: 8px; background: #EFE9DF; color: #8A7A62; font-weight: 600; letter-spacing: 1px; }
   .news-tag.nt-intl { background: #EAF3FB; color: #5B8FC7; }
@@ -788,7 +837,7 @@
   .news-pop .np-a:hover { text-decoration: underline; }
   #tw { cursor: pointer; }
   @media (prefers-color-scheme: dark) {
-    .news-row { border-top-color: rgba(255,255,255,0.09); }
+    .news-in { border-top-color: rgba(255,255,255,0.09); }
     .news-tag { background: rgba(255,255,255,0.08); color: #B9AB94; }
     .news-tag.nt-intl { background: rgba(94,159,232,0.14); color: #8FB8E8; }
     .news-tag.nt-fin { background: rgba(224,190,114,0.14); color: #DCC183; }
@@ -797,7 +846,7 @@
     .news-pop { background: #33322E; border-color: rgba(255,255,255,0.12); box-shadow: 0 8px 26px rgba(0,0,0,0.5); }
     .news-pop .np-a { color: #8FB8E8; }
   }
-  @media (max-width: 520px) { .news-src { display: none; } .news-row { margin: 4px 0 0 4px; padding-top: 4px; } }
+  @media (max-width: 520px) { .news-src { display: none; } .news-row { margin-top: 4px; } .news-in { padding-top: 4px; } }
 </style>
 </head>
 <body>
@@ -826,17 +875,81 @@
             <g class="sg-body" transform="translate(20 20) scale(0.68) translate(-20 -20)">
             <g id="seasonArcs"></g>
             <circle class="sg-med" cx="20" cy="20" r="9.6"></circle>
-            <g id="seasonOrn">
-              <path class="sg-leaf" d="M20 20 Q21.5 16.6 20 13.6 Q18.5 16.6 20 20 Z"></path>
-              <path class="sg-leaf" d="M20 20 Q21.5 16.6 20 13.6 Q18.5 16.6 20 20 Z" transform="rotate(90 20 20)"></path>
-              <path class="sg-leaf" d="M20 20 Q21.5 16.6 20 13.6 Q18.5 16.6 20 20 Z" transform="rotate(180 20 20)"></path>
-              <path class="sg-leaf" d="M20 20 Q21.5 16.6 20 13.6 Q18.5 16.6 20 20 Z" transform="rotate(270 20 20)"></path>
-              <path class="sg-petal" d="M20 20 Q23.6 15.4 20 11.4 Q16.4 15.4 20 20 Z" transform="rotate(45 20 20)"></path>
-              <path class="sg-petal" d="M20 20 Q23.6 15.4 20 11.4 Q16.4 15.4 20 20 Z" transform="rotate(135 20 20)"></path>
-              <path class="sg-petal" d="M20 20 Q23.6 15.4 20 11.4 Q16.4 15.4 20 20 Z" transform="rotate(225 20 20)"></path>
-              <path class="sg-petal" d="M20 20 Q23.6 15.4 20 11.4 Q16.4 15.4 20 20 Z" transform="rotate(315 20 20)"></path>
+            <g id="seasonOrn" data-s="au"><!-- 中心意象：台灣四季花木（慕夏風：光環圓盤＋細鉛線花形），依天文四季切換 -->
+              <circle class="se-halo" cx="20" cy="20" r="6.4"></circle>
+              <g class="se-emb se-sp"><!-- 春＝蝴蝶蘭 -->
+                <path style="fill:var(--se-lf1)" d="M20 27.7 C17.4 27.6 14.9 26.6 13.7 24.9 C16.3 24.5 18.6 25.6 20 27.7 Z"></path>
+                <path style="fill:var(--se-lf2)" d="M20 27.7 C22.6 27.6 25.1 26.6 26.3 24.9 C23.7 24.5 21.4 25.6 20 27.7 Z"></path>
+                <path style="fill:var(--se-pk0)" d="M20 19.4 C22.62 19.54 24.45 22.37 24.31 23.71 C22.97 23.85 20.14 22.02 20 19.4 Z"></path>
+                <path style="fill:var(--se-pk0)" d="M20 19.4 C19.86 22.02 17.03 23.85 15.69 23.71 C15.55 22.37 17.38 19.54 20 19.4 Z"></path>
+                <path style="fill:var(--se-pk0)" d="M20 19.4 C18.2 17.32 18.92 13.81 20 12.9 C21.08 13.81 21.8 17.32 20 19.4 Z"></path>
+                <path style="fill:var(--se-pk1)" d="M20 19.4 C19 17.7 15.9 15 14 16.3 C12.4 17.5 13.4 21 16.1 21.5 C17.8 21.8 19.3 20.8 20 19.4 Z"></path>
+                <path style="fill:var(--se-pk1)" d="M20 19.4 C21 17.7 24.1 15 26 16.3 C27.6 17.5 26.6 21 23.9 21.5 C22.2 21.8 20.7 20.8 20 19.4 Z"></path>
+                <path class="ln pk" d="M19.4 19.1 Q16.8 17.7 14.7 17.5 M19.4 19.6 Q17 19.4 15 20.3"></path>
+                <path class="ln pk" d="M20.6 19.1 Q23.2 17.7 25.3 17.5 M20.6 19.6 Q23 19.4 25 20.3"></path>
+                <path style="fill:var(--se-pk3)" d="M20 20.1 C21.6 20.3 22.3 21.9 21.2 23 L20.7 23.5 C21 24.1 20.7 24.7 20 25 C19.3 24.7 19 24.1 19.3 23.5 L18.8 23 C17.7 21.9 18.4 20.3 20 20.1 Z"></path>
+                <path class="ln tdr" d="M19.5 24.8 Q18.4 25.6 17.9 24.7 M20.5 24.8 Q21.6 25.6 22.1 24.7"></path>
+                <circle style="fill:var(--sg-gold)" cx="20" cy="19.3" r="0.95"></circle>
+              </g>
+              <g class="se-emb se-su"><!-- 夏＝荷花 -->
+                <path class="st" d="M15.6 24.7 Q14.7 21.2 14.9 17.6"></path>
+                <path style="fill:var(--se-pk2)" d="M14.9 18.1 C13.81 16.88 14.66 15.33 15.36 14.83 C15.9 15.51 16.28 17.23 14.9 18.1 Z"></path>
+                <path style="fill:var(--se-lf1)" d="M20 25.4 L18.9 27.3 C15.8 27.2 13.5 26.4 13.6 25.2 C13.8 23.9 16.9 23.2 20 23.2 C23.1 23.2 26.2 23.9 26.4 25.2 C26.5 26.4 24.2 27.2 21.1 27.3 Z"></path>
+                <path class="ln" d="M20 25.1 L15.3 24.7 M20 25.1 L17.4 23.7 M20 25.1 L22.6 23.7 M20 25.1 L24.7 24.7"></path>
+                <path style="fill:var(--se-pk2)" d="M20 24.3 C17.32 25.33 15.54 22.87 15.42 21.44 C16.76 20.92 19.75 21.43 20 24.3 Z"></path>
+                <path style="fill:var(--se-pk2)" d="M20 24.3 C20.25 21.43 23.24 20.92 24.58 21.44 C24.46 22.87 22.68 25.33 20 24.3 Z"></path>
+                <circle class="pod" style="fill:var(--sg-gold)" cx="20" cy="18.9" r="1.25"></circle>
+                <path style="fill:var(--se-pk1)" d="M20 24.3 C16.77 23.47 16.19 19.58 16.87 18.15 C18.42 18.45 21.23 21.2 20 24.3 Z"></path>
+                <path style="fill:var(--se-pk1)" d="M20 24.3 C18.77 21.2 21.58 18.45 23.13 18.15 C23.81 19.58 23.23 23.47 20 24.3 Z"></path>
+                <path style="fill:var(--se-pk0)" d="M20 24.3 C17.25 22.28 18.62 18.88 20 18 C21.38 18.88 22.75 22.28 20 24.3 Z"></path>
+                <path class="ln pk" d="M20 23.6 L20 19.2"></path>
+              </g>
+              <g class="se-emb se-au"><!-- 秋＝台灣欒樹 -->
+                <path class="st au" d="M13.3 16.9 C16 14.2 23.8 13.6 26.8 16.6"></path>
+                <path style="fill:var(--se-lf1)" d="M14.6 16 C13.3 15.6 12.6 16.6 12.8 17.9 C14 18.2 14.9 17.3 14.6 16 Z"></path>
+                <path style="fill:var(--se-lf2)" d="M25.6 15.6 C26.9 15.1 27.7 16 27.6 17.3 C26.4 17.7 25.4 16.9 25.6 15.6 Z"></path>
+                <path class="ln ped" d="M16.6 15.3 L16.5 17.1 M20.2 14.4 L20.2 19.1 M23.6 14.9 L23.7 16.8"></path>
+                <path style="fill:var(--se-sal)" d="M16.5 17.32 C15.34 17.41 14.56 18.53 14.82 19.82 C15.04 20.72 15.86 21.41 16.5 21.75 Q16.97 19.56 16.5 17.32 Z"></path>
+                <path style="fill:var(--se-pk2)" d="M16.5 17.32 C17.66 17.41 18.43 18.53 18.18 19.82 C17.96 20.72 17.14 21.41 16.5 21.75 Q16.97 19.56 16.5 17.32 Z"></path>
+                <path class="cap" style="fill:var(--se-lf2)" d="M15.86 17.54 Q16.5 16.94 17.14 17.54 Q16.5 17.8 15.86 17.54 Z"></path>
+                <path style="fill:var(--se-pk1)" d="M23.7 17.02 C22.54 17.11 21.77 18.23 22.02 19.52 C22.24 20.42 23.05 21.11 23.7 21.45 Q24.17 19.26 23.7 17.02 Z"></path>
+                <path style="fill:var(--se-pk2)" d="M23.7 17.02 C24.86 17.11 25.63 18.23 25.38 19.52 C25.16 20.42 24.34 21.11 23.7 21.45 Q24.17 19.26 23.7 17.02 Z"></path>
+                <path class="cap" style="fill:var(--se-lf2)" d="M23.05 17.24 Q23.7 16.64 24.34 17.24 Q23.7 17.5 23.05 17.24 Z"></path>
+                <path style="fill:var(--se-pk2)" d="M20.2 19.25 C18.82 19.36 17.91 20.68 18.21 22.21 C18.47 23.28 19.43 24.1 20.2 24.51 Q20.76 21.91 20.2 19.25 Z"></path>
+                <path style="fill:var(--se-pk3)" d="M20.2 19.25 C21.58 19.36 22.49 20.68 22.19 22.21 C21.93 23.28 20.96 24.1 20.2 24.51 Q20.76 21.91 20.2 19.25 Z"></path>
+                <path class="cap" style="fill:var(--se-lf2)" d="M19.43 19.51 Q20.2 18.8 20.96 19.51 Q20.2 19.82 19.43 19.51 Z"></path>
+                <circle class="fl" style="fill:var(--sg-gold)" cx="18.3" cy="13.9" r="0.55"></circle>
+                <circle class="fl" style="fill:var(--sg-gold)" cx="19.4" cy="13.1" r="0.6"></circle>
+                <circle class="fl" style="fill:var(--sg-gold)" cx="20.7" cy="13.2" r="0.6"></circle>
+                <circle class="fl" style="fill:var(--sg-gold)" cx="21.8" cy="13.9" r="0.55"></circle>
+                <circle class="fl" style="fill:var(--sg-gold)" cx="20.1" cy="12.2" r="0.5"></circle>
+              </g>
+              <g class="se-emb se-wi"><!-- 冬＝梅花 -->
+                <path class="br" d="M14 25 C15.9 23.8 17.6 22.6 19.6 20.8 C22.4 18.3 24.1 16.7 26.3 15.2"></path>
+                <path class="br br2" d="M17.9 22.3 C17.3 20.2 16.4 18.4 15.3 16.6"></path>
+                <path class="br br2" d="M23.6 17.3 C24.6 18.1 25.6 19.2 26.2 20.6"></path>
+                <circle style="fill:var(--se-pk2)" cx="15.1" cy="16.2" r="1.1"></circle>
+                <path class="ln" d="M14.3 16.9 Q15.1 17.8 15.9 16.9"></path>
+                <circle style="fill:var(--se-pk1)" cx="26.3" cy="21.2" r="0.9"></circle>
+                <path style="fill:var(--se-wh)" d="M21.08 18.96 C19.68 17.9 19.65 15.8 20.87 15.35 Q21.71 15.15 22.08 15.87 Q22.8 15.5 23.36 16.16 C24.09 17.24 22.82 18.93 21.08 18.96 Z"></path>
+                <path style="fill:var(--se-wh)" d="M21.47 19.5 C22.04 17.85 24.03 17.16 24.83 18.19 Q25.29 18.93 24.72 19.5 Q25.29 20.07 24.83 20.81 C24.03 21.84 22.04 21.15 21.47 19.5 Z"></path>
+                <path style="fill:var(--se-wh)" d="M21.08 20.04 C22.82 20.07 24.09 21.76 23.36 22.84 Q22.8 23.5 22.08 23.13 Q21.71 23.85 20.87 23.65 C19.65 23.2 19.68 21.1 21.08 20.04 Z"></path>
+                <path style="fill:var(--se-wh)" d="M20.44 19.84 C20.95 21.51 19.74 23.23 18.49 22.87 Q17.68 22.54 17.81 21.74 Q17.01 21.62 16.95 20.75 C16.99 19.45 19.01 18.83 20.44 19.84 Z"></path>
+                <path style="fill:var(--se-wh)" d="M20.44 19.16 C19.01 20.17 16.99 19.55 16.95 18.25 Q17.01 17.38 17.81 17.26 Q17.68 16.46 18.49 16.13 C19.74 15.77 20.95 17.49 20.44 19.16 Z"></path>
+                <circle class="ctr" style="fill:var(--se-pk3)" cx="20.9" cy="19.5" r="1.1"></circle>
+                <path class="ln sta" d="M21.69 19.61 L23.43 19.85 M21.48 20.06 L22.45 20.99 M21.04 20.29 L21.34 22.01 M20.55 20.22 L19.96 21.43 M20.19 19.88 L18.65 20.7 M20.11 19.39 L18.77 19.2 M20.32 18.94 L19.07 17.73 M20.76 18.71 L20.53 17.38 M21.25 18.78 L22.02 17.21 M21.61 19.12 L22.8 18.49"></path>
+                <circle class="an" style="fill:var(--sg-gold)" cx="23.43" cy="19.85" r="0.34"></circle>
+                <circle class="an" style="fill:var(--sg-gold)" cx="22.45" cy="20.99" r="0.34"></circle>
+                <circle class="an" style="fill:var(--sg-gold)" cx="21.34" cy="22.01" r="0.34"></circle>
+                <circle class="an" style="fill:var(--sg-gold)" cx="19.96" cy="21.43" r="0.34"></circle>
+                <circle class="an" style="fill:var(--sg-gold)" cx="18.65" cy="20.7" r="0.34"></circle>
+                <circle class="an" style="fill:var(--sg-gold)" cx="18.77" cy="19.2" r="0.34"></circle>
+                <circle class="an" style="fill:var(--sg-gold)" cx="19.07" cy="17.73" r="0.34"></circle>
+                <circle class="an" style="fill:var(--sg-gold)" cx="20.53" cy="17.38" r="0.34"></circle>
+                <circle class="an" style="fill:var(--sg-gold)" cx="22.02" cy="17.21" r="0.34"></circle>
+                <circle class="an" style="fill:var(--sg-gold)" cx="22.8" cy="18.49" r="0.34"></circle>
+              </g>
             </g>
-            <circle class="sg-core" cx="20" cy="20" r="2"></circle>
             <circle class="sg-lead-i" cx="20" cy="20" r="9.6"></circle>
             <circle class="sg-lead-o" cx="20" cy="20" r="18.4"></circle>
             <circle cx="20" cy="20" r="19.1" fill="url(#sgGlossS)" pointer-events="none"></circle>
@@ -863,6 +976,33 @@
             <circle id="sunHand" cx="20" cy="2.7" r="2.65"></circle>
             <circle class="sg-glint" id="sunGlint" cx="19.2" cy="1.9" r="0.8"></circle>
           </svg>
+          <svg class="sgring" id="orrery" viewBox="0 0 40 40" role="img" aria-label="天象儀">
+            <title id="orreryTitle">天象儀</title>
+            <defs><radialGradient id="sgGlossO" class="sg-gloss" cx="0.33" cy="0.27" r="0.8"><stop offset="0" class="g0"></stop><stop offset="0.48" class="g1"></stop><stop offset="1" class="g2"></stop></radialGradient>
+              <clipPath id="orrWin" clipPathUnits="userSpaceOnUse"><circle cx="20" cy="20" r="18.4"></circle></clipPath></defs>
+            <g class="sg-body" transform="translate(20 20) scale(0.68) translate(-20 -20)">
+            <!-- 圓窗中心＝太陽和地球之間；太陽在上方貼著外框（只露出透鏡形的一段），地球在下方，月亮繞地球 -->
+            <g clip-path="url(#orrWin)">
+              <g id="orrSky"></g>
+              <circle class="orr-morbit" cx="20" cy="27" r="6.9"></circle>
+              <g class="orr-earth" transform="translate(20 27) scale(1.38)">
+                <circle class="orr-ocean" r="3.4"></circle>
+                <path class="orr-land" d="M-2.3 -1.6 C-1.4 -2.6 0.2 -2.5 0.6 -1.6 C1 -0.8 -0.2 -0.3 -0.4 0.5 C-0.6 1.3 -1.6 1.4 -2.2 0.7 C-2.8 0 -2.9 -0.9 -2.3 -1.6 Z M1.3 0.2 C2 -0.3 2.9 0.2 2.8 1.1 C2.7 1.9 1.9 2.4 1.3 2.1 C0.8 1.8 0.8 0.7 1.3 0.2 Z"></path>
+                <path class="orr-night" d="M-3.4 0 A3.4 3.4 0 0 0 3.4 0 Z"></path>
+                <circle class="orr-rim" r="3.4"></circle>
+                <circle class="sg-glint" cx="-1.2" cy="-2" r="0.6"></circle>
+              </g>
+              <g id="orrMoon" class="orr-moon" transform="translate(20 20.1)">
+                <circle class="orr-mshade" r="1.55"></circle>
+                <path class="orr-mlit" d="M-1.55 0 A1.55 1.55 0 0 1 1.55 0 Z"></path>
+                <circle class="orr-rim orr-mrim" r="1.55"></circle>
+              </g>
+            </g>
+            <circle class="sg-lead-o" cx="20" cy="20" r="18.4"></circle>
+            <circle cx="20" cy="20" r="19.1" fill="url(#sgGlossO)" pointer-events="none"></circle>
+            </g>
+            <circle class="sg-track" cx="20" cy="20" r="17.3"></circle>
+          </svg>
           <span class="time"><span id="hm">--:--</span> <span class="sec" id="ss">--</span></span>
         </span>
       </div>
@@ -876,6 +1016,7 @@
       </div>
     </div>
     <div class="news-row" id="newsRow" hidden>
+      <div class="news-in">
       <span class="news-tag" id="newsTag">新聞</span>
       <span class="news-item" id="newsItem">
         <a class="news-a" id="newsA" href="#" target="_blank" rel="noopener noreferrer">—</a>
@@ -885,8 +1026,9 @@
         <button type="button" class="nd prev" id="newsPrev" aria-label="上一則" title="上一則"></button>
         <button type="button" class="nd next" id="newsNext" aria-label="下一則" title="下一則"></button>
       </span>
-      <div class="news-pop" id="newsPop" hidden></div>
+      </div>
     </div>
+    <div class="news-pop" id="newsPop" hidden></div>
     <div class="vdiv" aria-hidden="true"></div>
     <div class="mcal" id="mcal" role="group" aria-label="月曆">
       <div class="mc-side">
@@ -1128,12 +1270,13 @@
     for (var b = 0; b < bounds.length; b++) {
       if (now >= bounds[b][0] && now < bounds[b][1]) {
         var sn = bounds[b][2];
-        var orn = document.getElementById("seasonOrn"); // 中心四瓣花＝當季的淺色玻璃
-        if (orn) orn.style.setProperty("--sg-petal", "var(--sg-" + { spring: "sp", summer: "su", autumn: "au", winter: "wi" }[sn] + "3)");
+        var orn = document.getElementById("seasonOrn"); // 中心花窗：春蝴蝶蘭、夏荷花、秋台灣欒樹、冬梅花
+        if (orn) orn.setAttribute("data-s", { spring: "sp", summer: "su", autumn: "au", winter: "wi" }[sn]);
         var dTot = Math.round((bounds[b][1] - bounds[b][0]) / 864e5);
         var dIn = Math.floor((now - bounds[b][0]) / 864e5) + 1;
         var left = Math.ceil((bounds[b][1] - now) / 864e5);
-        setText("seasonTitle", "四季輪：" + names[sn] + "季 第 " + dIn + "／" + dTot + " 天（" + Math.round(dIn / dTot * 100) + "%），距" + nextName[sn] + "（" + (bounds[b][1].getMonth() + 1) + "/" + bounds[b][1].getDate() + "）還有 " + left + " 天");
+        setText("seasonTitle", "四季輪：" + names[sn] + "季 第 " + dIn + "／" + dTot + " 天（" + Math.round(dIn / dTot * 100) + "%），距" + nextName[sn] + "（" + (bounds[b][1].getMonth() + 1) + "/" + bounds[b][1].getDate() + "）還有 " + left + " 天" +
+          "\n中心花窗：" + { spring: "蝴蝶蘭（台灣原生，春天開花）", summer: "荷花（白河、觀音的夏日蓮花季）", autumn: "台灣欒樹（台灣特有種，秋天黃花轉粉紅燈籠果）", winter: "梅花（國花，冬天在山區梅園盛開）" }[sn]);
         break;
       }
     }
@@ -1301,6 +1444,69 @@
     }
     setText("sunTitle", lines.join("\n"));
   }
+  // ---- 天象儀：圓窗中心在太陽和地球之間——太陽在上方、只露出貼著外框的透鏡形一段，地球在下方，月亮繞地球
+  //   從北極上方往下看（月亮逆時針繞地球）、不按比例；地球、月亮都是朝太陽那半邊亮
+  //   月亮的位置＝日月角距：新月在地球和太陽之間、上弦在左、滿月在背對太陽的下方、下弦在右
+  var ORR_SUN = [20, -3], ORR_E = [20, 27], ORR_MR = 6.9, orrKey = "", orrBuilt = false;
+  function orrSec(r1, r2, a1, a2, cls, tone) { // 以太陽中心為圓心的環形扇區（角度 0° 朝上、順時針；圓窗在 90°～270° 之間）
+    var c = ORR_SUN, lg = a2 - a1 > 180 ? 1 : 0;
+    function pt(a, r) { a = a * Math.PI / 180; return (c[0] + r * Math.sin(a)).toFixed(2) + " " + (c[1] - r * Math.cos(a)).toFixed(2); }
+    return '<path class="' + cls + '" style="fill:' + tone + '" d="M' + pt(a1, r2) + " A" + r2 + " " + r2 + " 0 " + lg + " 1 " + pt(a2, r2) +
+      (r1 > 0 ? " L" + pt(a2, r1) + " A" + r1 + " " + r1 + " 0 " + lg + " 0 " + pt(a1, r1) : " L" + c[0] + " " + c[1]) + ' Z"></path>';
+  }
+  function buildOrrScene() {
+    function mix(a, b, p) { return p >= 100 ? "var(" + a + ")" : "color-mix(in oklab, var(" + a + ") " + p + "%, var(" + b + "))"; }
+    var h = "", k, L = 150, R = 210, c = ORR_SUN, rays = "";
+    function pt(a, r) { a = a * Math.PI / 180; return (c[0] + r * Math.sin(a)).toFixed(2) + " " + (c[1] - r * Math.cos(a)).toFixed(2); }
+    function ring(r, cls, tone) { return '<circle class="' + cls + '" style="fill:' + tone + '" cx="' + c[0] + '" cy="' + c[1] + '" r="' + r + '"></circle>'; }
+    // 天空玻璃：以太陽為圓心一圈圈往外，離太陽越遠越暗（玫瑰金 → 暮紫 → 夜藍）；最外圈兩側再暗一階，光集中在日地之間
+    h += orrSec(25.5, 52, 60, L, "orr-sky", mix("--sg-nt-deep", "--sg-nt-edge", 70)) + orrSec(25.5, 52, L, R, "orr-sky", "var(--sg-nt-edge)") + orrSec(25.5, 52, R, 300, "orr-sky", mix("--sg-nt-deep", "--sg-nt-edge", 70));
+    h += orrSec(18.3, 25.5, 60, 300, "orr-sky", "var(--sg-tw)");
+    // 太陽：大圓只露出貼著外框的透鏡形一段；慕夏式光環＝玫瑰金光圈＋一圈金珠，日面三圈同心玻璃（邊緣暖金 → 中心最亮）＋細光芒線
+    h += ring(18.3, "orr-sky", mix("--sg-dawn", "--sg-dy2", 55)) + ring(15.6, "orr-sun", "var(--sg-dy1)") + ring(12.9, "orr-sun2", "var(--sg-dy2)") + ring(9.6, "orr-sun2", "var(--sg-dy4)");
+    for (k = 0; k <= 15; k++) rays += "M" + pt(120 + k * 8, 10.2) + " L" + pt(120 + k * 8, 15) + " ";
+    h += '<path class="orr-fine" d="' + rays + '"></path>';
+    for (k = 0; k <= 18; k++) { var q = pt(99 + k * 9, 16.95).split(" "); h += '<circle class="orr-bead" cx="' + q[0] + '" cy="' + q[1] + '" r="0.6"></circle>'; }
+    document.getElementById("orrSky").innerHTML = h;
+  }
+  function nextElong(target, from) { // 下一次日月角距＝target 度的時刻（每 6 小時掃描、再二分到秒）
+    function f(ms) { var e = moonEcliptic((ms - 946728000000) / 864e5).elong - target; return ((e % 360) + 540) % 360 - 180; }
+    var a = from.getTime(), fa = f(a);
+    for (var i = 0; i < 130; i++) {
+      var b = a + 6 * 3600000, fb = f(b);
+      if (fa < 0 && fb >= 0 && fb - fa < 90) {
+        for (var j = 0; j < 24; j++) { var m = (a + b) / 2, fm = f(m); if (fm < 0) a = m; else b = m; }
+        return new Date(b);
+      }
+      a = b; fa = fb;
+    }
+    return null;
+  }
+  function updateOrrery(now) {
+    var svg = document.getElementById("orrery");
+    if (!svg || !svg.getClientRects().length) return; // 沒顯示（主欄不夠寬）就不算
+    if (!orrBuilt) { buildOrrScene(); orrBuilt = true; }
+    var key = now.getFullYear() + "-" + now.getMonth() + "-" + now.getDate() + "-" + now.getHours() + "-" + Math.floor(now.getMinutes() / 10);
+    if (key === orrKey) return;
+    orrKey = key;
+    var yr = now.getFullYear(), y0 = new Date(yr, 0, 1);
+    var t = (now.getTime() - 946728000000) / 864e5, el = moonEcliptic(t).elong, rad = Math.PI / 180;
+    var mx = ORR_E[0] - ORR_MR * Math.sin(el * rad), my = ORR_E[1] - ORR_MR * Math.cos(el * rad); // 逆時針：上弦在左
+    document.getElementById("orrMoon").setAttribute("transform", "translate(" + mx.toFixed(2) + " " + my.toFixed(2) + ")");
+    // 提示文字
+    var Ms = (357.529 + 0.98560028 * t) * rad;
+    var dist = (1.00014 - 0.01671 * Math.cos(Ms) - 0.00014 * Math.cos(2 * Ms)) * 1.496;
+    var dIn = Math.floor((now - y0) / 864e5) + 1, pct = Math.round((1 - Math.cos(el * rad)) / 2 * 100);
+    var mName = MOON_NAMES_RING[Math.floor(el / 45 + 0.5) % 8], mAge = (now - lastNewMoon(now)) / 864e5; // 月相名稱表在這裡就有（moonInfo 用的表宣告在後面）
+    var where = el < 20 || el > 340 ? "月亮在地球和太陽之間" : Math.abs(el - 180) < 20 ? "月亮在地球背對太陽的一側"
+      : el < 180 ? "從地球看，月亮在太陽東邊 " + Math.round(el) + "°（傍晚看得到）" : "從地球看，月亮在太陽西邊 " + Math.round(360 - el) + "°（清晨看得到）";
+    var nNew = nextElong(0, now), nFull = nextElong(180, now);
+    function md(d) { return d ? (d.getMonth() + 1) + "/" + d.getDate() : "—"; }
+    setText("orreryTitle", "天象儀（示意，不按比例）：太陽在上、地球在下，從北極上方往下看，月亮逆時針繞地球一個月一圈\n" +
+      "地球：今年第 " + dIn + " 天，離太陽 " + dist.toFixed(3) + " 億公里（1 月初最近、7 月初最遠）\n" +
+      "月亮：" + mName + "，月齡 " + mAge.toFixed(1) + " 天、亮面 " + pct + "%｜" + where + "\n" +
+      "下次新月 " + md(nNew) + "、下次滿月 " + md(nFull));
+  }
   var wdChip = document.getElementById("wdchip");
   var lastDateKey = "";
   var fills = [];
@@ -1367,6 +1573,7 @@
 
     updateSunRing(now);
     updateSeasonRing(now);
+    updateOrrery(now);
 
     // 今年進度（分段）
     var yearStart = new Date(now.getFullYear(), 0, 1);
