@@ -22,11 +22,15 @@
     --sg-nt-edge: #5A5EB2; --sg-nt-deep: #352E78;
     --sg-tw: #7C6BC2; --sg-moonlit: #C6CEEE; --sg-moon-dark: #2B356A; /* 深暮紫、月光玻璃、月相暗面 */
     --sg-track: rgba(110,90,70,0.58);
+    --pl-me: #A8A39B; --pl-ve: #F2DFA7; --pl-ma: #D9603B; --pl-ju: #D8B48C; --pl-ju2: #A9774E; --pl-sa: #E2C178; /* 天象儀外圈五大行星 */
     --sg-earth: #3E92D4; --sg-earth-night: #1F3766; --sg-moon-shade: #A29C90; /* 天象儀：地球白天／夜半邊、月亮背光面 */
-    /* 四季輪中心花木（慕夏柔和色）：粉紅四階、鮭橘、白瓣、葉綠兩階、枝幹；光環圓盤四季淡色 */
-    --se-pk0: #FCE6EC; --se-pk1: #F4BFCF; --se-pk2: #E58FA6; --se-pk3: #B9507A; --se-sal: #EE9A7C; --se-wh: #FFFDF7;
+    /* 四季輪中心花木（台灣四季：油桐花、鳳凰花、台灣欒樹、山櫻花）＋慕夏光環四季淡底 */
+    --se-wh: #FFFDF7; --se-cen: #CBD06A; --se-crim: #C2414F;                       /* 油桐：白瓣、黃綠花心、瓣基紅紋 */
+    --se-red: #E4502F; --se-red2: #A9301F; --se-cream: #FFF1CC;                    /* 鳳凰花：朱紅瓣、深紅花絲、乳白旗瓣 */
+    --se-ylw: #F6CB3E; --se-anth: #B5652E; --se-lan1: #F6A896; --se-lan2: #DE6A78;  /* 欒樹：金黃花瓣、花藥、燈籠果亮面／暗面 */
+    --se-ck1: #D83F7C; --se-ck2: #EE86AC; --se-cal: #9E2F52;                       /* 山櫻花：花瓣、花心、花萼與花蕊 */
     --se-lf1: #8DBB72; --se-lf2: #5E9A58; --se-br: #6B4A36;
-    --se-h-sp: #E3F0D6; --se-h-su: #FBE2DC; --se-h-au: #F8E5BC; --se-h-wi: #DDE8F6;
+    --se-h-sp: #E3F0D6; --se-h-su: #FCEBCB; --se-h-au: #ECE4F2; --se-h-wi: #DDE8F6;
     --mkt-closed: #EDEDEB;
     --ring-hand: #E25C2E; /* 日照輪、四季輪的寶石指針（同一色，飽和朱橘，繞在圈外） */
     --dot-blue: #A9CDEC;
@@ -148,10 +152,14 @@
       --sg-nt-edge: #44478F; --sg-nt-deep: #24205A;
       --sg-tw: #61579F; --sg-moonlit: #93A1D6; --sg-moon-dark: #1C234F;
       --sg-track: rgba(235,215,185,0.5);
+      --pl-me: #8F8A82; --pl-ve: #E3CF97; --pl-ma: #C9583A; --pl-ju: #C4A07A; --pl-ju2: #8A5E3C; --pl-sa: #CDAE68;
       --sg-earth: #3C83C4; --sg-earth-night: #18294F; --sg-moon-shade: #77736A;
-      --se-pk0: #E9CBD3; --se-pk1: #DAA2B3; --se-pk2: #C77890; --se-pk3: #A2486D; --se-sal: #CF8468; --se-wh: #EEE8DA;
+      --se-wh: #EEE8DA; --se-cen: #AEB15A; --se-crim: #B04050;
+      --se-red: #CF4A2E; --se-red2: #8F2A1C; --se-cream: #E9D8AE;
+      --se-ylw: #DDB33C; --se-anth: #9A5628; --se-lan1: #D68E80; --se-lan2: #B95562;
+      --se-ck1: #BE3A70; --se-ck2: #D27598; --se-cal: #5E1F34;
       --se-lf1: #75A061; --se-lf2: #4F8449; --se-br: #2A1D15;
-      --se-h-sp: #4A5A3E; --se-h-su: #5E4440; --se-h-au: #5F5030; --se-h-wi: #3E4A60;
+      --se-h-sp: #4A5A3E; --se-h-su: #5E5038; --se-h-au: #4E4560; --se-h-wi: #3E4A60;
       --mkt-closed: rgba(170,170,170,0.2);
       --ring-hand: #F07A45; /* 寶石指針（深色模式） */
       --seg-fill-a: rgba(94,159,232,0.45);
@@ -559,7 +567,7 @@
     align-self: center;
   }
   /* ---- 四季輪＋日照輪：慕夏彩繪玻璃風
-     圓窗（.sg-body，縮成 68%）：古銅金外框 → 分片玻璃（深淺交錯）→ 內圈鉛條 → 中心花窗（四季＝台灣花木：春蝴蝶蘭、夏荷花、秋台灣欒樹、冬梅花，襯慕夏光環圓盤；日照＝太陽／夜間新月）
+     圓窗（.sg-body，縮成 68%）：古銅金外框 → 分片玻璃（深淺交錯）→ 內圈鉛條 → 中心花窗（四季＝台灣花木：春油桐花、夏鳳凰花、秋台灣欒樹、冬山櫻花，四季輪的花窗放大到半徑 12、襯慕夏細光環；日照＝太陽／夜間月相）
      圈外：點狀光環軌道＋寶石指針（沿軌道繞行）
      座標 0–40、0° 在正上方順時針；玻璃片由 JS 依節氣、日出日落產生 ---- */
   .wrap { --dock-ring: 60px; --dock-gap: 12px; --dock-n: 2; --dock-dy: 16px; } /* 圓環展示區：大小、間距、幾個環、垂直位移（置中於時鐘列～新聞列） */
@@ -568,39 +576,58 @@
   .sg-lead-o { fill: none; stroke: var(--sg-frame); stroke-width: 2.1; } /* 外框：慕夏光環的古銅金 */
   .sg-lead-i { fill: none; stroke: var(--sg-lead); stroke-width: 1.45; }
   .sg-med { fill: var(--sg-med); }
+  /* SE-EMB-CSS-BEGIN 四季輪中心花窗 */
   .se-emb { display: none; }
   #seasonOrn[data-s="sp"] .se-sp, #seasonOrn[data-s="su"] .se-su, #seasonOrn[data-s="au"] .se-au, #seasonOrn[data-s="wi"] .se-wi { display: inline; }
-  .se-halo { fill: var(--se-h-au); stroke: var(--sg-frame); stroke-width: 0.5; } /* 慕夏的光環圓盤：花木壓在圓盤邊上 */
+  .se-halo { fill: var(--se-h-au); }
   #seasonOrn[data-s="sp"] .se-halo { fill: var(--se-h-sp); }
   #seasonOrn[data-s="su"] .se-halo { fill: var(--se-h-su); }
   #seasonOrn[data-s="wi"] .se-halo { fill: var(--se-h-wi); }
-  .se-emb path, .se-emb circle { stroke: var(--sg-lead); stroke-width: 0.5; stroke-linejoin: round; }
-  .se-emb .ln { fill: none; stroke-width: 0.3; stroke-linecap: round; stroke-opacity: 0.7; }
-  .se-emb .ln.pk { stroke: var(--se-pk3); stroke-opacity: 0.55; }
-  .se-emb .ln.tdr { stroke: var(--se-pk3); stroke-width: 0.35; stroke-opacity: 1; }
-  .se-emb .ln.ped { stroke: var(--se-br); stroke-width: 0.4; stroke-opacity: 1; }
-  .se-emb .ln.sta { stroke: var(--sg-gold); stroke-width: 0.28; stroke-opacity: 1; }
-  .se-emb .st { fill: none; stroke: var(--se-lf2); stroke-width: 0.75; stroke-linecap: round; }
-  .se-emb .st.au { stroke: var(--se-br); stroke-width: 0.8; }
+  .se-ring { fill: none; stroke: var(--sg-frame); stroke-width: 0.45; } /* 慕夏光環：細古銅圈，花木壓在圈上 */
+  .se-emb path, .se-emb circle, .se-emb ellipse { stroke: var(--sg-lead); stroke-width: 0.5; stroke-linejoin: round; }
+  .se-emb .ln { fill: none; stroke-width: 0.3; stroke-linecap: round; stroke-opacity: 0.6; }
+  .se-emb .vein { stroke: var(--se-crim); stroke-width: 0.4; stroke-opacity: 0.9; }
+  .se-emb .red2 { stroke: var(--se-red2); stroke-width: 0.35; stroke-opacity: 0.75; }
+  .se-emb .spot { stroke: var(--se-red); stroke-width: 0.5; stroke-opacity: 1; }
+  .se-emb .fil { fill: none; stroke: var(--se-red2); stroke-width: 0.42; stroke-linecap: round; }
+  .se-emb .rib { fill: none; stroke: var(--se-lf2); stroke-width: 0.45; stroke-linecap: round; }
+  .se-emb .lft { stroke: var(--se-lf2); stroke-width: 0.2; }
   .se-emb .br { fill: none; stroke: var(--se-br); stroke-width: 1.35; stroke-linecap: round; }
   .se-emb .br2 { stroke-width: 0.8; }
-  .se-emb .an, .se-emb .fl { stroke-width: 0.25; }
+  .se-emb .ped { fill: none; stroke: var(--se-br); stroke-width: 0.45; stroke-linecap: round; }
+  .se-emb .stam { stroke: var(--se-cal); stroke-opacity: 0.9; }
+  .se-emb .dot { stroke-width: 0.22; }
   .se-emb .cap { stroke-width: 0.3; }
-  /* 天象儀：圓窗中心在日地之間；太陽貼著上方外框露出透鏡形一段，天空玻璃離太陽越遠越暗；地球、月亮都是朝太陽（上方）那半邊亮 */
+  .se-emb .mid { stroke-width: 0.35; }
+  .se-emb .cal { stroke-width: 0.4; }
+  .se-emb .blot { stroke: none; opacity: 0.85; }
+  .se-emb .fil2 { fill: none; stroke: var(--se-anth); stroke-width: 0.32; stroke-linecap: round; }
+  .se-emb .ckv { stroke: var(--se-cal); stroke-width: 0.35; stroke-opacity: 0.55; }
+  /* SE-EMB-CSS-END */
+  /* 天象儀：圓窗中心在日地之間；太陽是一個很大的圓，只露出被圓窗切下的一角（下緣幾乎平），天空玻璃離太陽越遠越暗；地球、月亮都是朝太陽（上方）那半邊亮 */
   .orr-pane { stroke: var(--sg-lead); stroke-width: 1.15; stroke-linejoin: round; } /* 太陽：和其他環同粗的鉛條 */
   .orr-sky { stroke: var(--sg-lead); stroke-width: 0.8; stroke-linejoin: round; } /* 天空：細一點的鉛條，主角留給日地月 */
   .orr-sun { stroke: var(--sg-lead); stroke-width: 1.05; }   /* 日面外緣：粗鉛條 */
   .orr-sun2 { stroke: var(--sg-lead); stroke-width: 0.45; }  /* 日面內圈：細描線 */
   .orr-fine { fill: none; stroke: var(--sg-dy3); stroke-width: 0.4; stroke-linecap: round; } /* 細光芒線 */
   .orr-bead { fill: var(--sg-dy4); stroke: none; } /* 光圈上的金珠 */
-  .orr-morbit { fill: none; stroke: var(--sg-moonlit); stroke-width: 0.6; stroke-linecap: round; stroke-dasharray: 0 1.3; opacity: 0.8; } /* 月亮軌道：點狀，呼應外圈軌道 */
+  .orr-morbit { fill: none; stroke: var(--sg-moonlit); stroke-width: 0.6; stroke-linecap: round; stroke-dasharray: 0 1.5; opacity: 0.8; } /* 月亮軌道：點狀 */
+  .orr-star { fill: var(--sg-dy4); opacity: 0.9; }  /* 兩側暗玻璃上的小星星 */
+  .orr-atm { fill: var(--sg-moonlit); opacity: 0.35; } /* 地球外圈一層淡淡的大氣光 */
   .orr-ocean { fill: var(--sg-earth); }
-  .orr-land { fill: var(--se-lf1); stroke: var(--sg-lead); stroke-width: 0.25; }
+  .orr-land { fill: var(--se-lf1); stroke: var(--sg-lead); stroke-width: 0.22; }
   .orr-night { fill: var(--sg-earth-night); opacity: 0.78; }  /* 背對太陽的半邊 */
   .orr-mshade { fill: var(--sg-moon-shade); }
   .orr-mlit { fill: var(--sg-moon); }
-  .orr-rim { fill: none; stroke: var(--sg-lead); stroke-width: 0.6; } /* 地球外框（整組放大 1.38 倍，實際約 0.8） */
-  .orr-mrim { stroke-width: 0.55; }
+  .orr-rim { fill: none; stroke: var(--sg-lead); stroke-width: 0.55; } /* 地球外框（整組放大 1.65 倍，實際約 0.9） */
+  .orr-mrim { stroke-width: 0.6; }
+  /* 天象儀外圈：點狀軌道＋五大行星珠（位置＝從地球看離太陽的角度：太陽在上，東＝左、西＝右、下＝整夜可見） */
+  .orr-pl { stroke: var(--sg-lead); stroke-width: 0.5; }
+  .orr-pl.me { fill: var(--pl-me); } .orr-pl.ve { fill: var(--pl-ve); } .orr-pl.ma { fill: var(--pl-ma); } .orr-pl.ju { fill: var(--pl-ju); } .orr-pl.sa { fill: var(--pl-sa); }
+  .orr-band { fill: none; stroke: var(--pl-ju2); stroke-width: 0.42; } /* 木星條紋 */
+  .orr-sring { fill: none; stroke: var(--sg-lead); stroke-width: 1.05; }  /* 土星環：外描邊 */
+  .orr-sring2 { fill: none; stroke: var(--pl-sa); stroke-width: 0.42; }  /* 土星環：本色 */
+  .orr-pg.dim { opacity: 0.42; } /* 離太陽 15° 內、被陽光淹沒看不到的行星淡一點 */
   .sg-core { fill: var(--sg-gold); stroke: var(--sg-lead); stroke-width: 1; }
   .sg-track { fill: none; stroke: var(--sg-track); stroke-width: 1.25; stroke-linecap: round; stroke-dasharray: 0 2.7; } /* 圈外點狀軌道 */
   .sg-gloss .g0 { stop-color: #fff; stop-opacity: var(--sg-gloss0); }
@@ -874,83 +901,124 @@
             <defs><radialGradient id="sgGlossS" class="sg-gloss" cx="0.33" cy="0.27" r="0.8"><stop offset="0" class="g0"></stop><stop offset="0.48" class="g1"></stop><stop offset="1" class="g2"></stop></radialGradient></defs>
             <g class="sg-body" transform="translate(20 20) scale(0.68) translate(-20 -20)">
             <g id="seasonArcs"></g>
-            <circle class="sg-med" cx="20" cy="20" r="9.6"></circle>
-            <g id="seasonOrn" data-s="au"><!-- 中心意象：台灣四季花木（慕夏風：光環圓盤＋細鉛線花形），依天文四季切換 -->
-              <circle class="se-halo" cx="20" cy="20" r="6.4"></circle>
-              <g class="se-emb se-sp"><!-- 春＝蝴蝶蘭 -->
-                <path style="fill:var(--se-lf1)" d="M20 27.7 C17.4 27.6 14.9 26.6 13.7 24.9 C16.3 24.5 18.6 25.6 20 27.7 Z"></path>
-                <path style="fill:var(--se-lf2)" d="M20 27.7 C22.6 27.6 25.1 26.6 26.3 24.9 C23.7 24.5 21.4 25.6 20 27.7 Z"></path>
-                <path style="fill:var(--se-pk0)" d="M20 19.4 C22.62 19.54 24.45 22.37 24.31 23.71 C22.97 23.85 20.14 22.02 20 19.4 Z"></path>
-                <path style="fill:var(--se-pk0)" d="M20 19.4 C19.86 22.02 17.03 23.85 15.69 23.71 C15.55 22.37 17.38 19.54 20 19.4 Z"></path>
-                <path style="fill:var(--se-pk0)" d="M20 19.4 C18.2 17.32 18.92 13.81 20 12.9 C21.08 13.81 21.8 17.32 20 19.4 Z"></path>
-                <path style="fill:var(--se-pk1)" d="M20 19.4 C19 17.7 15.9 15 14 16.3 C12.4 17.5 13.4 21 16.1 21.5 C17.8 21.8 19.3 20.8 20 19.4 Z"></path>
-                <path style="fill:var(--se-pk1)" d="M20 19.4 C21 17.7 24.1 15 26 16.3 C27.6 17.5 26.6 21 23.9 21.5 C22.2 21.8 20.7 20.8 20 19.4 Z"></path>
-                <path class="ln pk" d="M19.4 19.1 Q16.8 17.7 14.7 17.5 M19.4 19.6 Q17 19.4 15 20.3"></path>
-                <path class="ln pk" d="M20.6 19.1 Q23.2 17.7 25.3 17.5 M20.6 19.6 Q23 19.4 25 20.3"></path>
-                <path style="fill:var(--se-pk3)" d="M20 20.1 C21.6 20.3 22.3 21.9 21.2 23 L20.7 23.5 C21 24.1 20.7 24.7 20 25 C19.3 24.7 19 24.1 19.3 23.5 L18.8 23 C17.7 21.9 18.4 20.3 20 20.1 Z"></path>
-                <path class="ln tdr" d="M19.5 24.8 Q18.4 25.6 17.9 24.7 M20.5 24.8 Q21.6 25.6 22.1 24.7"></path>
-                <circle style="fill:var(--sg-gold)" cx="20" cy="19.3" r="0.95"></circle>
+            <circle class="sg-med" cx="20" cy="20" r="12"></circle>
+            <g id="seasonOrn" data-s="au"><!-- 中心花窗：台灣四季花木（春油桐花、夏鳳凰花、秋台灣欒樹、冬山櫻花），依天文四季切換 -->
+              <circle class="se-halo" cx="20" cy="20" r="11.9"></circle>
+              <circle class="se-ring" cx="20" cy="20" r="10.25"></circle>
+              <g class="se-emb se-sp"><!-- 春＝油桐花 -->
+                <path style="fill:var(--se-lf1)" d="M20 20 C22.31 18.06 26.96 19.69 29.17 24.47 C24.04 25.68 19.89 23.01 20 20 Z"></path>
+                <path class="ln" d="M21.35 20.66 L28.09 23.95"></path>
+                <path style="fill:var(--se-lf2)" d="M20 20 C19.31 22.73 14.87 24.06 10.55 21.67 C13.79 17.94 18.42 17.67 20 20 Z"></path>
+                <path class="ln" d="M18.52 20.26 L11.73 21.46"></path>
+                <path style="fill:var(--se-wh)" d="M20.03 19.75 C19.3 17.96 17.23 16.35 17.6 14.22 C17.94 12.48 19.66 11.94 20.64 12.39 Q20.94 12.59 20.99 12.98 Q21.14 12.62 21.48 12.51 C22.55 12.35 24.05 13.34 23.9 15.11 C23.67 17.25 21.23 18.23 20.03 19.75 Z"></path>
+                <path style="fill:var(--se-wh)" d="M20.25 19.96 C21.73 18.71 22.62 16.24 24.76 15.93 C26.52 15.72 27.56 17.18 27.43 18.26 Q27.34 18.61 26.98 18.77 Q27.37 18.8 27.58 19.09 C28.06 20.06 27.59 21.8 25.86 22.2 C23.75 22.64 22.07 20.63 20.25 19.96 Z"></path>
+                <path style="fill:var(--se-wh)" d="M20.12 20.22 C21.76 21.24 24.39 21.33 25.34 23.26 C26.09 24.87 25.01 26.32 23.95 26.53 Q23.59 26.55 23.33 26.25 Q23.42 26.64 23.21 26.93 C22.43 27.69 20.64 27.77 19.72 26.25 C18.65 24.38 20.04 22.16 20.12 20.22 Z"></path>
+                <path style="fill:var(--se-wh)" d="M19.83 20.18 C19.36 22.06 20.09 24.58 18.55 26.09 C17.25 27.3 15.54 26.72 15.01 25.78 Q14.88 25.44 15.08 25.1 Q14.74 25.31 14.4 25.19 C13.44 24.69 12.8 23.01 13.96 21.66 C15.42 20.07 17.96 20.71 19.83 20.18 Z"></path>
+                <path style="fill:var(--se-wh)" d="M19.78 19.89 C17.84 20.03 15.67 21.5 13.76 20.5 C12.21 19.64 12.23 17.84 12.96 17.04 Q13.24 16.81 13.63 16.89 Q13.33 16.64 13.33 16.28 C13.51 15.21 14.92 14.09 16.55 14.77 C18.52 15.66 18.7 18.28 19.78 19.89 Z"></path>
+                <path class="ln vein" d="M19.82 18.51 L19.6 16.72 M20.21 18.51 L20.57 15.94 M20.59 18.62 L21.29 16.96 M21.36 19.37 L22.99 18.61 M21.48 19.74 L24.04 19.29 M21.49 20.13 L23.29 20.29 M21.02 21.1 L22.25 22.41 M20.7 21.32 L21.92 23.62 M20.34 21.46 L20.74 23.22 M19.27 21.31 L18.4 22.89 M18.96 21.08 L17.15 22.95 M18.71 20.77 L17.17 21.7 M18.53 19.71 L16.76 19.37 M18.65 19.34 L16.31 18.2 M18.87 19.02 L17.51 17.84"></path>
+                <circle style="fill:var(--se-cen)" cx="20" cy="20" r="1.45"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="20.59" cy="19.39" r="0.32"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="20.76" cy="20.37" r="0.32"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="19.88" cy="20.84" r="0.32"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="19.16" cy="20.15" r="0.32"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="19.6" cy="19.25" r="0.32"></circle>
               </g>
-              <g class="se-emb se-su"><!-- 夏＝荷花 -->
-                <path class="st" d="M15.6 24.7 Q14.7 21.2 14.9 17.6"></path>
-                <path style="fill:var(--se-pk2)" d="M14.9 18.1 C13.81 16.88 14.66 15.33 15.36 14.83 C15.9 15.51 16.28 17.23 14.9 18.1 Z"></path>
-                <path style="fill:var(--se-lf1)" d="M20 25.4 L18.9 27.3 C15.8 27.2 13.5 26.4 13.6 25.2 C13.8 23.9 16.9 23.2 20 23.2 C23.1 23.2 26.2 23.9 26.4 25.2 C26.5 26.4 24.2 27.2 21.1 27.3 Z"></path>
-                <path class="ln" d="M20 25.1 L15.3 24.7 M20 25.1 L17.4 23.7 M20 25.1 L22.6 23.7 M20 25.1 L24.7 24.7"></path>
-                <path style="fill:var(--se-pk2)" d="M20 24.3 C17.32 25.33 15.54 22.87 15.42 21.44 C16.76 20.92 19.75 21.43 20 24.3 Z"></path>
-                <path style="fill:var(--se-pk2)" d="M20 24.3 C20.25 21.43 23.24 20.92 24.58 21.44 C24.46 22.87 22.68 25.33 20 24.3 Z"></path>
-                <circle class="pod" style="fill:var(--sg-gold)" cx="20" cy="18.9" r="1.25"></circle>
-                <path style="fill:var(--se-pk1)" d="M20 24.3 C16.77 23.47 16.19 19.58 16.87 18.15 C18.42 18.45 21.23 21.2 20 24.3 Z"></path>
-                <path style="fill:var(--se-pk1)" d="M20 24.3 C18.77 21.2 21.58 18.45 23.13 18.15 C23.81 19.58 23.23 23.47 20 24.3 Z"></path>
-                <path style="fill:var(--se-pk0)" d="M20 24.3 C17.25 22.28 18.62 18.88 20 18 C21.38 18.88 22.75 22.28 20 24.3 Z"></path>
-                <path class="ln pk" d="M20 23.6 L20 19.2"></path>
+              <g class="se-emb se-su"><!-- 夏＝鳳凰花 -->
+                <path class="rib" d="M21 21 Q26.5 21.6 29.6 25"></path>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="22.89" cy="20.11" rx="1.32" ry="0.68" transform="rotate(-51.69 22.89 20.11)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="22.51" cy="22.39" rx="1.32" ry="0.68" transform="rotate(70.69 22.51 22.39)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="24.67" cy="20.66" rx="1.23" ry="0.65" transform="rotate(-45.5 24.67 20.66)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="24.09" cy="22.73" rx="1.23" ry="0.65" transform="rotate(76.88 24.09 22.73)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="26.29" cy="21.38" rx="1.13" ry="0.62" transform="rotate(-38.62 26.29 21.38)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="25.53" cy="23.21" rx="1.13" ry="0.62" transform="rotate(83.76 25.53 23.21)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="27.75" cy="22.27" rx="1.04" ry="0.59" transform="rotate(-31.16 27.75 22.27)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="26.84" cy="23.84" rx="1.04" ry="0.59" transform="rotate(91.22 26.84 23.84)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="29.04" cy="23.31" rx="0.94" ry="0.56" transform="rotate(-23.32 29.04 23.31)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="28.03" cy="24.61" rx="0.94" ry="0.56" transform="rotate(99.06 28.03 24.61)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="30.16" cy="24.51" rx="0.85" ry="0.53" transform="rotate(-15.38 30.16 24.51)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="29.1" cy="25.54" rx="0.85" ry="0.53" transform="rotate(107 29.1 25.54)"></ellipse>
+                <path class="rib" d="M19 21.4 Q15.2 25.4 13.6 29.2"></path>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="18.7" cy="23.44" rx="1.32" ry="0.68" transform="rotate(70.78 18.7 23.44)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="16.98" cy="21.9" rx="1.32" ry="0.68" transform="rotate(-166.84 16.98 21.9)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="17.56" cy="24.7" rx="1.23" ry="0.65" transform="rotate(67.87 17.56 24.7)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="15.89" cy="23.34" rx="1.23" ry="0.65" transform="rotate(-169.75 15.89 23.34)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="16.54" cy="25.93" rx="1.13" ry="0.62" transform="rotate(64.63 16.54 25.93)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="14.94" cy="24.77" rx="1.13" ry="0.62" transform="rotate(-172.99 14.94 24.77)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="15.65" cy="27.16" rx="1.04" ry="0.59" transform="rotate(61.05 15.65 27.16)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="14.12" cy="26.19" rx="1.04" ry="0.59" transform="rotate(-176.57 14.12 26.19)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="14.89" cy="28.37" rx="0.94" ry="0.56" transform="rotate(57.08 14.89 28.37)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="13.44" cy="27.59" rx="0.94" ry="0.56" transform="rotate(179.46 13.44 27.59)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="14.24" cy="29.57" rx="0.85" ry="0.53" transform="rotate(52.72 14.24 29.57)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="12.89" cy="28.97" rx="0.85" ry="0.53" transform="rotate(175.1 12.89 28.97)"></ellipse>
+                <path style="fill:var(--se-red)" d="M19.49 18.12 C20.37 17.63 20.92 17.21 21.54 16.76 C21 14.71 23.71 13.19 25 14.24 Q25.83 14.5 25.58 15.32 Q26.37 15.66 26.04 16.46 Q26.79 16.88 26.37 17.64 C26.18 19.3 23.17 20.08 22.13 18.23 C21.38 18.34 20.69 18.42 19.71 18.68 Z"></path>
+                <path class="ln red2" d="M21.83 17.5 L24.61 16.38"></path>
+                <path style="fill:var(--se-red)" d="M19.83 18.2 C20.57 18.9 21.14 19.29 21.76 19.74 C23.54 18.59 25.83 20.7 25.22 22.25 Q25.23 23.12 24.37 23.14 Q24.29 23.99 23.44 23.92 Q23.27 24.77 22.42 24.61 C20.78 24.93 19.1 22.32 20.54 20.76 C20.21 20.08 19.92 19.44 19.37 18.6 Z"></path>
+                <path class="ln red2" d="M21.14 20.24 L23.07 22.54"></path>
+                <path style="fill:var(--se-red)" d="M19.85 18.57 C19.39 19.47 19.17 20.13 18.91 20.84 C20.5 22.24 19.11 25.02 17.45 24.87 Q16.62 25.12 16.36 24.3 Q15.52 24.45 15.35 23.61 Q14.49 23.68 14.41 22.82 C13.65 21.33 15.7 19 17.59 19.96 C18.16 19.45 18.68 18.99 19.35 18.23 Z"></path>
+                <path class="ln red2" d="M18.26 20.39 L16.58 22.88"></path>
+                <path style="fill:var(--se-red)" d="M19.51 18.69 C18.51 18.5 17.82 18.46 17.06 18.41 C16.16 20.33 13.1 19.75 12.79 18.11 Q12.32 17.38 13.04 16.91 Q12.65 16.14 13.42 15.75 Q13.11 14.95 13.92 14.63 C15.14 13.49 17.95 14.82 17.55 16.9 C18.2 17.3 18.78 17.68 19.69 18.11 Z"></path>
+                <path class="ln red2" d="M17.32 17.66 L14.46 16.73"></path>
+                <path style="fill:var(--se-cream)" d="M19.33 18.39 C19.25 17.35 19.11 16.66 18.97 15.89 C17.09 15.55 16.84 12.37 18.19 11.58 Q18.71 10.91 19.29 11.49 Q19.86 10.88 20.39 11.52 Q21.01 10.99 21.48 11.7 C22.78 12.57 22.31 15.73 20.4 15.94 C20.21 16.7 20.02 17.38 19.87 18.41 Z"></path>
+                <path class="ln spot" d="M19.13 15.74 L17.88 14.13 M19.5 16 L18.93 12.94 M19.87 16.02 L20.65 13 M20.25 15.78 L21.62 14.27"></path>
+                <path class="fil" d="M19.6 18.4 Q19.92 22.95 22.2 25.54 M19.6 18.4 Q19.08 23.35 21.04 26.57 M19.6 18.4 Q18.18 23.36 19.6 27 M19.6 18.4 Q17.44 22.82 18.18 26.48 M19.6 18.4 Q16.99 21.99 17.07 25.35"></path>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="22.2" cy="25.54" r="0.45"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="21.04" cy="26.57" r="0.45"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="19.6" cy="27" r="0.45"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="18.18" cy="26.48" r="0.45"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="17.07" cy="25.35" r="0.45"></circle>
+                <circle style="fill:var(--se-red2)" cx="19.6" cy="18.4" r="0.95"></circle>
               </g>
               <g class="se-emb se-au"><!-- 秋＝台灣欒樹 -->
-                <path class="st au" d="M13.3 16.9 C16 14.2 23.8 13.6 26.8 16.6"></path>
-                <path style="fill:var(--se-lf1)" d="M14.6 16 C13.3 15.6 12.6 16.6 12.8 17.9 C14 18.2 14.9 17.3 14.6 16 Z"></path>
-                <path style="fill:var(--se-lf2)" d="M25.6 15.6 C26.9 15.1 27.7 16 27.6 17.3 C26.4 17.7 25.4 16.9 25.6 15.6 Z"></path>
-                <path class="ln ped" d="M16.6 15.3 L16.5 17.1 M20.2 14.4 L20.2 19.1 M23.6 14.9 L23.7 16.8"></path>
-                <path style="fill:var(--se-sal)" d="M16.5 17.32 C15.34 17.41 14.56 18.53 14.82 19.82 C15.04 20.72 15.86 21.41 16.5 21.75 Q16.97 19.56 16.5 17.32 Z"></path>
-                <path style="fill:var(--se-pk2)" d="M16.5 17.32 C17.66 17.41 18.43 18.53 18.18 19.82 C17.96 20.72 17.14 21.41 16.5 21.75 Q16.97 19.56 16.5 17.32 Z"></path>
-                <path class="cap" style="fill:var(--se-lf2)" d="M15.86 17.54 Q16.5 16.94 17.14 17.54 Q16.5 17.8 15.86 17.54 Z"></path>
-                <path style="fill:var(--se-pk1)" d="M23.7 17.02 C22.54 17.11 21.77 18.23 22.02 19.52 C22.24 20.42 23.05 21.11 23.7 21.45 Q24.17 19.26 23.7 17.02 Z"></path>
-                <path style="fill:var(--se-pk2)" d="M23.7 17.02 C24.86 17.11 25.63 18.23 25.38 19.52 C25.16 20.42 24.34 21.11 23.7 21.45 Q24.17 19.26 23.7 17.02 Z"></path>
-                <path class="cap" style="fill:var(--se-lf2)" d="M23.05 17.24 Q23.7 16.64 24.34 17.24 Q23.7 17.5 23.05 17.24 Z"></path>
-                <path style="fill:var(--se-pk2)" d="M20.2 19.25 C18.82 19.36 17.91 20.68 18.21 22.21 C18.47 23.28 19.43 24.1 20.2 24.51 Q20.76 21.91 20.2 19.25 Z"></path>
-                <path style="fill:var(--se-pk3)" d="M20.2 19.25 C21.58 19.36 22.49 20.68 22.19 22.21 C21.93 23.28 20.96 24.1 20.2 24.51 Q20.76 21.91 20.2 19.25 Z"></path>
-                <path class="cap" style="fill:var(--se-lf2)" d="M19.43 19.51 Q20.2 18.8 20.96 19.51 Q20.2 19.82 19.43 19.51 Z"></path>
-                <circle class="fl" style="fill:var(--sg-gold)" cx="18.3" cy="13.9" r="0.55"></circle>
-                <circle class="fl" style="fill:var(--sg-gold)" cx="19.4" cy="13.1" r="0.6"></circle>
-                <circle class="fl" style="fill:var(--sg-gold)" cx="20.7" cy="13.2" r="0.6"></circle>
-                <circle class="fl" style="fill:var(--sg-gold)" cx="21.8" cy="13.9" r="0.55"></circle>
-                <circle class="fl" style="fill:var(--sg-gold)" cx="20.1" cy="12.2" r="0.5"></circle>
+                <path style="fill:var(--se-lan2)" d="M21.85 22.85 C20.43 23.94 19.9 25.93 20.93 27.4 C21.99 28.85 24.16 28.92 25.61 28.64 C26.45 27.43 27.28 25.42 26.38 23.86 C25.46 22.32 23.43 21.99 21.85 22.85 Z"></path>
+                <path class="mid" style="fill:var(--se-lan1)" d="M21.85 22.85 C21.17 24.78 23.07 27.82 25.61 28.64 C25.9 25.98 23.89 23.01 21.85 22.85 Z"></path>
+                <path style="fill:var(--se-lan2)" d="M17.15 21.85 C16.06 20.43 14.07 19.9 12.6 20.93 C11.15 21.99 11.08 24.16 11.36 25.61 C12.57 26.45 14.58 27.28 16.14 26.38 C17.68 25.46 18.01 23.43 17.15 21.85 Z"></path>
+                <path class="mid" style="fill:var(--se-lan1)" d="M17.15 21.85 C15.22 21.17 12.18 23.07 11.36 25.61 C14.02 25.9 16.99 23.89 17.15 21.85 Z"></path>
+                <path style="fill:var(--se-ylw)" d="M20.06 19.71 C19.72 18.39 18.11 16.33 18.47 14.24 C18.76 12.59 20.57 12.04 21.58 12.57 C22.72 12.5 24.14 13.73 23.74 15.36 C23.22 17.42 20.91 18.64 20.06 19.71 Z"></path>
+                <path style="fill:var(--se-ylw)" d="M20.29 20.06 C21.61 19.72 23.67 18.11 25.76 18.47 C27.41 18.76 27.96 20.57 27.43 21.58 C27.5 22.72 26.27 24.14 24.64 23.74 C22.58 23.22 21.36 20.91 20.29 20.06 Z"></path>
+                <path style="fill:var(--se-ylw)" d="M19.94 20.29 C20.28 21.61 21.89 23.67 21.53 25.76 C21.24 27.41 19.43 27.96 18.42 27.43 C17.28 27.5 15.86 26.27 16.26 24.64 C16.78 22.58 19.09 21.36 19.94 20.29 Z"></path>
+                <path style="fill:var(--se-ylw)" d="M19.71 19.94 C18.39 20.28 16.33 21.89 14.24 21.53 C12.59 21.24 12.04 19.43 12.57 18.42 C12.5 17.28 13.73 15.86 15.36 16.26 C17.42 16.78 18.64 19.09 19.71 19.94 Z"></path>
+                <path class="blot" style="fill:var(--se-crim)" d="M20.19 19.12 C19.35 18.23 19.6 16.85 20.75 16.48 C21.65 17.28 21.31 18.64 20.19 19.12 Z"></path>
+                <path class="blot" style="fill:var(--se-crim)" d="M20.88 20.19 C21.77 19.35 23.15 19.6 23.52 20.75 C22.72 21.65 21.36 21.31 20.88 20.19 Z"></path>
+                <path class="blot" style="fill:var(--se-crim)" d="M19.81 20.88 C20.65 21.77 20.4 23.15 19.25 23.52 C18.35 22.72 18.69 21.36 19.81 20.88 Z"></path>
+                <path class="blot" style="fill:var(--se-crim)" d="M19.12 19.81 C18.23 20.65 16.85 20.4 16.48 19.25 C17.28 18.35 18.64 18.69 19.12 19.81 Z"></path>
+                <path class="fil2" d="M20.74 19.33 L23.94 16.45 M20.91 19.59 L24.84 17.84 M20.67 20.74 L23.55 23.94 M20.41 20.91 L22.16 24.84 M19.26 20.67 L16.06 23.55 M19.09 20.41 L15.16 22.16 M19.33 19.26 L16.45 16.06 M19.59 19.09 L17.84 15.16"></path>
+                <circle class="dot" style="fill:var(--se-anth)" cx="23.94" cy="16.45" r="0.42"></circle>
+                <circle class="dot" style="fill:var(--se-anth)" cx="24.84" cy="17.84" r="0.42"></circle>
+                <circle class="dot" style="fill:var(--se-anth)" cx="23.55" cy="23.94" r="0.42"></circle>
+                <circle class="dot" style="fill:var(--se-anth)" cx="22.16" cy="24.84" r="0.42"></circle>
+                <circle class="dot" style="fill:var(--se-anth)" cx="16.06" cy="23.55" r="0.42"></circle>
+                <circle class="dot" style="fill:var(--se-anth)" cx="15.16" cy="22.16" r="0.42"></circle>
+                <circle class="dot" style="fill:var(--se-anth)" cx="16.45" cy="16.06" r="0.42"></circle>
+                <circle class="dot" style="fill:var(--se-anth)" cx="17.84" cy="15.16" r="0.42"></circle>
+                <circle style="fill:var(--se-crim)" cx="20" cy="20" r="1.25"></circle>
               </g>
-              <g class="se-emb se-wi"><!-- 冬＝梅花 -->
-                <path class="br" d="M14 25 C15.9 23.8 17.6 22.6 19.6 20.8 C22.4 18.3 24.1 16.7 26.3 15.2"></path>
-                <path class="br br2" d="M17.9 22.3 C17.3 20.2 16.4 18.4 15.3 16.6"></path>
-                <path class="br br2" d="M23.6 17.3 C24.6 18.1 25.6 19.2 26.2 20.6"></path>
-                <circle style="fill:var(--se-pk2)" cx="15.1" cy="16.2" r="1.1"></circle>
-                <path class="ln" d="M14.3 16.9 Q15.1 17.8 15.9 16.9"></path>
-                <circle style="fill:var(--se-pk1)" cx="26.3" cy="21.2" r="0.9"></circle>
-                <path style="fill:var(--se-wh)" d="M21.08 18.96 C19.68 17.9 19.65 15.8 20.87 15.35 Q21.71 15.15 22.08 15.87 Q22.8 15.5 23.36 16.16 C24.09 17.24 22.82 18.93 21.08 18.96 Z"></path>
-                <path style="fill:var(--se-wh)" d="M21.47 19.5 C22.04 17.85 24.03 17.16 24.83 18.19 Q25.29 18.93 24.72 19.5 Q25.29 20.07 24.83 20.81 C24.03 21.84 22.04 21.15 21.47 19.5 Z"></path>
-                <path style="fill:var(--se-wh)" d="M21.08 20.04 C22.82 20.07 24.09 21.76 23.36 22.84 Q22.8 23.5 22.08 23.13 Q21.71 23.85 20.87 23.65 C19.65 23.2 19.68 21.1 21.08 20.04 Z"></path>
-                <path style="fill:var(--se-wh)" d="M20.44 19.84 C20.95 21.51 19.74 23.23 18.49 22.87 Q17.68 22.54 17.81 21.74 Q17.01 21.62 16.95 20.75 C16.99 19.45 19.01 18.83 20.44 19.84 Z"></path>
-                <path style="fill:var(--se-wh)" d="M20.44 19.16 C19.01 20.17 16.99 19.55 16.95 18.25 Q17.01 17.38 17.81 17.26 Q17.68 16.46 18.49 16.13 C19.74 15.77 20.95 17.49 20.44 19.16 Z"></path>
-                <circle class="ctr" style="fill:var(--se-pk3)" cx="20.9" cy="19.5" r="1.1"></circle>
-                <path class="ln sta" d="M21.69 19.61 L23.43 19.85 M21.48 20.06 L22.45 20.99 M21.04 20.29 L21.34 22.01 M20.55 20.22 L19.96 21.43 M20.19 19.88 L18.65 20.7 M20.11 19.39 L18.77 19.2 M20.32 18.94 L19.07 17.73 M20.76 18.71 L20.53 17.38 M21.25 18.78 L22.02 17.21 M21.61 19.12 L22.8 18.49"></path>
-                <circle class="an" style="fill:var(--sg-gold)" cx="23.43" cy="19.85" r="0.34"></circle>
-                <circle class="an" style="fill:var(--sg-gold)" cx="22.45" cy="20.99" r="0.34"></circle>
-                <circle class="an" style="fill:var(--sg-gold)" cx="21.34" cy="22.01" r="0.34"></circle>
-                <circle class="an" style="fill:var(--sg-gold)" cx="19.96" cy="21.43" r="0.34"></circle>
-                <circle class="an" style="fill:var(--sg-gold)" cx="18.65" cy="20.7" r="0.34"></circle>
-                <circle class="an" style="fill:var(--sg-gold)" cx="18.77" cy="19.2" r="0.34"></circle>
-                <circle class="an" style="fill:var(--sg-gold)" cx="19.07" cy="17.73" r="0.34"></circle>
-                <circle class="an" style="fill:var(--sg-gold)" cx="20.53" cy="17.38" r="0.34"></circle>
-                <circle class="an" style="fill:var(--sg-gold)" cx="22.02" cy="17.21" r="0.34"></circle>
-                <circle class="an" style="fill:var(--sg-gold)" cx="22.8" cy="18.49" r="0.34"></circle>
+              <g class="se-emb se-wi"><!-- 冬＝山櫻花 -->
+                <path class="br br2" d="M12.51 25.85 Q16.78 22.53 20 20"></path>
+                <path class="ped" d="M21.97 16.29 L23.15 14.08"></path>
+                <path style="fill:var(--se-ck1)" d="M23.15 14.08 C22.45 13.26 22.88 12.02 24.44 11.66 C25 13.15 24.22 14.2 23.15 14.08 Z"></path>
+                <path class="cap" style="fill:var(--se-cal)" d="M22.56 13.49 Q22.89 14.57 23.97 14.24 Q23.52 13.38 22.56 13.49 Z"></path>
+                <path style="fill:var(--se-ck1)" d="M19.96 19.75 C18.6 18.55 16.16 17.59 15.85 15.48 C15.63 13.83 16.7 12.71 17.84 12.66 Q18.42 12.95 18.94 14.01 Q19.07 12.83 19.53 12.37 C20.6 12.02 22 12.7 22.35 14.34 C22.79 16.42 20.81 18.16 19.96 19.75 Z"></path>
+                <path style="fill:var(--se-ck1)" d="M20.22 19.88 C20.95 18.22 21.1 15.6 23.01 14.66 C24.52 13.93 25.92 14.61 26.31 15.67 Q26.22 16.32 25.37 17.15 Q26.53 16.9 27.11 17.19 C27.77 18.11 27.56 19.64 26.11 20.49 C24.26 21.54 22 20.21 20.22 19.88 Z"></path>
+                <path style="fill:var(--se-ck1)" d="M20.18 20.17 C21.98 20.35 24.53 19.69 26.01 21.22 C27.17 22.43 26.95 23.96 26.06 24.66 Q25.42 24.78 24.37 24.22 Q24.96 25.25 24.87 25.9 C24.2 26.81 22.67 27.08 21.43 25.96 C19.85 24.53 20.42 21.97 20.18 20.17 Z"></path>
+                <path style="fill:var(--se-ck1)" d="M19.89 20.22 C20.28 21.99 21.69 24.21 20.7 26.09 C19.91 27.57 18.38 27.84 17.44 27.21 Q17.13 26.63 17.33 25.46 Q16.54 26.34 15.9 26.45 C14.82 26.1 14.09 24.73 14.77 23.2 C15.64 21.26 18.26 21.01 19.89 20.22 Z"></path>
+                <path style="fill:var(--se-ck1)" d="M19.75 19.97 C18.19 20.88 16.52 22.91 14.42 22.55 C12.78 22.25 12.05 20.88 12.35 19.79 Q12.8 19.32 13.98 19.15 Q12.9 18.67 12.59 18.09 C12.6 16.96 13.68 15.85 15.34 16.01 C17.46 16.24 18.5 18.66 19.75 19.97 Z"></path>
+                <path class="ln ckv" d="M19.72 18.42 L19.27 15.86 M21.41 19.25 L23.71 18.03 M21.15 21.11 L23.02 22.92 M19.3 21.44 L18.16 23.77 M18.42 19.78 L15.84 19.42"></path>
+                <circle style="fill:var(--se-ck2)" cx="20" cy="20" r="1.75"></circle>
+                <path class="ln stam" d="M20.1 19.31 L20.46 16.73 M20.49 19.5 L22.01 17.91 M20.69 19.88 L23.25 19.43 M20.63 20.31 L22.61 21.27 M20.33 20.62 L21.55 22.91 M19.9 20.69 L19.6 22.87 M19.51 20.5 L17.71 22.37 M19.31 20.12 L17.14 20.5 M19.37 19.69 L17.03 18.55 M19.67 19.38 L18.64 17.44"></path>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="20.46" cy="16.73" r="0.36"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="22.01" cy="17.91" r="0.36"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="23.25" cy="19.43" r="0.36"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="22.61" cy="21.27" r="0.36"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="21.55" cy="22.91" r="0.36"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="19.6" cy="22.87" r="0.36"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="17.71" cy="22.37" r="0.36"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="17.14" cy="20.5" r="0.36"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="17.03" cy="18.55" r="0.36"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="18.64" cy="17.44" r="0.36"></circle>
+                <circle style="fill:var(--se-cal)" cx="20" cy="20" r="0.8"></circle>
               </g>
             </g>
-            <circle class="sg-lead-i" cx="20" cy="20" r="9.6"></circle>
+            <circle class="sg-lead-i" cx="20" cy="20" r="12"></circle>
             <circle class="sg-lead-o" cx="20" cy="20" r="18.4"></circle>
             <circle cx="20" cy="20" r="19.1" fill="url(#sgGlossS)" pointer-events="none"></circle>
             </g>
@@ -981,27 +1049,29 @@
             <defs><radialGradient id="sgGlossO" class="sg-gloss" cx="0.33" cy="0.27" r="0.8"><stop offset="0" class="g0"></stop><stop offset="0.48" class="g1"></stop><stop offset="1" class="g2"></stop></radialGradient>
               <clipPath id="orrWin" clipPathUnits="userSpaceOnUse"><circle cx="20" cy="20" r="18.4"></circle></clipPath></defs>
             <g class="sg-body" transform="translate(20 20) scale(0.68) translate(-20 -20)">
-            <!-- 圓窗中心＝太陽和地球之間；太陽在上方貼著外框（只露出透鏡形的一段），地球在下方，月亮繞地球 -->
+            <!-- 圓窗中心＝太陽和地球之間；太陽是上方一個很大的圓（只露出被圓窗切下的一角），地球在下方，月亮繞地球 -->
             <g clip-path="url(#orrWin)">
               <g id="orrSky"></g>
-              <circle class="orr-morbit" cx="20" cy="27" r="6.9"></circle>
-              <g class="orr-earth" transform="translate(20 27) scale(1.38)">
+              <circle class="orr-morbit" cx="20" cy="23.2" r="10"></circle>
+              <g class="orr-earth" transform="translate(20 23.2) scale(1.65)">
+                <circle class="orr-atm" r="3.75"></circle>
                 <circle class="orr-ocean" r="3.4"></circle>
-                <path class="orr-land" d="M-2.3 -1.6 C-1.4 -2.6 0.2 -2.5 0.6 -1.6 C1 -0.8 -0.2 -0.3 -0.4 0.5 C-0.6 1.3 -1.6 1.4 -2.2 0.7 C-2.8 0 -2.9 -0.9 -2.3 -1.6 Z M1.3 0.2 C2 -0.3 2.9 0.2 2.8 1.1 C2.7 1.9 1.9 2.4 1.3 2.1 C0.8 1.8 0.8 0.7 1.3 0.2 Z"></path>
+                <path class="orr-land" d="M-2.5 -1.5 C-1.7 -2.6 0 -2.7 0.6 -1.8 C1.1 -1 0.1 -0.5 -0.2 0.3 C-0.5 1.2 -1.5 1.5 -2.2 0.9 C-2.9 0.3 -3.1 -0.7 -2.5 -1.5 Z M1.2 0.1 C1.9 -0.5 3 -0.1 3 0.9 C3 1.8 2.1 2.5 1.4 2.2 C0.8 1.9 0.7 0.6 1.2 0.1 Z M0.9 -2.9 C1.5 -3.2 2.3 -2.8 2.2 -2.2 C2.1 -1.7 1.4 -1.6 1 -1.9 C0.7 -2.2 0.6 -2.7 0.9 -2.9 Z"></path>
                 <path class="orr-night" d="M-3.4 0 A3.4 3.4 0 0 0 3.4 0 Z"></path>
                 <circle class="orr-rim" r="3.4"></circle>
-                <circle class="sg-glint" cx="-1.2" cy="-2" r="0.6"></circle>
+                <circle class="sg-glint" cx="-1.3" cy="-2.1" r="0.55"></circle>
               </g>
-              <g id="orrMoon" class="orr-moon" transform="translate(20 20.1)">
-                <circle class="orr-mshade" r="1.55"></circle>
-                <path class="orr-mlit" d="M-1.55 0 A1.55 1.55 0 0 1 1.55 0 Z"></path>
-                <circle class="orr-rim orr-mrim" r="1.55"></circle>
+              <g id="orrMoon" class="orr-moon" transform="translate(20 13.2)">
+                <circle class="orr-mshade" r="2.3"></circle>
+                <path class="orr-mlit" d="M-2.3 0 A2.3 2.3 0 0 1 2.3 0 Z"></path>
+                <circle class="orr-rim orr-mrim" r="2.3"></circle>
               </g>
             </g>
             <circle class="sg-lead-o" cx="20" cy="20" r="18.4"></circle>
             <circle cx="20" cy="20" r="19.1" fill="url(#sgGlossO)" pointer-events="none"></circle>
             </g>
             <circle class="sg-track" cx="20" cy="20" r="17.3"></circle>
+            <g id="orrPlanets"></g><!-- 外圈＝五大行星：位置＝從地球看離太陽的角度（太陽在上；左＝東、黃昏看得到，右＝西、黎明看得到，下＝整夜可見） -->
           </svg>
           <span class="time"><span id="hm">--:--</span> <span class="sec" id="ss">--</span></span>
         </span>
@@ -1212,16 +1282,17 @@
   }
   // ---- 彩繪玻璃圓環共用：座標 0–40、圓心 (20,20)，角度 0° 在正上方、順時針 ----
   var SG_RI = 9.6, SG_RO = 18.4, SG_ORBIT = 17.3; // 玻璃帶內外半徑（縮放前）、圈外軌道半徑
+  var SG_RI_SEA = 12; // 四季輪玻璃帶內徑：中心花窗放大，玻璃帶變窄
   function sgPt(deg, r) {
     var a = deg * Math.PI / 180;
     return (20 + r * Math.sin(a)).toFixed(2) + " " + (20 - r * Math.cos(a)).toFixed(2);
   }
   // 一片玻璃（環形扇區，a1→a2 順時針），鉛條由描邊畫出
-  function sgPane(a1, a2, tone) {
-    var lg = a2 - a1 > 180 ? 1 : 0;
+  function sgPane(a1, a2, tone, ri) {
+    var lg = a2 - a1 > 180 ? 1 : 0, RI = ri || SG_RI;
     var fill = tone.indexOf("--") === 0 ? "var(" + tone + ")" : tone; // CSS 變數名、或直接給 url(#漸層)／color-mix
     return '<path class="sg-pane" style="fill:' + fill + '" d="M' + sgPt(a1, SG_RO) + " A" + SG_RO + " " + SG_RO + " 0 " + lg + " 1 " + sgPt(a2, SG_RO) +
-      " L" + sgPt(a2, SG_RI) + " A" + SG_RI + " " + SG_RI + " 0 " + lg + " 0 " + sgPt(a1, SG_RI) + ' Z"></path>';
+      " L" + sgPt(a2, RI) + " A" + RI + " " + RI + " 0 " + lg + " 0 " + sgPt(a1, RI) + ' Z"></path>';
   }
   // 寶石指針：沿圈外軌道繞行，高光固定在左上（光源方向不隨指針轉）
   function sgHand(handId, glintId, deg) {
@@ -1260,7 +1331,7 @@
     for (var k = 1; k <= 23; k += 2) bnd.push(frac(termDate(yr, k)) * 360);
     var seaOf = ["wi", "wi", "wi", "sp", "sp", "sp", "su", "su", "su", "au", "au", "au"], toneOf = [2, 1, 3];
     var html = "";
-    for (var i = 0; i < 12; i++) html += sgPane(bnd[i], bnd[i + 1], "--sg-" + seaOf[i] + toneOf[i % 3]);
+    for (var i = 0; i < 12; i++) html += sgPane(bnd[i], bnd[i + 1], "--sg-" + seaOf[i] + toneOf[i % 3], SG_RI_SEA);
     g.innerHTML = html;
     var f = Math.min(0.9999, Math.max(0, frac(now)));
     sgHand("seasonHand", "seasonGlint", f * 360);
@@ -1270,13 +1341,13 @@
     for (var b = 0; b < bounds.length; b++) {
       if (now >= bounds[b][0] && now < bounds[b][1]) {
         var sn = bounds[b][2];
-        var orn = document.getElementById("seasonOrn"); // 中心花窗：春蝴蝶蘭、夏荷花、秋台灣欒樹、冬梅花
+        var orn = document.getElementById("seasonOrn"); // 中心花窗：春油桐花、夏鳳凰花、秋台灣欒樹、冬山櫻花
         if (orn) orn.setAttribute("data-s", { spring: "sp", summer: "su", autumn: "au", winter: "wi" }[sn]);
         var dTot = Math.round((bounds[b][1] - bounds[b][0]) / 864e5);
         var dIn = Math.floor((now - bounds[b][0]) / 864e5) + 1;
         var left = Math.ceil((bounds[b][1] - now) / 864e5);
         setText("seasonTitle", "四季輪：" + names[sn] + "季 第 " + dIn + "／" + dTot + " 天（" + Math.round(dIn / dTot * 100) + "%），距" + nextName[sn] + "（" + (bounds[b][1].getMonth() + 1) + "/" + bounds[b][1].getDate() + "）還有 " + left + " 天" +
-          "\n中心花窗：" + { spring: "蝴蝶蘭（台灣原生，春天開花）", summer: "荷花（白河、觀音的夏日蓮花季）", autumn: "台灣欒樹（台灣特有種，秋天黃花轉粉紅燈籠果）", winter: "梅花（國花，冬天在山區梅園盛開）" }[sn]);
+          "\n中心花窗：" + { spring: "油桐花（四、五月滿山白花，落花如雪，人稱「五月雪」）", summer: "鳳凰花（夏天火紅，畢業季的花）", autumn: "台灣欒樹的花（台灣特有種，九、十月滿樹金黃小花、瓣基一點紅，旁邊是接著結的粉紅燈籠果）", winter: "山櫻花（台灣原生，一、二月開深桃紅色的花，瓣尖有櫻花招牌的缺刻）" }[sn]);
         break;
       }
     }
@@ -1381,10 +1452,11 @@
     return { moon: { elong: el, illum: illum, spans: vis, night: [realTime(nA), realTime(-H0)] } };
   }
   // 中心月相（夜間）：亮面依實際月相（右亮＝漸盈、左亮＝漸虧）
-  function moonLitPath(elong) {
-    var r = 4, cx = 20, cy = 20, e = elong * Math.PI / 180, rx = Math.abs(Math.cos(e)) * r;
+  function moonLitPath(elong, r, cx, cy) { // 從地球看到的亮面（北半球：漸盈右亮、漸虧左亮）；預設＝日照輪中心
+    r = r || 4; cx = cx === undefined ? 20 : cx; cy = cy === undefined ? 20 : cy;
+    var e = elong * Math.PI / 180, rx = Math.abs(Math.cos(e)) * r;
     var wax = elong < 180, cres = Math.cos(e) > 0; // 眉月／殘月：亮面小於一半
-    var top = cx + " " + (cy - r), bot = cx + " " + (cy + r);
+    var top = (+cx).toFixed(2) + " " + (cy - r).toFixed(2), bot = (+cx).toFixed(2) + " " + (cy + r).toFixed(2);
     var limb = "A" + r + " " + r + " 0 0 " + (wax ? 1 : 0) + " " + bot;
     var term = "A" + rx.toFixed(2) + " " + r + " 0 0 " + ((wax ? cres : !cres) ? 0 : 1) + " " + top;
     return "M" + top + " " + limb + " " + term + " Z";
@@ -1444,11 +1516,11 @@
     }
     setText("sunTitle", lines.join("\n"));
   }
-  // ---- 天象儀：圓窗中心在太陽和地球之間——太陽在上方、只露出貼著外框的透鏡形一段，地球在下方，月亮繞地球
+  // ---- 天象儀：圓窗中心在太陽和地球之間——太陽是上方一個很大的圓、只露出被圓窗切下的一角，地球在下方，月亮繞地球
   //   從北極上方往下看（月亮逆時針繞地球）、不按比例；地球、月亮都是朝太陽那半邊亮
   //   月亮的位置＝日月角距：新月在地球和太陽之間、上弦在左、滿月在背對太陽的下方、下弦在右
-  var ORR_SUN = [20, -3], ORR_E = [20, 27], ORR_MR = 6.9, orrKey = "", orrBuilt = false;
-  function orrSec(r1, r2, a1, a2, cls, tone) { // 以太陽中心為圓心的環形扇區（角度 0° 朝上、順時針；圓窗在 90°～270° 之間）
+  var ORR_SUN = [20, -22], ORR_SR = 30, ORR_E = [20, 23.2], ORR_MR = 10, orrKey = "", orrBuilt = false;
+  function orrSec(r1, r2, a1, a2, cls, tone) { // 以太陽中心為圓心的環形扇區（角度 0° 朝上、順時針；從太陽中心看，圓窗只在 154°～206° 之間）
     var c = ORR_SUN, lg = a2 - a1 > 180 ? 1 : 0;
     function pt(a, r) { a = a * Math.PI / 180; return (c[0] + r * Math.sin(a)).toFixed(2) + " " + (c[1] - r * Math.cos(a)).toFixed(2); }
     return '<path class="' + cls + '" style="fill:' + tone + '" d="M' + pt(a1, r2) + " A" + r2 + " " + r2 + " 0 " + lg + " 1 " + pt(a2, r2) +
@@ -1456,18 +1528,58 @@
   }
   function buildOrrScene() {
     function mix(a, b, p) { return p >= 100 ? "var(" + a + ")" : "color-mix(in oklab, var(" + a + ") " + p + "%, var(" + b + "))"; }
-    var h = "", k, L = 150, R = 210, c = ORR_SUN, rays = "";
+    var h = "", k, c = ORR_SUN, S = ORR_SR, rays = "";
     function pt(a, r) { a = a * Math.PI / 180; return (c[0] + r * Math.sin(a)).toFixed(2) + " " + (c[1] - r * Math.cos(a)).toFixed(2); }
     function ring(r, cls, tone) { return '<circle class="' + cls + '" style="fill:' + tone + '" cx="' + c[0] + '" cy="' + c[1] + '" r="' + r + '"></circle>'; }
-    // 天空玻璃：以太陽為圓心一圈圈往外，離太陽越遠越暗（玫瑰金 → 暮紫 → 夜藍）；最外圈兩側再暗一階，光集中在日地之間
-    h += orrSec(25.5, 52, 60, L, "orr-sky", mix("--sg-nt-deep", "--sg-nt-edge", 70)) + orrSec(25.5, 52, L, R, "orr-sky", "var(--sg-nt-edge)") + orrSec(25.5, 52, R, 300, "orr-sky", mix("--sg-nt-deep", "--sg-nt-edge", 70));
-    h += orrSec(18.3, 25.5, 60, 300, "orr-sky", "var(--sg-tw)");
-    // 太陽：大圓只露出貼著外框的透鏡形一段；慕夏式光環＝玫瑰金光圈＋一圈金珠，日面三圈同心玻璃（邊緣暖金 → 中心最亮）＋細光芒線
-    h += ring(18.3, "orr-sky", mix("--sg-dawn", "--sg-dy2", 55)) + ring(15.6, "orr-sun", "var(--sg-dy1)") + ring(12.9, "orr-sun2", "var(--sg-dy2)") + ring(9.6, "orr-sun2", "var(--sg-dy4)");
-    for (k = 0; k <= 15; k++) rays += "M" + pt(120 + k * 8, 10.2) + " L" + pt(120 + k * 8, 15) + " ";
+    // 天空玻璃：以太陽為圓心一圈圈往外，離太陽越遠越暗（光暈 → 暮紫 → 夜藍）；最外圈兩側再暗一階，光集中在日地之間
+    h += orrSec(S + 13, 66, 148, 164, "orr-sky", mix("--sg-nt-deep", "--sg-nt-edge", 70)) + orrSec(S + 13, 66, 164, 196, "orr-sky", "var(--sg-nt-edge)") + orrSec(S + 13, 66, 196, 212, "orr-sky", mix("--sg-nt-deep", "--sg-nt-edge", 70));
+    h += orrSec(S + 6, S + 13, 148, 212, "orr-sky", mix("--sg-nt-edge", "--sg-tw", 55));
+    h += orrSec(S + 2.7, S + 6, 148, 212, "orr-sky", "var(--sg-tw)");
+    // 小星星（慕夏式四芒星，只放在兩側暗玻璃）
+    [[6.4, 21.8, 0.95], [9.2, 30.6, 0.75], [33.6, 21.8, 0.95], [30.8, 30.6, 0.75], [4.9, 13.9, 0.6], [35.1, 13.9, 0.6]].forEach(function (p) {
+      var x = p[0], y = p[1], r = p[2], w = r * 0.28;
+      h += '<path class="orr-star" d="M' + x + " " + (y - r) + " Q" + (x + w) + " " + (y - w) + " " + (x + r) + " " + y + " Q" + (x + w) + " " + (y + w) + " " + x + " " + (y + r) +
+        " Q" + (x - w) + " " + (y + w) + " " + (x - r) + " " + y + " Q" + (x - w) + " " + (y - w) + " " + x + " " + (y - r) + ' Z"></path>';
+    });
+    // 太陽：半徑 30 的大圓，只露出被圓窗切下的一角（上緣跟著圓窗、下緣幾乎平）；光環＝玫瑰金光圈＋一圈金珠，日面三圈同心玻璃（邊緣暖金 → 中心最亮）＋細光芒線
+    h += ring(S + 2.7, "orr-sky", mix("--sg-dawn", "--sg-dy2", 55)) + ring(S, "orr-sun", "var(--sg-dy1)") + ring(S - 1.9, "orr-sun2", "var(--sg-dy2)") + ring(S - 3.8, "orr-sun2", "var(--sg-dy4)");
+    for (k = 0; k <= 18; k++) rays += "M" + pt(153 + k * 3, S - 3.4) + " L" + pt(153 + k * 3, S - 0.5) + " ";
     h += '<path class="orr-fine" d="' + rays + '"></path>';
-    for (k = 0; k <= 18; k++) { var q = pt(99 + k * 9, 16.95).split(" "); h += '<circle class="orr-bead" cx="' + q[0] + '" cy="' + q[1] + '" r="0.6"></circle>'; }
+    for (k = 0; k <= 20; k++) { var q = pt(148 + k * 3.2, S + 1.35).split(" "); h += '<circle class="orr-bead" cx="' + q[0] + '" cy="' + q[1] + '" r="0.5"></circle>'; }
     document.getElementById("orrSky").innerHTML = h;
+  }
+  // 五大行星地心黃經與日距角（JPL 近似軌道要素，1800–2050 年適用）
+  var PL_EL = { // a, e, I, L0, Ldot, varpi0, varpidot, Omega0, Omegadot
+    me: [0.38709927, 0.20563593, 7.00497902, 252.25032350, 149472.67411175, 77.45779628, 0.16047689, 48.33076593, -0.12534081],
+    ve: [0.72333566, 0.00677672, 3.39467605, 181.97909950, 58517.81538729, 131.60246718, 0.00268329, 76.67984255, -0.27769418],
+    em: [1.00000261, 0.01671123, -0.00001531, 100.46457166, 35999.37244981, 102.93768193, 0.32327364, 0, 0],
+    ma: [1.52371034, 0.09339410, 1.84969142, -4.55343205, 19140.30268499, -23.94362959, 0.44441088, 49.55953891, -0.29257343],
+    ju: [5.20288700, 0.04838624, 1.30439695, 34.39644051, 3034.74612775, 14.72847983, 0.21252668, 100.47390909, 0.20469106],
+    sa: [9.53667594, 0.05386179, 2.48599187, 49.95424423, 1222.49362201, 92.59887831, -0.41897216, 113.66242448, -0.28867794]
+  };
+  function plHelio(k, T) {
+    var p = PL_EL[k], r = Math.PI / 180, a = p[0], e = p[1], I = p[2] * r;
+    var L = p[3] + p[4] * T, w = p[5] + p[6] * T, O = (p[7] + p[8] * T) * r;
+    var M = ((L - w) % 360 + 540) % 360 - 180, om = (w - p[7] - p[8] * T) * r;
+    M *= r; var E = M + e * Math.sin(M);
+    for (var i = 0; i < 6; i++) E -= (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
+    var x1 = a * (Math.cos(E) - e), y1 = a * Math.sqrt(1 - e * e) * Math.sin(E);
+    var cw = Math.cos(om), sw = Math.sin(om), cO = Math.cos(O), sO = Math.sin(O), cI = Math.cos(I), sI = Math.sin(I);
+    return [(cw * cO - sw * sO * cI) * x1 + (-sw * cO - cw * sO * cI) * y1,
+            (cw * sO + sw * cO * cI) * x1 + (-sw * sO + cw * cO * cI) * y1,
+            (sw * sI) * x1 + (cw * sI) * y1];
+  }
+  function planetElong(t) { // t＝J2000 起算日數；回傳每顆行星的日距角（東正西負，度）
+    var T = t / 36525, ea = plHelio("em", T), sx = -ea[0], sy = -ea[1], sz = -ea[2], out = {};
+    var sl = Math.atan2(sy, sx);
+    ["me", "ve", "ma", "ju", "sa"].forEach(function (k) {
+      var h = plHelio(k, T), gx = h[0] - ea[0], gy = h[1] - ea[1], gz = h[2] - ea[2];
+      var d = Math.atan2(gy, gx) - sl; d = Math.atan2(Math.sin(d), Math.cos(d)); // 黃經差：決定東西
+      var cosE = (gx * sx + gy * sy + gz * sz) / Math.hypot(gx, gy, gz) / Math.hypot(sx, sy, sz);
+      var E = Math.acos(Math.max(-1, Math.min(1, cosE))) * 180 / Math.PI;
+      out[k] = d >= 0 ? E : -E;
+    });
+    return out;
   }
   function nextElong(target, from) { // 下一次日月角距＝target 度的時刻（每 6 小時掃描、再二分到秒）
     function f(ms) { var e = moonEcliptic((ms - 946728000000) / 864e5).elong - target; return ((e % 360) + 540) % 360 - 180; }
@@ -1493,6 +1605,37 @@
     var t = (now.getTime() - 946728000000) / 864e5, el = moonEcliptic(t).elong, rad = Math.PI / 180;
     var mx = ORR_E[0] - ORR_MR * Math.sin(el * rad), my = ORR_E[1] - ORR_MR * Math.cos(el * rad); // 逆時針：上弦在左
     document.getElementById("orrMoon").setAttribute("transform", "translate(" + mx.toFixed(2) + " " + my.toFixed(2) + ")");
+    // 外圈五大行星：位置＝從地球看離太陽的角度（太陽在上；東＝左、黃昏看得到，西＝右、黎明看得到，下＝整夜可見），和圈內月亮同一套方向
+    var pe = planetElong(t), ps = [["me", "水星", 1.15], ["ve", "金星", 1.6], ["ma", "火星", 1.35], ["ju", "木星", 1.9], ["sa", "土星", 1.5]].map(function (p) {
+      return { k: p[0], n: p[1], r: p[2], w: p[0] === "sa" ? 2.4 : p[2], e: pe[p[0]], a: pe[p[0]] };
+    });
+    // 兩顆擠在一起時沿軌道各推開一點（只動畫面位置，提示文字仍是實際角度）
+    var srt = ps.slice().sort(function (p, q) { return p.a - q.a; }), it, i;
+    for (it = 0; it < 40; it++) {
+      var moved = false;
+      for (i = 0; i < srt.length; i++) {
+        var pa = srt[i], pb = srt[(i + 1) % srt.length], gap = pb.a - pa.a + (i === srt.length - 1 ? 360 : 0), need = (pa.w + pb.w + 0.4) / SG_ORBIT / rad;
+        if (gap < need) { pa.a -= (need - gap) / 2; pb.a += (need - gap) / 2; moved = true; }
+      }
+      if (!moved) break;
+    }
+    var pg = "";
+    [3, 4, 2, 1, 0].forEach(function (idx) { // 先畫外行星，內行星疊在上面
+      var p = ps[idx], x = 20 - SG_ORBIT * Math.sin(p.a * rad), y = 20 - SG_ORBIT * Math.cos(p.a * rad), r = p.r;
+      pg += '<g class="orr-pg' + (Math.abs(p.e) < 15 ? " dim" : "") + '" transform="translate(' + x.toFixed(2) + " " + y.toFixed(2) + ')">';
+      if (p.k === "sa") pg += '<g transform="rotate(-22)"><ellipse class="orr-sring" rx="2.55" ry="0.72"></ellipse><ellipse class="orr-sring2" rx="2.55" ry="0.72"></ellipse></g>';
+      pg += '<circle class="orr-pl ' + p.k + '" r="' + r + '"></circle>';
+      if (p.k === "ju") pg += '<path class="orr-band" d="M-1.55 -0.5 L1.55 -0.5 M-1.5 0.55 L1.5 0.55"></path>';
+      if (p.k === "sa") pg += '<g transform="rotate(-22)"><path class="orr-sring" d="M-2.55 0 A2.55 0.72 0 0 0 2.55 0"></path><path class="orr-sring2" d="M-2.55 0 A2.55 0.72 0 0 0 2.55 0"></path></g>';
+      if (r >= 1.3) pg += '<circle class="sg-glint" cx="' + (-r * 0.38).toFixed(2) + '" cy="' + (-r * 0.38).toFixed(2) + '" r="' + (r * 0.27).toFixed(2) + '"></circle>';
+      pg += "</g>";
+    });
+    document.getElementById("orrPlanets").innerHTML = pg;
+    function plDesc(e) { // 粗估：離太陽每 15° 約晚 1 小時落下（東）／早 1 小時升起（西）
+      var a = Math.abs(e), E = e > 0;
+      return a < 15 ? "太靠近太陽，看不到" : a < 60 ? (E ? "黃昏的西方天空" : "黎明的東方天空") : a < 120 ? (E ? "傍晚到半夜" : "半夜到黎明") : a < 150 ? (E ? "入夜到凌晨" : "晚上升起到黎明") : "幾乎整夜可見";
+    }
+    var plTxt = ps.map(function (p) { return p.n + " " + (p.e >= 0 ? "東" : "西") + " " + Math.round(Math.abs(p.e)) + "°（" + plDesc(p.e) + "）"; }).join("、");
     // 提示文字
     var Ms = (357.529 + 0.98560028 * t) * rad;
     var dist = (1.00014 - 0.01671 * Math.cos(Ms) - 0.00014 * Math.cos(2 * Ms)) * 1.496;
@@ -1503,6 +1646,8 @@
     var nNew = nextElong(0, now), nFull = nextElong(180, now);
     function md(d) { return d ? (d.getMonth() + 1) + "/" + d.getDate() : "—"; }
     setText("orreryTitle", "天象儀（示意，不按比例）：太陽在上、地球在下，從北極上方往下看，月亮逆時針繞地球一個月一圈\n" +
+      "外圈：五大行星在天上離太陽多遠（太陽在上方；左＝太陽東邊、黃昏看得到，右＝西邊、黎明看得到，下＝整夜可見，淡色＝太靠近太陽看不到）\n" +
+      "行星：" + plTxt + "\n" +
       "地球：今年第 " + dIn + " 天，離太陽 " + dist.toFixed(3) + " 億公里（1 月初最近、7 月初最遠）\n" +
       "月亮：" + mName + "，月齡 " + mAge.toFixed(1) + " 天、亮面 " + pct + "%｜" + where + "\n" +
       "下次新月 " + md(nNew) + "、下次滿月 " + md(nFull));
