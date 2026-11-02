@@ -567,7 +567,7 @@
     align-self: center;
   }
   /* ---- 四季輪＋日照輪：慕夏彩繪玻璃風
-     圓窗（.sg-body，縮成 68%）：古銅金外框 → 分片玻璃（深淺交錯）→ 內圈鉛條 → 中心花窗（四季＝台灣花木：春油桐花、夏鳳凰花、秋台灣欒樹、冬山櫻花，四季輪的花窗放大到半徑 12、襯慕夏細光環；日照＝太陽／夜間月相）
+     圓窗（.sg-body，縮成 68%）：古銅金外框 → 分片玻璃（深淺交錯）→ 內圈鉛條 → 中心花窗（四季＝台灣花木：春油桐花、夏鳳凰花、秋台灣欒樹、冬山櫻花；日照＝太陽／夜間月相；兩環花窗都放大到半徑 12、襯慕夏細光環）
      圈外：點狀光環軌道＋寶石指針（沿軌道繞行）
      座標 0–40、0° 在正上方順時針；玻璃片由 JS 依節氣、日出日落產生 ---- */
   .wrap { --dock-ring: 60px; --dock-gap: 12px; --dock-n: 2; --dock-dy: 16px; } /* 圓環展示區：大小、間距、幾個環、垂直位移（置中於時鐘列～新聞列） */
@@ -624,9 +624,9 @@
   /* 天象儀外圈：點狀軌道＋五大行星珠（位置＝從地球看離太陽的角度：太陽在上，東＝左、西＝右、下＝整夜可見） */
   .orr-pl { stroke: var(--sg-lead); stroke-width: 0.5; }
   .orr-pl.me { fill: var(--pl-me); } .orr-pl.ve { fill: var(--pl-ve); } .orr-pl.ma { fill: var(--pl-ma); } .orr-pl.ju { fill: var(--pl-ju); } .orr-pl.sa { fill: var(--pl-sa); }
-  .orr-band { fill: none; stroke: var(--pl-ju2); stroke-width: 0.42; } /* 木星條紋 */
-  .orr-sring { fill: none; stroke: var(--sg-lead); stroke-width: 1.05; }  /* 土星環：外描邊 */
-  .orr-sring2 { fill: none; stroke: var(--pl-sa); stroke-width: 0.42; }  /* 土星環：本色 */
+  .orr-band { fill: none; stroke: var(--pl-ju2); stroke-width: 0.5; } /* 木星條紋 */
+  .orr-sring { fill: none; stroke: var(--sg-lead); stroke-width: 1.15; }  /* 土星環：外描邊 */
+  .orr-sring2 { fill: none; stroke: var(--pl-sa); stroke-width: 0.5; }  /* 土星環：本色 */
   .orr-pg.dim { opacity: 0.42; } /* 離太陽 15° 內、被陽光淹沒看不到的行星淡一點 */
   .sg-core { fill: var(--sg-gold); stroke: var(--sg-lead); stroke-width: 1; }
   .sg-track { fill: none; stroke: var(--sg-track); stroke-width: 1.25; stroke-linecap: round; stroke-dasharray: 0 2.7; } /* 圈外點狀軌道 */
@@ -906,22 +906,22 @@
               <circle class="se-halo" cx="20" cy="20" r="11.9"></circle>
               <circle class="se-ring" cx="20" cy="20" r="10.25"></circle>
               <g class="se-emb se-sp"><!-- 春＝油桐花 -->
-                <path style="fill:var(--se-lf1)" d="M20 20 C22.31 18.06 26.96 19.69 29.17 24.47 C24.04 25.68 19.89 23.01 20 20 Z"></path>
-                <path class="ln" d="M21.35 20.66 L28.09 23.95"></path>
-                <path style="fill:var(--se-lf2)" d="M20 20 C19.31 22.73 14.87 24.06 10.55 21.67 C13.79 17.94 18.42 17.67 20 20 Z"></path>
-                <path class="ln" d="M18.52 20.26 L11.73 21.46"></path>
-                <path style="fill:var(--se-wh)" d="M20.03 19.75 C19.3 17.96 17.23 16.35 17.6 14.22 C17.94 12.48 19.66 11.94 20.64 12.39 Q20.94 12.59 20.99 12.98 Q21.14 12.62 21.48 12.51 C22.55 12.35 24.05 13.34 23.9 15.11 C23.67 17.25 21.23 18.23 20.03 19.75 Z"></path>
-                <path style="fill:var(--se-wh)" d="M20.25 19.96 C21.73 18.71 22.62 16.24 24.76 15.93 C26.52 15.72 27.56 17.18 27.43 18.26 Q27.34 18.61 26.98 18.77 Q27.37 18.8 27.58 19.09 C28.06 20.06 27.59 21.8 25.86 22.2 C23.75 22.64 22.07 20.63 20.25 19.96 Z"></path>
-                <path style="fill:var(--se-wh)" d="M20.12 20.22 C21.76 21.24 24.39 21.33 25.34 23.26 C26.09 24.87 25.01 26.32 23.95 26.53 Q23.59 26.55 23.33 26.25 Q23.42 26.64 23.21 26.93 C22.43 27.69 20.64 27.77 19.72 26.25 C18.65 24.38 20.04 22.16 20.12 20.22 Z"></path>
-                <path style="fill:var(--se-wh)" d="M19.83 20.18 C19.36 22.06 20.09 24.58 18.55 26.09 C17.25 27.3 15.54 26.72 15.01 25.78 Q14.88 25.44 15.08 25.1 Q14.74 25.31 14.4 25.19 C13.44 24.69 12.8 23.01 13.96 21.66 C15.42 20.07 17.96 20.71 19.83 20.18 Z"></path>
-                <path style="fill:var(--se-wh)" d="M19.78 19.89 C17.84 20.03 15.67 21.5 13.76 20.5 C12.21 19.64 12.23 17.84 12.96 17.04 Q13.24 16.81 13.63 16.89 Q13.33 16.64 13.33 16.28 C13.51 15.21 14.92 14.09 16.55 14.77 C18.52 15.66 18.7 18.28 19.78 19.89 Z"></path>
-                <path class="ln vein" d="M19.82 18.51 L19.6 16.72 M20.21 18.51 L20.57 15.94 M20.59 18.62 L21.29 16.96 M21.36 19.37 L22.99 18.61 M21.48 19.74 L24.04 19.29 M21.49 20.13 L23.29 20.29 M21.02 21.1 L22.25 22.41 M20.7 21.32 L21.92 23.62 M20.34 21.46 L20.74 23.22 M19.27 21.31 L18.4 22.89 M18.96 21.08 L17.15 22.95 M18.71 20.77 L17.17 21.7 M18.53 19.71 L16.76 19.37 M18.65 19.34 L16.31 18.2 M18.87 19.02 L17.51 17.84"></path>
+                <path style="fill:var(--se-lf1)" d="M20 20 C21.98 17.8 26.72 18.74 29.51 23.09 C24.69 24.97 20.3 22.95 20 20 Z"></path>
+                <path class="ln" d="M21.43 20.46 L28.37 22.72"></path>
+                <path style="fill:var(--se-lf2)" d="M20 20 C19.7 22.95 15.31 24.97 10.49 23.09 C13.28 18.74 18.02 17.8 20 20 Z"></path>
+                <path class="ln" d="M18.57 20.46 L11.63 22.72"></path>
+                <path style="fill:var(--se-wh)" d="M20 19.75 C19.02 18.07 16.75 16.77 16.82 14.61 C16.91 12.84 18.54 12.07 19.58 12.38 Q19.9 12.53 20 12.92 Q20.1 12.53 20.42 12.38 C21.46 12.07 23.09 12.84 23.18 14.61 C23.25 16.77 20.98 18.07 20 19.75 Z"></path>
+                <path style="fill:var(--se-wh)" d="M20.24 19.92 C21.53 18.48 22.07 15.91 24.14 15.31 C25.86 14.85 27.09 16.16 27.12 17.24 Q27.07 17.6 26.74 17.81 Q27.13 17.78 27.38 18.05 C27.99 18.94 27.76 20.72 26.11 21.36 C24.08 22.09 22.13 20.33 20.24 19.92 Z"></path>
+                <path style="fill:var(--se-wh)" d="M20.15 20.2 C21.92 20.98 24.53 20.71 25.74 22.49 C26.71 23.98 25.84 25.56 24.82 25.92 Q24.47 25.99 24.16 25.73 Q24.31 26.1 24.14 26.42 C23.48 27.28 21.71 27.61 20.59 26.23 C19.27 24.53 20.34 22.13 20.15 20.2 Z"></path>
+                <path style="fill:var(--se-wh)" d="M19.85 20.2 C19.66 22.13 20.73 24.53 19.41 26.23 C18.29 27.61 16.52 27.28 15.86 26.42 Q15.69 26.1 15.84 25.73 Q15.53 25.99 15.18 25.92 C14.16 25.56 13.29 23.98 14.26 22.49 C15.47 20.71 18.08 20.98 19.85 20.2 Z"></path>
+                <path style="fill:var(--se-wh)" d="M19.76 19.92 C17.87 20.33 15.92 22.09 13.89 21.36 C12.24 20.72 12.01 18.94 12.62 18.05 Q12.87 17.78 13.26 17.81 Q12.93 17.6 12.88 17.24 C12.91 16.16 14.14 14.85 15.86 15.31 C17.93 15.91 18.47 18.48 19.76 19.92 Z"></path>
+                <path class="ln vein" d="M19.61 18.55 L19.15 16.81 M20 18.5 L20 15.9 M20.39 18.55 L20.85 16.81 M21.26 19.18 L22.77 18.2 M21.43 19.54 L23.9 18.73 M21.5 19.92 L23.3 19.83 M21.17 20.94 L22.56 22.08 M20.88 21.21 L22.41 23.32 M20.54 21.4 L21.18 23.08 M19.46 21.4 L18.82 23.08 M19.12 21.21 L17.59 23.32 M18.83 20.94 L17.44 22.08 M18.5 19.92 L16.7 19.83 M18.57 19.54 L16.1 18.73 M18.74 19.18 L17.23 18.2"></path>
                 <circle style="fill:var(--se-cen)" cx="20" cy="20" r="1.45"></circle>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="20.59" cy="19.39" r="0.32"></circle>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="20.76" cy="20.37" r="0.32"></circle>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="19.88" cy="20.84" r="0.32"></circle>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="19.16" cy="20.15" r="0.32"></circle>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="19.6" cy="19.25" r="0.32"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="20.5" cy="19.31" r="0.32"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="20.81" cy="20.26" r="0.32"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="20" cy="20.85" r="0.32"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="19.19" cy="20.26" r="0.32"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="19.5" cy="19.31" r="0.32"></circle>
               </g>
               <g class="se-emb se-su"><!-- 夏＝鳳凰花 -->
                 <path class="rib" d="M21 21 Q26.5 21.6 29.6 25"></path>
@@ -937,84 +937,84 @@
                 <ellipse class="lft" style="fill:var(--se-lf1)" cx="28.03" cy="24.61" rx="0.94" ry="0.56" transform="rotate(99.06 28.03 24.61)"></ellipse>
                 <ellipse class="lft" style="fill:var(--se-lf1)" cx="30.16" cy="24.51" rx="0.85" ry="0.53" transform="rotate(-15.38 30.16 24.51)"></ellipse>
                 <ellipse class="lft" style="fill:var(--se-lf1)" cx="29.1" cy="25.54" rx="0.85" ry="0.53" transform="rotate(107 29.1 25.54)"></ellipse>
-                <path class="rib" d="M19 21.4 Q15.2 25.4 13.6 29.2"></path>
-                <ellipse class="lft" style="fill:var(--se-lf1)" cx="18.7" cy="23.44" rx="1.32" ry="0.68" transform="rotate(70.78 18.7 23.44)"></ellipse>
-                <ellipse class="lft" style="fill:var(--se-lf1)" cx="16.98" cy="21.9" rx="1.32" ry="0.68" transform="rotate(-166.84 16.98 21.9)"></ellipse>
-                <ellipse class="lft" style="fill:var(--se-lf1)" cx="17.56" cy="24.7" rx="1.23" ry="0.65" transform="rotate(67.87 17.56 24.7)"></ellipse>
-                <ellipse class="lft" style="fill:var(--se-lf1)" cx="15.89" cy="23.34" rx="1.23" ry="0.65" transform="rotate(-169.75 15.89 23.34)"></ellipse>
-                <ellipse class="lft" style="fill:var(--se-lf1)" cx="16.54" cy="25.93" rx="1.13" ry="0.62" transform="rotate(64.63 16.54 25.93)"></ellipse>
-                <ellipse class="lft" style="fill:var(--se-lf1)" cx="14.94" cy="24.77" rx="1.13" ry="0.62" transform="rotate(-172.99 14.94 24.77)"></ellipse>
-                <ellipse class="lft" style="fill:var(--se-lf1)" cx="15.65" cy="27.16" rx="1.04" ry="0.59" transform="rotate(61.05 15.65 27.16)"></ellipse>
-                <ellipse class="lft" style="fill:var(--se-lf1)" cx="14.12" cy="26.19" rx="1.04" ry="0.59" transform="rotate(-176.57 14.12 26.19)"></ellipse>
-                <ellipse class="lft" style="fill:var(--se-lf1)" cx="14.89" cy="28.37" rx="0.94" ry="0.56" transform="rotate(57.08 14.89 28.37)"></ellipse>
-                <ellipse class="lft" style="fill:var(--se-lf1)" cx="13.44" cy="27.59" rx="0.94" ry="0.56" transform="rotate(179.46 13.44 27.59)"></ellipse>
-                <ellipse class="lft" style="fill:var(--se-lf1)" cx="14.24" cy="29.57" rx="0.85" ry="0.53" transform="rotate(52.72 14.24 29.57)"></ellipse>
-                <ellipse class="lft" style="fill:var(--se-lf1)" cx="12.89" cy="28.97" rx="0.85" ry="0.53" transform="rotate(175.1 12.89 28.97)"></ellipse>
-                <path style="fill:var(--se-red)" d="M19.49 18.12 C20.37 17.63 20.92 17.21 21.54 16.76 C21 14.71 23.71 13.19 25 14.24 Q25.83 14.5 25.58 15.32 Q26.37 15.66 26.04 16.46 Q26.79 16.88 26.37 17.64 C26.18 19.3 23.17 20.08 22.13 18.23 C21.38 18.34 20.69 18.42 19.71 18.68 Z"></path>
-                <path class="ln red2" d="M21.83 17.5 L24.61 16.38"></path>
-                <path style="fill:var(--se-red)" d="M19.83 18.2 C20.57 18.9 21.14 19.29 21.76 19.74 C23.54 18.59 25.83 20.7 25.22 22.25 Q25.23 23.12 24.37 23.14 Q24.29 23.99 23.44 23.92 Q23.27 24.77 22.42 24.61 C20.78 24.93 19.1 22.32 20.54 20.76 C20.21 20.08 19.92 19.44 19.37 18.6 Z"></path>
-                <path class="ln red2" d="M21.14 20.24 L23.07 22.54"></path>
-                <path style="fill:var(--se-red)" d="M19.85 18.57 C19.39 19.47 19.17 20.13 18.91 20.84 C20.5 22.24 19.11 25.02 17.45 24.87 Q16.62 25.12 16.36 24.3 Q15.52 24.45 15.35 23.61 Q14.49 23.68 14.41 22.82 C13.65 21.33 15.7 19 17.59 19.96 C18.16 19.45 18.68 18.99 19.35 18.23 Z"></path>
-                <path class="ln red2" d="M18.26 20.39 L16.58 22.88"></path>
-                <path style="fill:var(--se-red)" d="M19.51 18.69 C18.51 18.5 17.82 18.46 17.06 18.41 C16.16 20.33 13.1 19.75 12.79 18.11 Q12.32 17.38 13.04 16.91 Q12.65 16.14 13.42 15.75 Q13.11 14.95 13.92 14.63 C15.14 13.49 17.95 14.82 17.55 16.9 C18.2 17.3 18.78 17.68 19.69 18.11 Z"></path>
-                <path class="ln red2" d="M17.32 17.66 L14.46 16.73"></path>
-                <path style="fill:var(--se-cream)" d="M19.33 18.39 C19.25 17.35 19.11 16.66 18.97 15.89 C17.09 15.55 16.84 12.37 18.19 11.58 Q18.71 10.91 19.29 11.49 Q19.86 10.88 20.39 11.52 Q21.01 10.99 21.48 11.7 C22.78 12.57 22.31 15.73 20.4 15.94 C20.21 16.7 20.02 17.38 19.87 18.41 Z"></path>
-                <path class="ln spot" d="M19.13 15.74 L17.88 14.13 M19.5 16 L18.93 12.94 M19.87 16.02 L20.65 13 M20.25 15.78 L21.62 14.27"></path>
-                <path class="fil" d="M19.6 18.4 Q19.92 22.95 22.2 25.54 M19.6 18.4 Q19.08 23.35 21.04 26.57 M19.6 18.4 Q18.18 23.36 19.6 27 M19.6 18.4 Q17.44 22.82 18.18 26.48 M19.6 18.4 Q16.99 21.99 17.07 25.35"></path>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="22.2" cy="25.54" r="0.45"></circle>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="21.04" cy="26.57" r="0.45"></circle>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="19.6" cy="27" r="0.45"></circle>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="18.18" cy="26.48" r="0.45"></circle>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="17.07" cy="25.35" r="0.45"></circle>
-                <circle style="fill:var(--se-red2)" cx="19.6" cy="18.4" r="0.95"></circle>
+                <path class="rib" d="M19 21 Q13.5 21.6 10.4 25"></path>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="17.49" cy="22.39" rx="1.32" ry="0.68" transform="rotate(109.31 17.49 22.39)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="17.11" cy="20.11" rx="1.32" ry="0.68" transform="rotate(-128.31 17.11 20.11)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="15.91" cy="22.73" rx="1.23" ry="0.65" transform="rotate(103.12 15.91 22.73)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="15.33" cy="20.66" rx="1.23" ry="0.65" transform="rotate(-134.5 15.33 20.66)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="14.47" cy="23.21" rx="1.13" ry="0.62" transform="rotate(96.24 14.47 23.21)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="13.71" cy="21.38" rx="1.13" ry="0.62" transform="rotate(-141.38 13.71 21.38)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="13.16" cy="23.84" rx="1.04" ry="0.59" transform="rotate(88.78 13.16 23.84)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="12.25" cy="22.27" rx="1.04" ry="0.59" transform="rotate(-148.84 12.25 22.27)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="11.97" cy="24.61" rx="0.94" ry="0.56" transform="rotate(80.94 11.97 24.61)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="10.96" cy="23.31" rx="0.94" ry="0.56" transform="rotate(-156.68 10.96 23.31)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="10.9" cy="25.54" rx="0.85" ry="0.53" transform="rotate(73 10.9 25.54)"></ellipse>
+                <ellipse class="lft" style="fill:var(--se-lf1)" cx="9.84" cy="24.51" rx="0.85" ry="0.53" transform="rotate(-164.62 9.84 24.51)"></ellipse>
+                <path style="fill:var(--se-red)" d="M19.91 18.11 C20.82 17.68 21.4 17.3 22.05 16.9 C21.65 14.82 24.46 13.49 25.68 14.63 Q26.49 14.95 26.18 15.75 Q26.95 16.14 26.56 16.91 Q27.28 17.38 26.81 18.11 C26.5 19.75 23.44 20.33 22.54 18.41 C21.78 18.46 21.09 18.5 20.09 18.69 Z"></path>
+                <path class="ln red2" d="M22.28 17.66 L25.14 16.73"></path>
+                <path style="fill:var(--se-red)" d="M20.25 18.22 C20.94 18.96 21.48 19.4 22.06 19.89 C23.92 18.87 26.05 21.13 25.34 22.64 Q25.29 23.5 24.43 23.46 Q24.29 24.31 23.44 24.18 Q23.22 25.01 22.38 24.79 C20.72 25 19.23 22.27 20.78 20.82 C20.49 20.11 20.25 19.46 19.75 18.58 Z"></path>
+                <path class="ln red2" d="M21.41 20.34 L23.17 22.77"></path>
+                <path style="fill:var(--se-red)" d="M20.25 18.58 C19.75 19.46 19.51 20.11 19.22 20.82 C20.77 22.27 19.28 25 17.62 24.79 Q16.78 25.01 16.56 24.18 Q15.71 24.31 15.57 23.46 Q14.71 23.5 14.66 22.64 C13.95 21.13 16.08 18.87 17.94 19.89 C18.52 19.4 19.06 18.96 19.75 18.22 Z"></path>
+                <path class="ln red2" d="M18.59 20.34 L16.83 22.77"></path>
+                <path style="fill:var(--se-red)" d="M19.91 18.69 C18.91 18.5 18.22 18.46 17.46 18.41 C16.56 20.33 13.5 19.75 13.19 18.11 Q12.72 17.38 13.44 16.91 Q13.05 16.14 13.82 15.75 Q13.51 14.95 14.32 14.63 C15.54 13.49 18.35 14.82 17.95 16.9 C18.6 17.3 19.18 17.68 20.09 18.11 Z"></path>
+                <path class="ln red2" d="M17.72 17.66 L14.86 16.73"></path>
+                <path style="fill:var(--se-cream)" d="M19.73 18.4 C19.61 17.36 19.45 16.67 19.29 15.92 C17.39 15.64 17.03 12.47 18.35 11.64 Q18.84 10.95 19.45 11.5 Q20 10.88 20.55 11.5 Q21.16 10.95 21.65 11.64 C22.97 12.47 22.61 15.64 20.71 15.92 C20.55 16.67 20.39 17.36 20.27 18.4 Z"></path>
+                <path class="ln spot" d="M19.44 15.76 L18.13 14.2 M19.81 16.01 L19.14 12.97 M20.19 16.01 L20.86 12.97 M20.56 15.76 L21.87 14.2"></path>
+                <path class="fil" d="M20 18.4 Q22.38 22.22 22.57 25.45 M20 18.4 Q21.37 23.19 21.44 26.57 M20 18.4 Q20 23.62 20 27.1 M20 18.4 Q18.63 23.19 18.56 26.57 M20 18.4 Q17.62 22.22 17.43 25.45"></path>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="22.57" cy="25.45" r="0.45"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="21.44" cy="26.57" r="0.45"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="20" cy="27.1" r="0.45"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="18.56" cy="26.57" r="0.45"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="17.43" cy="25.45" r="0.45"></circle>
+                <circle style="fill:var(--se-red2)" cx="20" cy="18.4" r="0.95"></circle>
               </g>
               <g class="se-emb se-au"><!-- 秋＝台灣欒樹 -->
-                <path style="fill:var(--se-lan2)" d="M21.85 22.85 C20.43 23.94 19.9 25.93 20.93 27.4 C21.99 28.85 24.16 28.92 25.61 28.64 C26.45 27.43 27.28 25.42 26.38 23.86 C25.46 22.32 23.43 21.99 21.85 22.85 Z"></path>
-                <path class="mid" style="fill:var(--se-lan1)" d="M21.85 22.85 C21.17 24.78 23.07 27.82 25.61 28.64 C25.9 25.98 23.89 23.01 21.85 22.85 Z"></path>
-                <path style="fill:var(--se-lan2)" d="M17.15 21.85 C16.06 20.43 14.07 19.9 12.6 20.93 C11.15 21.99 11.08 24.16 11.36 25.61 C12.57 26.45 14.58 27.28 16.14 26.38 C17.68 25.46 18.01 23.43 17.15 21.85 Z"></path>
-                <path class="mid" style="fill:var(--se-lan1)" d="M17.15 21.85 C15.22 21.17 12.18 23.07 11.36 25.61 C14.02 25.9 16.99 23.89 17.15 21.85 Z"></path>
-                <path style="fill:var(--se-ylw)" d="M20.06 19.71 C19.72 18.39 18.11 16.33 18.47 14.24 C18.76 12.59 20.57 12.04 21.58 12.57 C22.72 12.5 24.14 13.73 23.74 15.36 C23.22 17.42 20.91 18.64 20.06 19.71 Z"></path>
-                <path style="fill:var(--se-ylw)" d="M20.29 20.06 C21.61 19.72 23.67 18.11 25.76 18.47 C27.41 18.76 27.96 20.57 27.43 21.58 C27.5 22.72 26.27 24.14 24.64 23.74 C22.58 23.22 21.36 20.91 20.29 20.06 Z"></path>
-                <path style="fill:var(--se-ylw)" d="M19.94 20.29 C20.28 21.61 21.89 23.67 21.53 25.76 C21.24 27.41 19.43 27.96 18.42 27.43 C17.28 27.5 15.86 26.27 16.26 24.64 C16.78 22.58 19.09 21.36 19.94 20.29 Z"></path>
-                <path style="fill:var(--se-ylw)" d="M19.71 19.94 C18.39 20.28 16.33 21.89 14.24 21.53 C12.59 21.24 12.04 19.43 12.57 18.42 C12.5 17.28 13.73 15.86 15.36 16.26 C17.42 16.78 18.64 19.09 19.71 19.94 Z"></path>
-                <path class="blot" style="fill:var(--se-crim)" d="M20.19 19.12 C19.35 18.23 19.6 16.85 20.75 16.48 C21.65 17.28 21.31 18.64 20.19 19.12 Z"></path>
-                <path class="blot" style="fill:var(--se-crim)" d="M20.88 20.19 C21.77 19.35 23.15 19.6 23.52 20.75 C22.72 21.65 21.36 21.31 20.88 20.19 Z"></path>
-                <path class="blot" style="fill:var(--se-crim)" d="M19.81 20.88 C20.65 21.77 20.4 23.15 19.25 23.52 C18.35 22.72 18.69 21.36 19.81 20.88 Z"></path>
-                <path class="blot" style="fill:var(--se-crim)" d="M19.12 19.81 C18.23 20.65 16.85 20.4 16.48 19.25 C17.28 18.35 18.64 18.69 19.12 19.81 Z"></path>
-                <path class="fil2" d="M20.74 19.33 L23.94 16.45 M20.91 19.59 L24.84 17.84 M20.67 20.74 L23.55 23.94 M20.41 20.91 L22.16 24.84 M19.26 20.67 L16.06 23.55 M19.09 20.41 L15.16 22.16 M19.33 19.26 L16.45 16.06 M19.59 19.09 L17.84 15.16"></path>
-                <circle class="dot" style="fill:var(--se-anth)" cx="23.94" cy="16.45" r="0.42"></circle>
-                <circle class="dot" style="fill:var(--se-anth)" cx="24.84" cy="17.84" r="0.42"></circle>
-                <circle class="dot" style="fill:var(--se-anth)" cx="23.55" cy="23.94" r="0.42"></circle>
-                <circle class="dot" style="fill:var(--se-anth)" cx="22.16" cy="24.84" r="0.42"></circle>
-                <circle class="dot" style="fill:var(--se-anth)" cx="16.06" cy="23.55" r="0.42"></circle>
-                <circle class="dot" style="fill:var(--se-anth)" cx="15.16" cy="22.16" r="0.42"></circle>
-                <circle class="dot" style="fill:var(--se-anth)" cx="16.45" cy="16.06" r="0.42"></circle>
-                <circle class="dot" style="fill:var(--se-anth)" cx="17.84" cy="15.16" r="0.42"></circle>
+                <path style="fill:var(--se-lan2)" d="M22.4 22.4 C21.24 23.77 21.13 25.82 22.45 27.04 C23.79 28.24 25.93 27.86 27.28 27.28 C27.86 25.93 28.24 23.79 27.04 22.45 C25.82 21.13 23.77 21.24 22.4 22.4 Z"></path>
+                <path class="mid" style="fill:var(--se-lan1)" d="M22.4 22.4 C22.13 24.43 24.62 27.01 27.28 27.28 C27.01 24.62 24.43 22.13 22.4 22.4 Z"></path>
+                <path style="fill:var(--se-lan2)" d="M17.6 22.4 C16.23 21.24 14.18 21.13 12.96 22.45 C11.76 23.79 12.14 25.93 12.72 27.28 C14.07 27.86 16.21 28.24 17.55 27.04 C18.87 25.82 18.76 23.77 17.6 22.4 Z"></path>
+                <path class="mid" style="fill:var(--se-lan1)" d="M17.6 22.4 C15.57 22.13 12.99 24.62 12.72 27.28 C15.38 27.01 17.87 24.43 17.6 22.4 Z"></path>
+                <path style="fill:var(--se-ylw)" d="M20 19.7 C19.39 18.48 17.39 16.81 17.3 14.68 C17.25 13.01 18.9 12.1 20 12.4 C21.1 12.1 22.75 13.01 22.7 14.68 C22.61 16.81 20.61 18.48 20 19.7 Z"></path>
+                <path style="fill:var(--se-ylw)" d="M20.3 20 C21.52 19.39 23.19 17.39 25.32 17.3 C26.99 17.25 27.9 18.9 27.6 20 C27.9 21.1 26.99 22.75 25.32 22.7 C23.19 22.61 21.52 20.61 20.3 20 Z"></path>
+                <path style="fill:var(--se-ylw)" d="M20 20.3 C20.61 21.52 22.61 23.19 22.7 25.32 C22.75 26.99 21.1 27.9 20 27.6 C18.9 27.9 17.25 26.99 17.3 25.32 C17.39 23.19 19.39 21.52 20 20.3 Z"></path>
+                <path style="fill:var(--se-ylw)" d="M19.7 20 C18.48 20.61 16.81 22.61 14.68 22.7 C13.01 22.75 12.1 21.1 12.4 20 C12.1 18.9 13.01 17.25 14.68 17.3 C16.81 17.39 18.48 19.39 19.7 20 Z"></path>
+                <path class="blot" style="fill:var(--se-crim)" d="M20 19.1 C19 18.4 18.95 17 20 16.4 C21.05 17 21 18.4 20 19.1 Z"></path>
+                <path class="blot" style="fill:var(--se-crim)" d="M20.9 20 C21.6 19 23 18.95 23.6 20 C23 21.05 21.6 21 20.9 20 Z"></path>
+                <path class="blot" style="fill:var(--se-crim)" d="M20 20.9 C21 21.6 21.05 23 20 23.6 C18.95 23 19 21.6 20 20.9 Z"></path>
+                <path class="blot" style="fill:var(--se-crim)" d="M19.1 20 C18.4 21 17 21.05 16.4 20 C17 18.95 18.4 19 19.1 20 Z"></path>
+                <path class="fil2" d="M20.59 19.19 L23.12 15.71 M20.81 19.41 L24.29 16.88 M20.81 20.59 L24.29 23.12 M20.59 20.81 L23.12 24.29 M19.41 20.81 L16.88 24.29 M19.19 20.59 L15.71 23.12 M19.19 19.41 L15.71 16.88 M19.41 19.19 L16.88 15.71"></path>
+                <circle class="dot" style="fill:var(--se-anth)" cx="23.12" cy="15.71" r="0.42"></circle>
+                <circle class="dot" style="fill:var(--se-anth)" cx="24.29" cy="16.88" r="0.42"></circle>
+                <circle class="dot" style="fill:var(--se-anth)" cx="24.29" cy="23.12" r="0.42"></circle>
+                <circle class="dot" style="fill:var(--se-anth)" cx="23.12" cy="24.29" r="0.42"></circle>
+                <circle class="dot" style="fill:var(--se-anth)" cx="16.88" cy="24.29" r="0.42"></circle>
+                <circle class="dot" style="fill:var(--se-anth)" cx="15.71" cy="23.12" r="0.42"></circle>
+                <circle class="dot" style="fill:var(--se-anth)" cx="15.71" cy="16.88" r="0.42"></circle>
+                <circle class="dot" style="fill:var(--se-anth)" cx="16.88" cy="15.71" r="0.42"></circle>
                 <circle style="fill:var(--se-crim)" cx="20" cy="20" r="1.25"></circle>
               </g>
               <g class="se-emb se-wi"><!-- 冬＝山櫻花 -->
-                <path class="br br2" d="M12.51 25.85 Q16.78 22.53 20 20"></path>
-                <path class="ped" d="M21.97 16.29 L23.15 14.08"></path>
-                <path style="fill:var(--se-ck1)" d="M23.15 14.08 C22.45 13.26 22.88 12.02 24.44 11.66 C25 13.15 24.22 14.2 23.15 14.08 Z"></path>
-                <path class="cap" style="fill:var(--se-cal)" d="M22.56 13.49 Q22.89 14.57 23.97 14.24 Q23.52 13.38 22.56 13.49 Z"></path>
-                <path style="fill:var(--se-ck1)" d="M19.96 19.75 C18.6 18.55 16.16 17.59 15.85 15.48 C15.63 13.83 16.7 12.71 17.84 12.66 Q18.42 12.95 18.94 14.01 Q19.07 12.83 19.53 12.37 C20.6 12.02 22 12.7 22.35 14.34 C22.79 16.42 20.81 18.16 19.96 19.75 Z"></path>
-                <path style="fill:var(--se-ck1)" d="M20.22 19.88 C20.95 18.22 21.1 15.6 23.01 14.66 C24.52 13.93 25.92 14.61 26.31 15.67 Q26.22 16.32 25.37 17.15 Q26.53 16.9 27.11 17.19 C27.77 18.11 27.56 19.64 26.11 20.49 C24.26 21.54 22 20.21 20.22 19.88 Z"></path>
-                <path style="fill:var(--se-ck1)" d="M20.18 20.17 C21.98 20.35 24.53 19.69 26.01 21.22 C27.17 22.43 26.95 23.96 26.06 24.66 Q25.42 24.78 24.37 24.22 Q24.96 25.25 24.87 25.9 C24.2 26.81 22.67 27.08 21.43 25.96 C19.85 24.53 20.42 21.97 20.18 20.17 Z"></path>
-                <path style="fill:var(--se-ck1)" d="M19.89 20.22 C20.28 21.99 21.69 24.21 20.7 26.09 C19.91 27.57 18.38 27.84 17.44 27.21 Q17.13 26.63 17.33 25.46 Q16.54 26.34 15.9 26.45 C14.82 26.1 14.09 24.73 14.77 23.2 C15.64 21.26 18.26 21.01 19.89 20.22 Z"></path>
-                <path style="fill:var(--se-ck1)" d="M19.75 19.97 C18.19 20.88 16.52 22.91 14.42 22.55 C12.78 22.25 12.05 20.88 12.35 19.79 Q12.8 19.32 13.98 19.15 Q12.9 18.67 12.59 18.09 C12.6 16.96 13.68 15.85 15.34 16.01 C17.46 16.24 18.5 18.66 19.75 19.97 Z"></path>
-                <path class="ln ckv" d="M19.72 18.42 L19.27 15.86 M21.41 19.25 L23.71 18.03 M21.15 21.11 L23.02 22.92 M19.3 21.44 L18.16 23.77 M18.42 19.78 L15.84 19.42"></path>
+                <path class="br br2" d="M10.96 22.94 Q15.93 21.02 20 20"></path>
+                <path class="ped" d="M22.47 16.6 L23.94 14.58"></path>
+                <path style="fill:var(--se-ck1)" d="M23.94 14.58 C23.36 13.67 23.97 12.5 25.55 12.35 C25.91 13.91 24.98 14.84 23.94 14.58 Z"></path>
+                <path class="cap" style="fill:var(--se-cal)" d="M23.44 13.91 Q23.61 15.02 24.73 14.85 Q24.41 13.93 23.44 13.91 Z"></path>
+                <path style="fill:var(--se-ck1)" d="M20 19.75 C18.88 18.33 16.63 16.96 16.7 14.83 C16.77 13.16 18.02 12.25 19.14 12.4 Q19.67 12.78 20 13.92 Q20.33 12.78 20.86 12.4 C21.98 12.25 23.23 13.16 23.3 14.83 C23.37 16.96 21.12 18.33 20 19.75 Z"></path>
+                <path style="fill:var(--se-ck1)" d="M20.24 19.92 C21.24 18.42 21.85 15.86 23.9 15.26 C25.51 14.81 26.76 15.72 26.96 16.84 Q26.76 17.46 25.78 18.12 Q26.97 18.08 27.49 18.47 C27.98 19.49 27.5 20.96 25.93 21.54 C23.93 22.26 21.94 20.55 20.24 19.92 Z"></path>
+                <path style="fill:var(--se-ck1)" d="M20.15 20.2 C21.89 20.69 24.51 20.48 25.71 22.24 C26.64 23.63 26.16 25.11 25.16 25.64 Q24.51 25.65 23.57 24.92 Q23.98 26.04 23.77 26.65 C22.95 27.44 21.4 27.43 20.37 26.12 C19.06 24.44 20.08 22.01 20.15 20.2 Z"></path>
+                <path style="fill:var(--se-ck1)" d="M19.85 20.2 C19.92 22.01 20.94 24.44 19.63 26.12 C18.6 27.43 17.05 27.44 16.23 26.65 Q16.02 26.04 16.43 24.92 Q15.49 25.65 14.84 25.64 C13.84 25.11 13.36 23.63 14.29 22.24 C15.49 20.48 18.11 20.69 19.85 20.2 Z"></path>
+                <path style="fill:var(--se-ck1)" d="M19.76 19.92 C18.06 20.55 16.07 22.26 14.07 21.54 C12.5 20.96 12.02 19.49 12.51 18.47 Q13.03 18.08 14.22 18.12 Q13.24 17.46 13.04 16.84 C13.24 15.72 14.49 14.81 16.1 15.26 C18.15 15.86 18.76 18.42 19.76 19.92 Z"></path>
+                <path class="ln ckv" d="M20 18.4 L20 15.8 M21.52 19.51 L23.99 18.7 M20.94 21.29 L22.47 23.4 M19.06 21.29 L17.53 23.4 M18.48 19.51 L16.01 18.7"></path>
                 <circle style="fill:var(--se-ck2)" cx="20" cy="20" r="1.75"></circle>
-                <path class="ln stam" d="M20.1 19.31 L20.46 16.73 M20.49 19.5 L22.01 17.91 M20.69 19.88 L23.25 19.43 M20.63 20.31 L22.61 21.27 M20.33 20.62 L21.55 22.91 M19.9 20.69 L19.6 22.87 M19.51 20.5 L17.71 22.37 M19.31 20.12 L17.14 20.5 M19.37 19.69 L17.03 18.55 M19.67 19.38 L18.64 17.44"></path>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="20.46" cy="16.73" r="0.36"></circle>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="22.01" cy="17.91" r="0.36"></circle>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="23.25" cy="19.43" r="0.36"></circle>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="22.61" cy="21.27" r="0.36"></circle>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="21.55" cy="22.91" r="0.36"></circle>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="19.6" cy="22.87" r="0.36"></circle>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="17.71" cy="22.37" r="0.36"></circle>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="17.14" cy="20.5" r="0.36"></circle>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="17.03" cy="18.55" r="0.36"></circle>
-                <circle class="dot" style="fill:var(--sg-gold)" cx="18.64" cy="17.44" r="0.36"></circle>
+                <path class="ln stam" d="M20.22 19.33 L21.02 16.86 M20.57 19.59 L22.35 18.3 M20.7 20 L23.3 20 M20.57 20.41 L22.35 21.7 M20.22 20.67 L21.02 23.14 M19.78 20.67 L19.1 22.76 M19.43 20.41 L17.33 21.94 M19.3 20 L17.1 20 M19.43 19.59 L17.33 18.06 M19.78 19.33 L19.1 17.24"></path>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="21.02" cy="16.86" r="0.36"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="22.35" cy="18.3" r="0.36"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="23.3" cy="20" r="0.36"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="22.35" cy="21.7" r="0.36"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="21.02" cy="23.14" r="0.36"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="19.1" cy="22.76" r="0.36"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="17.33" cy="21.94" r="0.36"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="17.1" cy="20" r="0.36"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="17.33" cy="18.06" r="0.36"></circle>
+                <circle class="dot" style="fill:var(--sg-gold)" cx="19.1" cy="17.24" r="0.36"></circle>
                 <circle style="fill:var(--se-cal)" cx="20" cy="20" r="0.8"></circle>
               </g>
             </g>
@@ -1031,12 +1031,13 @@
             <defs><radialGradient id="sgGlossN" class="sg-gloss" cx="0.33" cy="0.27" r="0.8"><stop offset="0" class="g0"></stop><stop offset="0.48" class="g1"></stop><stop offset="1" class="g2"></stop></radialGradient></defs>
             <g class="sg-body" transform="translate(20 20) scale(0.68) translate(-20 -20)">
             <g id="sunPanes"></g>
-            <circle class="sg-med" cx="20" cy="20" r="9.6"></circle>
+            <circle class="sg-med" cx="20" cy="20" r="12"></circle>
+            <circle class="se-ring" cx="20" cy="20" r="10.25"></circle><!-- 和四季輪一樣：花窗半徑 12＋一圈細古銅光環 -->
             <g id="sunRays"></g>
-            <circle id="sunCore" class="sg-core" cx="20" cy="20" r="4"></circle>
+            <circle id="sunCore" class="sg-core" cx="20" cy="20" r="5"></circle>
             <path id="moonLit" d=""></path>
-            <circle id="moonRim" cx="20" cy="20" r="4"></circle>
-            <circle class="sg-lead-i" cx="20" cy="20" r="9.6"></circle>
+            <circle id="moonRim" cx="20" cy="20" r="5"></circle>
+            <circle class="sg-lead-i" cx="20" cy="20" r="12"></circle>
             <circle class="sg-lead-o" cx="20" cy="20" r="18.4"></circle>
             <circle cx="20" cy="20" r="19.1" fill="url(#sgGlossN)" pointer-events="none"></circle>
             </g>
@@ -1281,7 +1282,7 @@
     return Math.asin(Math.sin(SUN_LAT * rad) * Math.sin(dec) + Math.cos(SUN_LAT * rad) * Math.cos(dec) * Math.cos(ha)) / rad;
   }
   // ---- 彩繪玻璃圓環共用：座標 0–40、圓心 (20,20)，角度 0° 在正上方、順時針 ----
-  var SG_RI = 9.6, SG_RO = 18.4, SG_ORBIT = 17.3; // 玻璃帶內外半徑（縮放前）、圈外軌道半徑
+  var SG_RI = 12, SG_RO = 18.4, SG_ORBIT = 17.3; // 玻璃帶內外半徑（縮放前；日照輪、四季輪中心花窗都是 12）、圈外軌道半徑
   var SG_RI_SEA = 12; // 四季輪玻璃帶內徑：中心花窗放大，玻璃帶變窄
   function sgPt(deg, r) {
     var a = deg * Math.PI / 180;
@@ -1453,7 +1454,7 @@
   }
   // 中心月相（夜間）：亮面依實際月相（右亮＝漸盈、左亮＝漸虧）
   function moonLitPath(elong, r, cx, cy) { // 從地球看到的亮面（北半球：漸盈右亮、漸虧左亮）；預設＝日照輪中心
-    r = r || 4; cx = cx === undefined ? 20 : cx; cy = cy === undefined ? 20 : cy;
+    r = r || 5; cx = cx === undefined ? 20 : cx; cy = cy === undefined ? 20 : cy;
     var e = elong * Math.PI / 180, rx = Math.abs(Math.cos(e)) * r;
     var wax = elong < 180, cres = Math.cos(e) > 0; // 眉月／殘月：亮面小於一半
     var top = (+cx).toFixed(2) + " " + (cy - r).toFixed(2), bot = (+cx).toFixed(2) + " " + (cy + r).toFixed(2);
@@ -1478,7 +1479,7 @@
       sunInfo.dayDelta = (hr - (yInfo.hr === null ? 0 : yInfo.hr)) * 2 * 3600; // 日光比昨天長幾秒
       if (!document.getElementById("sunRays").firstChild) { // 中心太陽的 8 道光芒（夜間隱藏，改顯示月相）
         var rays = "";
-        for (var ri = 0; ri < 8; ri++) rays += '<path class="sg-ray" d="M18.7 15.6 L20 10.9 L21.3 15.6 Z" transform="rotate(' + (ri * 45 + 22.5) + ' 20 20)"></path>';
+        for (var ri = 0; ri < 8; ri++) rays += '<path class="sg-ray" d="M18.38 14.5 L20 8.63 L21.62 14.5 Z" transform="rotate(' + (ri * 45 + 22.5) + ' 20 20)"></path>';
         document.getElementById("sunRays").innerHTML = rays;
       }
     }
@@ -1606,8 +1607,8 @@
     var mx = ORR_E[0] - ORR_MR * Math.sin(el * rad), my = ORR_E[1] - ORR_MR * Math.cos(el * rad); // 逆時針：上弦在左
     document.getElementById("orrMoon").setAttribute("transform", "translate(" + mx.toFixed(2) + " " + my.toFixed(2) + ")");
     // 外圈五大行星：位置＝從地球看離太陽的角度（太陽在上；東＝左、黃昏看得到，西＝右、黎明看得到，下＝整夜可見），和圈內月亮同一套方向
-    var pe = planetElong(t), ps = [["me", "水星", 1.15], ["ve", "金星", 1.6], ["ma", "火星", 1.35], ["ju", "木星", 1.9], ["sa", "土星", 1.5]].map(function (p) {
-      return { k: p[0], n: p[1], r: p[2], w: p[0] === "sa" ? 2.4 : p[2], e: pe[p[0]], a: pe[p[0]] };
+    var pe = planetElong(t), ps = [["me", "水星", 1.4], ["ve", "金星", 1.9], ["ma", "火星", 1.6], ["ju", "木星", 2.25], ["sa", "土星", 1.8]].map(function (p) {
+      return { k: p[0], n: p[1], r: p[2], w: p[0] === "sa" ? 2.75 : p[2], e: pe[p[0]], a: pe[p[0]] };
     });
     // 兩顆擠在一起時沿軌道各推開一點（只動畫面位置，提示文字仍是實際角度）
     var srt = ps.slice().sort(function (p, q) { return p.a - q.a; }), it, i;
@@ -1623,10 +1624,10 @@
     [3, 4, 2, 1, 0].forEach(function (idx) { // 先畫外行星，內行星疊在上面
       var p = ps[idx], x = 20 - SG_ORBIT * Math.sin(p.a * rad), y = 20 - SG_ORBIT * Math.cos(p.a * rad), r = p.r;
       pg += '<g class="orr-pg' + (Math.abs(p.e) < 15 ? " dim" : "") + '" transform="translate(' + x.toFixed(2) + " " + y.toFixed(2) + ')">';
-      if (p.k === "sa") pg += '<g transform="rotate(-22)"><ellipse class="orr-sring" rx="2.55" ry="0.72"></ellipse><ellipse class="orr-sring2" rx="2.55" ry="0.72"></ellipse></g>';
+      if (p.k === "sa") pg += '<g transform="rotate(-22)"><ellipse class="orr-sring" rx="2.95" ry="0.84"></ellipse><ellipse class="orr-sring2" rx="2.95" ry="0.84"></ellipse></g>';
       pg += '<circle class="orr-pl ' + p.k + '" r="' + r + '"></circle>';
-      if (p.k === "ju") pg += '<path class="orr-band" d="M-1.55 -0.5 L1.55 -0.5 M-1.5 0.55 L1.5 0.55"></path>';
-      if (p.k === "sa") pg += '<g transform="rotate(-22)"><path class="orr-sring" d="M-2.55 0 A2.55 0.72 0 0 0 2.55 0"></path><path class="orr-sring2" d="M-2.55 0 A2.55 0.72 0 0 0 2.55 0"></path></g>';
+      if (p.k === "ju") pg += '<path class="orr-band" d="M-1.85 -0.6 L1.85 -0.6 M-1.8 0.65 L1.8 0.65"></path>';
+      if (p.k === "sa") pg += '<g transform="rotate(-22)"><path class="orr-sring" d="M-2.95 0 A2.95 0.84 0 0 0 2.95 0"></path><path class="orr-sring2" d="M-2.95 0 A2.95 0.84 0 0 0 2.95 0"></path></g>';
       if (r >= 1.3) pg += '<circle class="sg-glint" cx="' + (-r * 0.38).toFixed(2) + '" cy="' + (-r * 0.38).toFixed(2) + '" r="' + (r * 0.27).toFixed(2) + '"></circle>';
       pg += "</g>";
     });
