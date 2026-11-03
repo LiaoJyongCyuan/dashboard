@@ -21,7 +21,7 @@
     --sg-dy1: #F2B33F; --sg-dy2: #F8D068; --sg-dy3: #E5962B; --sg-dy4: #FBE39C; --sg-dawn: #EC7A58;
     --sg-nt-edge: #5A5EB2; --sg-nt-deep: #352E78;
     --sg-tw: #7C6BC2; --sg-moonlit: #C6CEEE; --sg-moon-dark: #2B356A; /* 深暮紫、月光玻璃、月相暗面 */
-    --sg-track: rgba(110,90,70,0.58);
+    --sg-track: rgba(110,90,70,0.58); --sg-track-line: rgba(110,98,86,0.5);
     --pl-me: #A8A39B; --pl-ve: #F2DFA7; --pl-ma: #D9603B; --pl-ju: #D8B48C; --pl-ju2: #A9774E; --pl-sa: #E2C178; /* 天象儀外圈五大行星 */
     --sg-earth: #3E92D4; --sg-earth-night: #1F3766; --sg-moon-shade: #A29C90; /* 天象儀：地球白天／夜半邊、月亮背光面 */
     /* 四季輪中心花木（台灣四季：油桐花、鳳凰花、台灣欒樹、山櫻花）＋慕夏光環四季淡底 */
@@ -151,7 +151,7 @@
       --sg-dy1: #D5A043; --sg-dy2: #E2B657; --sg-dy3: #BE832D; --sg-dy4: #EBCB7A; --sg-dawn: #C9694C;
       --sg-nt-edge: #44478F; --sg-nt-deep: #24205A;
       --sg-tw: #61579F; --sg-moonlit: #93A1D6; --sg-moon-dark: #1C234F;
-      --sg-track: rgba(235,215,185,0.5);
+      --sg-track: rgba(235,215,185,0.5); --sg-track-line: rgba(225,212,195,0.38);
       --pl-me: #8F8A82; --pl-ve: #E3CF97; --pl-ma: #C9583A; --pl-ju: #C4A07A; --pl-ju2: #8A5E3C; --pl-sa: #CDAE68;
       --sg-earth: #3C83C4; --sg-earth-night: #18294F; --sg-moon-shade: #77736A;
       --se-wh: #EEE8DA; --se-cen: #AEB15A; --se-crim: #B04050;
@@ -621,6 +621,7 @@
   .orr-mlit { fill: var(--sg-moon); }
   .orr-rim { fill: none; stroke: var(--sg-lead); stroke-width: 0.55; } /* 地球外框（整組放大 1.65 倍，實際約 0.9） */
   .orr-mrim { stroke-width: 0.6; }
+  .orr-here { fill: #fff; stroke: var(--sg-lead); stroke-width: 0.28; } /* 地球上的本地白點（台中），跟著自轉繞一天一圈 */
   /* 天象儀外圈：點狀軌道＋五大行星珠（位置＝從地球看離太陽的角度：太陽在上，東＝左、西＝右、下＝整夜可見） */
   .orr-pl { stroke: var(--sg-lead); stroke-width: 0.5; }
   .orr-pl.me { fill: var(--pl-me); } .orr-pl.ve { fill: var(--pl-ve); } .orr-pl.ma { fill: var(--pl-ma); } .orr-pl.ju { fill: var(--pl-ju); } .orr-pl.sa { fill: var(--pl-sa); }
@@ -629,7 +630,7 @@
   .orr-sring2 { fill: none; stroke: var(--pl-sa); stroke-width: 0.5; }  /* 土星環：本色 */
   .orr-pg.dim { opacity: 0.42; } /* 離太陽 15° 內、被陽光淹沒看不到的行星淡一點 */
   .sg-core { fill: var(--sg-gold); stroke: var(--sg-lead); stroke-width: 1; }
-  .sg-track { fill: none; stroke: var(--sg-track); stroke-width: 1.25; stroke-linecap: round; stroke-dasharray: 0 2.7; } /* 圈外點狀軌道 */
+  .sg-track { fill: none; stroke: var(--sg-track-line); stroke-width: 0.5; } /* 圈外軌道：灰色細線（像天儀的金屬軌） */
   .sg-gloss .g0 { stop-color: #fff; stop-opacity: var(--sg-gloss0); }
   .sg-gloss .g1 { stop-color: #fff; stop-opacity: var(--sg-gloss1); }
   .sg-gloss .g2 { stop-color: #fff; stop-opacity: 0; }
@@ -1057,9 +1058,10 @@
               <g class="orr-earth" transform="translate(20 23.2) scale(1.65)">
                 <circle class="orr-atm" r="3.75"></circle>
                 <circle class="orr-ocean" r="3.4"></circle>
-                <path class="orr-land" d="M-2.5 -1.5 C-1.7 -2.6 0 -2.7 0.6 -1.8 C1.1 -1 0.1 -0.5 -0.2 0.3 C-0.5 1.2 -1.5 1.5 -2.2 0.9 C-2.9 0.3 -3.1 -0.7 -2.5 -1.5 Z M1.2 0.1 C1.9 -0.5 3 -0.1 3 0.9 C3 1.8 2.1 2.5 1.4 2.2 C0.8 1.9 0.7 0.6 1.2 0.1 Z M0.9 -2.9 C1.5 -3.2 2.3 -2.8 2.2 -2.2 C2.1 -1.7 1.4 -1.6 1 -1.9 C0.7 -2.2 0.6 -2.7 0.9 -2.9 Z"></path>
+                <g id="orrSpin"><path class="orr-land" d="M-2.5 -1.5 C-1.7 -2.6 0 -2.7 0.6 -1.8 C1.1 -1 0.1 -0.5 -0.2 0.3 C-0.5 1.2 -1.5 1.5 -2.2 0.9 C-2.9 0.3 -3.1 -0.7 -2.5 -1.5 Z M1.2 0.1 C1.9 -0.5 3 -0.1 3 0.9 C3 1.8 2.1 2.5 1.4 2.2 C0.8 1.9 0.7 0.6 1.2 0.1 Z M0.9 -2.9 C1.5 -3.2 2.3 -2.8 2.2 -2.2 C2.1 -1.7 1.4 -1.6 1 -1.9 C0.7 -2.2 0.6 -2.7 0.9 -2.9 Z"></path></g><!-- 陸地跟著地球自轉（從北極上方看是逆時針） -->
                 <path class="orr-night" d="M-3.4 0 A3.4 3.4 0 0 0 3.4 0 Z"></path>
                 <circle class="orr-rim" r="3.4"></circle>
+                <g id="orrHere"><circle class="orr-here" cx="0" cy="-2.95" r="0.62"></circle></g><!-- 白點＝台中（北緯 24°，從北極往下看在地球邊緣附近）；朝太陽＝正午、左＝傍晚、背對＝午夜、右＝清晨 -->
                 <circle class="sg-glint" cx="-1.3" cy="-2.1" r="0.55"></circle>
               </g>
               <g id="orrMoon" class="orr-moon" transform="translate(20 13.2)">
@@ -1520,7 +1522,8 @@
   // ---- 天象儀：圓窗中心在太陽和地球之間——太陽是上方一個很大的圓、只露出被圓窗切下的一角，地球在下方，月亮繞地球
   //   從北極上方往下看（月亮逆時針繞地球）、不按比例；地球、月亮都是朝太陽那半邊亮
   //   月亮的位置＝日月角距：新月在地球和太陽之間、上弦在左、滿月在背對太陽的下方、下弦在右
-  var ORR_SUN = [20, -22], ORR_SR = 30, ORR_E = [20, 23.2], ORR_MR = 10, orrKey = "", orrBuilt = false;
+  var ORR_SUN = [20, -22], ORR_SR = 30, ORR_E = [20, 23.2], ORR_MR = 10, orrKey = "", orrDay = "", orrSpinA = "";
+  var ORR_SUN_Y0 = -22, ORR_SUN_DY = 2.2; // 日地距離示意：太陽圓心 y＝−22 −2.2×f（f：近日點 −1、遠日點 +1），實際只差 ±1.7%，這裡誇大約 8 倍
   function orrSec(r1, r2, a1, a2, cls, tone) { // 以太陽中心為圓心的環形扇區（角度 0° 朝上、順時針；從太陽中心看，圓窗只在 154°～206° 之間）
     var c = ORR_SUN, lg = a2 - a1 > 180 ? 1 : 0;
     function pt(a, r) { a = a * Math.PI / 180; return (c[0] + r * Math.sin(a)).toFixed(2) + " " + (c[1] - r * Math.cos(a)).toFixed(2); }
@@ -1598,7 +1601,20 @@
   function updateOrrery(now) {
     var svg = document.getElementById("orrery");
     if (!svg || !svg.getClientRects().length) return; // 沒顯示（主欄不夠寬）就不算
-    if (!orrBuilt) { buildOrrScene(); orrBuilt = true; }
+    // 地球自轉：本地白點和陸地依當地太陽時轉（正午朝太陽），每分鐘更新
+    if (sunInfo) {
+      var spinA = (-(now.getHours() + now.getMinutes() / 60 - sunInfo.noon) * 15).toFixed(1);
+      if (spinA !== orrSpinA) { orrSpinA = spinA; ["orrSpin", "orrHere"].forEach(function (id) { document.getElementById(id).setAttribute("transform", "rotate(" + spinA + ")"); }); }
+    }
+    // 日地距離：每天依地球公轉位置重畫一次太陽（近日點 1 月初太陽露出最多、遠日點 7 月初最少）
+    var dayKey = now.getFullYear() + "-" + now.getMonth() + "-" + now.getDate();
+    if (dayKey !== orrDay) {
+      orrDay = dayKey;
+      var Md = (357.529 + 0.98560028 * (now.getTime() - 946728000000) / 864e5) * Math.PI / 180;
+      var au = 1.00014 - 0.01671 * Math.cos(Md) - 0.00014 * Math.cos(2 * Md);
+      ORR_SUN[1] = ORR_SUN_Y0 - ORR_SUN_DY * Math.max(-1, Math.min(1, (au - 1.00014) / 0.01671));
+      buildOrrScene();
+    }
     var key = now.getFullYear() + "-" + now.getMonth() + "-" + now.getDate() + "-" + now.getHours() + "-" + Math.floor(now.getMinutes() / 10);
     if (key === orrKey) return;
     orrKey = key;
@@ -1649,7 +1665,8 @@
     setText("orreryTitle", "天象儀（示意，不按比例）：太陽在上、地球在下，從北極上方往下看，月亮逆時針繞地球一個月一圈\n" +
       "外圈：五大行星在天上離太陽多遠（太陽在上方；左＝太陽東邊、黃昏看得到，右＝西邊、黎明看得到，下＝整夜可見，淡色＝太靠近太陽看不到）\n" +
       "行星：" + plTxt + "\n" +
-      "地球：今年第 " + dIn + " 天，離太陽 " + dist.toFixed(3) + " 億公里（1 月初最近、7 月初最遠）\n" +
+      "地球：今年第 " + dIn + " 天，離太陽 " + dist.toFixed(3) + " 億公里（1 月初最近、7 月初最遠；圖中太陽跟著靠近／退遠，誇大示意）\n" +
+      "白點＝台中：地球從北極上方看逆時針自轉，白點朝太陽＝正午、轉到左邊＝傍晚、背對太陽＝午夜、右邊＝清晨\n" +
       "月亮：" + mName + "，月齡 " + mAge.toFixed(1) + " 天、亮面 " + pct + "%｜" + where + "\n" +
       "下次新月 " + md(nNew) + "、下次滿月 " + md(nFull));
   }
